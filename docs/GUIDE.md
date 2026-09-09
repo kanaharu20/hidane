@@ -129,7 +129,7 @@ One to three questions a day is plenty. A concept changes color after about 4-5 
 ~/.claude/skills/hidane/     the /hidane skill (updated by install.sh --skill)
 ```
 
-To update hidane: `cd ~/hidane && git pull && sh install.sh --skill`.
+To update hidane: `sh ~/hidane/install.sh --update` (or `/hidane --update` in Claude Code). Record-format changes are migrated automatically.
 
 ## 7. A little of the mechanics
 

@@ -173,6 +173,15 @@ sh scripts/lint.sh --dry-run # 統合のプロンプトを見る
 
 </details>
 
+## 更新する
+
+```sh
+sh ~/hidane/install.sh --update      # Claude Code なら /hidane --update
+```
+
+最新版を取り、`/hidane` を入れ直し、記録の形式が変わっていれば移行する(`migrate.sh`、何度回しても同じ、書き換える前に `.bak` を残す)。
+版はタグ(`v0.1.0`)で切り、[CHANGELOG.md](CHANGELOG.md) に書く。
+
 ## Configuration
 
 すべて環境変数。**定数は全部仮置き**で、使いながら決める段階。

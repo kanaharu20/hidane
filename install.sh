@@ -6,6 +6,8 @@
 #   install.sh --hook                   今いるリポジトリに post-commit hook を置く(他人の hook があれば触らない)
 #   install.sh --unhook                 hidane の hook なら消す
 #   install.sh --lang en|ja             言語を指定してセットアップ一式(あとから言語を変えるときも同じ)
+#   install.sh --update                 最新版にする(git pull → /hidane を更新 → 記録の形式を移行)。/hidane --update と同じ
+#   install.sh --version                版を出す
 set -eu
 HERE=$(cd "$(dirname "$0")" && pwd -P)
 ROOT="${HIDANE_ROOT:-$HOME/.claude/hidane}"
@@ -31,7 +33,8 @@ install_skill() {
   dst="${HIDANE_SKILL_DIR:-$HOME/.claude/skills/hidane}"
   mkdir -p "$dst/scripts" "$dst/hooks"
   cp "$HERE/SKILL.$lang.md" "$dst/SKILL.md"; cp "$HERE/scripts/"*.sh "$HERE/scripts/gitattributes" "$dst/scripts/"
-  cp "$HERE/hooks/post-commit" "$dst/hooks/"; cp "$HERE/install.sh" "$HERE/SKILL.en.md" "$HERE/SKILL.ja.md" "$dst/"
+  cp "$HERE/hooks/post-commit" "$dst/hooks/"; cp "$HERE/install.sh" "$HERE/SKILL.en.md" "$HERE/SKILL.ja.md" "$HERE/VERSION" "$dst/"
+  printf '%s\n' "$HERE" > "$dst/HOME"
   say "  /hidane を登録した: $dst" "  /hidane registered: $dst"
 }
 install_hook() {  # $1 = git root
@@ -44,10 +47,23 @@ install_hook() {  # $1 = git root
 }
 
 case "$cmd" in
+  --version) cat "$HERE/VERSION" ;;
+  --update)
+    lang=$(sed -n 's/^lang=//p' "$ROOT/config" 2>/dev/null | head -1); [ -n "$lang" ] || lang=en
+    before=$(cat "$HERE/VERSION")
+    if [ -d "$HERE/.git" ]; then
+      git -C "$HERE" pull --ff-only -q || { say "  git pull に失敗。$HERE で手で解決してから もう一度" "  git pull failed; fix it in $HERE and retry"; exit 4; }
+    fi
+    after=$(cat "$HERE/VERSION")
+    install_skill
+    sh "$HERE/scripts/migrate.sh"
+    sh "$HERE/scripts/pages.sh" >/dev/null 2>&1 || true
+    say "hidane $before → $after" "hidane $before → $after" ;;
   "")
     pick_lang
     say "hidane セットアップ(lang=$lang)" "hidane setup (lang=$lang)"
     install_skill
+    sh "$HERE/scripts/migrate.sh" >/dev/null
     if top=$(git rev-parse --show-toplevel 2>/dev/null); then
       install_hook "$top" || true
       if command -v "${HIDANE_CLAUDE:-claude}" >/dev/null 2>&1; then
@@ -71,5 +87,5 @@ case "$cmd" in
     top=$(git rev-parse --show-toplevel 2>/dev/null) || { echo "install.sh: run inside a git repository" >&2; exit 3; }
     hook="$top/.git/hooks/post-commit"
     if [ -f "$hook" ] && grep -q '^# hidane-hook' "$hook"; then rm -f "$hook"; echo "install.sh: hook removed"; else echo "install.sh: no hidane hook here"; fi ;;
-  *) sed -n '2,8p' "$0" | sed 's/^# \{0,1\}//'; exit 2 ;;
+  *) sed -n '2,10p' "$0" | sed 's/^# \{0,1\}//'; exit 2 ;;
 esac

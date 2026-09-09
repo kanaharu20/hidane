@@ -129,7 +129,7 @@ Claude Code が `sh .../scripts/next.sh` などの実行許可を毎回聞いて
 ~/.claude/skills/hidane/     /hidane の本体(install.sh --skill で更新)
 ```
 
-hidane を更新したら `cd ~/hidane && git pull && sh install.sh --skill` で skill 側も更新される。
+hidane を更新するには `sh ~/hidane/install.sh --update`(または Claude Code で `/hidane --update`)。記録の形式が変わっていても自動で移行される。
 
 ## 7. 仕組みを少しだけ
 

@@ -97,6 +97,7 @@ Trying it out for me? Please fill in [docs/FEEDBACK.md](docs/FEEDBACK.md); `scri
 | `/hidane --map` | Table of concepts: value, state, repos |
 | `/hidane --vault` | Rebuild the map and open it in Obsidian |
 | `/hidane --lint` | Merge concept names that mean the same thing (also runs automatically every 3 days) |
+| `/hidane --update` | Get the latest version and migrate records |
 | `git commit` | As usual. Functions touched are tagged in the background. The commit never blocks. |
 
 The scripts work on their own too; every one prints usage with `--help`.
@@ -178,6 +179,15 @@ Tagging may invent new names, so near-duplicates accumulate. Every few days Clau
 - Undo a merge by deleting its line in `aliases.md`.
 
 </details>
+
+## Updating
+
+```sh
+sh ~/hidane/install.sh --update      # or, in Claude Code: /hidane --update
+```
+
+Pulls the latest version, refreshes `/hidane`, and migrates your records if the format changed (`migrate.sh`, idempotent,
+keeps a `.bak` of anything it rewrites). Versions are tagged (`v0.1.0`); see [CHANGELOG.md](CHANGELOG.md).
 
 ## Configuration
 

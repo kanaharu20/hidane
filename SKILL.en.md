@@ -13,6 +13,7 @@ One function, one question per invocation. Answer, record, stop. Call again for 
 - `--vault` … run `sh <HIDANE>/scripts/open.sh`, show its single output line, stop. No question.
 - `--map` … run `sh <HIDANE>/scripts/map.sh`, show the table as is, stop. No question.
 - `--lint` … run `sh <HIDANE>/scripts/lint.sh`, show its output as is, stop. No question.
+- `--update` … run `sh "$(cat <HIDANE>/HOME)/install.sh" --update` to get the latest version, show its output as is, stop. No question.
 - none … follow the steps below.
 
 ## Steps
