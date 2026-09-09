@@ -1,0 +1,36 @@
+# 言語ごとの「関数名」認識。git に渡すだけで、リポジトリには書き込まない。
+#
+# git の既定は列 0 から始まる行を関数の先頭とみなす。C や Go では当たるが、
+# メソッドが字下げされる言語(Python, Ruby, Java, ...)では外側の class を拾う。
+# 見出しがずれると記録と --recall の突き合わせがずれるので、ここで直す。
+#
+# リポジトリ自身の .gitattributes が diff を指定していれば、そちらが勝つ。
+# プロジェクトの選択を上書きしない。
+
+*.py     diff=python
+*.rb     diff=ruby
+*.java   diff=java
+*.kt     diff=kotlin
+*.kts    diff=kotlin
+*.cs     diff=csharp
+*.rs     diff=rust
+*.php    diff=php
+*.ex     diff=elixir
+*.exs    diff=elixir
+*.pl     diff=perl
+*.pm     diff=perl
+*.go     diff=golang
+*.sh     diff=bash
+*.bash   diff=bash
+*.css    diff=css
+*.scss   diff=css
+*.html   diff=html
+*.tex    diff=tex
+
+# git に javascript / typescript の組み込みが無いので自前で持つ
+*.js     diff=reflectjs
+*.jsx    diff=reflectjs
+*.mjs    diff=reflectjs
+*.cjs    diff=reflectjs
+*.ts     diff=reflectjs
+*.tsx    diff=reflectjs

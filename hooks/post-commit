@@ -1,0 +1,15 @@
+#!/bin/sh
+# hidane-hook  (この行が自分自身を見分ける目印。消さない)
+# hidane: コミットのあと、触った関数に概念タグを付けて霧の地図を育てる。
+#   - post-commit なので **コミットを止めない**。何が起きても exit 0
+#   - LLM 呼び出しは背景で走らせ、結果は <root>/hook.log に残す
+#   - claude が無ければ黙って何もしない
+#   - HIDANE_HOOK_OFF=1 で止められる
+# 外すとき: rm .git/hooks/post-commit
+[ -n "${HIDANE_HOOK_OFF:-}" ] && exit 0
+H="${HIDANE_HOME:-__HIDANE_HOME__}"
+[ -f "$H/scripts/tag.sh" ] || exit 0
+command -v "${HIDANE_CLAUDE:-claude}" >/dev/null 2>&1 || exit 0
+root="${HIDANE_ROOT:-$HOME/.claude/hidane}"; mkdir -p "$root" 2>/dev/null || exit 0
+( nohup sh "$H/scripts/tag.sh" --commit HEAD --repo "$(pwd)" >> "$root/hook.log" 2>&1 & ) >/dev/null 2>&1
+exit 0
