@@ -61,6 +61,17 @@ mkdir -p "$TMP/sl/x"; { head -2 $FX/api/log.md | tail -1; echo '|---|---|---|---
 sh scripts/pages.sh --root "$TMP/sl" --vault "$TMP/slv" --today 2026-09-08 >/dev/null 2>&1
 { [ -f "$TMP/slv/concepts/入出力／バッファ.md" ] && grep -q '\[\[入出力／バッファ\]\]' "$TMP/slv/concepts/境界条件.md"; } && ok "P12 概念名の / は ／ に" || ng "P12 スラッシュ" "$(ls "$TMP/slv/concepts")"
 
+# P13 旧名・旧配色の graph.json は新しくなる。利用者が変えた色(未知の値)は触らない
+rm -rf "$TMP/v4"; sh scripts/pages.sh --root $FX --vault "$TMP/v4" --today 2026-09-08 >/dev/null 2>&1
+printf '{"colorGroups":[{"query":"[state:霧]","color":{"a":1,"rgb": 10395294 }},{"query":"[state:理解]","color":{"a":1,"rgb": 123 }}]}\n' > "$TMP/v4/.obsidian/graph.json"
+sh scripts/pages.sh --root $FX --vault "$TMP/v4" --today 2026-09-08 >/dev/null 2>&1
+{ grep -q '\[state:未出題\]' "$TMP/v4/.obsidian/graph.json" && grep -q '"rgb": 7041144 ' "$TMP/v4/.obsidian/graph.json" && grep -q '"rgb": 123 ' "$TMP/v4/.obsidian/graph.json"; } \
+  && ok "P13 旧名と旧配色は移行し、利用者の色は残る" || ng "P13 移行" "$(cat "$TMP/v4/.obsidian/graph.json")"
+# P14 Obsidian が整形した形(数字の後が改行)でも移行する
+printf '{\n  "colorGroups": [\n    {\n      "query": "[state:曖昧]",\n      "color": {\n        "a": 1,\n        "rgb": 16771899\n      }\n    }\n  ]\n}\n' > "$TMP/v4/.obsidian/graph.json"
+sh scripts/pages.sh --root $FX --vault "$TMP/v4" --today 2026-09-08 >/dev/null 2>&1
+grep -q '"rgb": 16765503$' "$TMP/v4/.obsidian/graph.json" && ok "P14 整形済み JSON(改行区切り)でも旧配色を移行" || ng "P14 整形済み" "$(cat "$TMP/v4/.obsidian/graph.json")"
+
 # O01 open.sh: vault を作り直し、URL を出す。O02 open コマンドの差し替えで開く
 rm -rf "$TMP/v3"; u=$(sh scripts/open.sh --root $FX --vault "$TMP/v3" --print)
 { echo "$u" | grep -q '^obsidian://open?path=%2F' && ! echo "$u" | grep -q ' ' && [ -f "$TMP/v3/index.md" ]; } && ok "O01 open.sh --print は vault を作って URL を出す" || ng "O01 open" "$u"

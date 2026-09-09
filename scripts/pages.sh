@@ -113,17 +113,24 @@ rm -f "$tsv.keep"
 
 # Graph view の色。無いときだけ書く(利用者が Obsidian 側で変えた設定を上書きしない)
 g="$VAULT/.obsidian/graph.json"
-# 旧名「霧」で作った色設定が残っていれば新名に直す(それ以外は触らない)
-[ -f "$g" ] && grep -q '\[state:霧\]' "$g" && sed -i '' 's/\[state:霧\]/[state:未出題]/' "$g" 2>/dev/null
+# 旧名「霧」や旧配色で作った色設定が残っていれば新しくする(利用者が自分で変えた色は触らない)。
+# Obsidian が整形し直した JSON(数字の後が改行)にも効くよう、行末と非数字の両方を見る
+if [ -f "$g" ]; then
+  sed -i '' 's/\[state:霧\]/[state:未出題]/' "$g" 2>/dev/null || true
+  for pair in 9159498:1566369 16771899:16765503 16007990:16729943 10395294:7041144 6323595:13620186; do
+    o=${pair%%:*}; n=${pair##*:}
+    sed -i '' "s/\(\"rgb\": *\)$o\([^0-9]\)/\1$n\2/; s/\(\"rgb\": *\)$o\$/\1$n/" "$g" 2>/dev/null || true
+  done
+fi
 [ -f "$g" ] || cat > "$g" <<'JSON'
 {
   "collapse-color-groups": false,
   "colorGroups": [
-    { "query": "[state:理解]",   "color": { "a": 1, "rgb": 9159498 } },
-    { "query": "[state:曖昧]",   "color": { "a": 1, "rgb": 16771899 } },
-    { "query": "[state:非理解]", "color": { "a": 1, "rgb": 16007990 } },
-    { "query": "[state:未出題]",     "color": { "a": 1, "rgb": 10395294 } },
-    { "query": "path:repos",     "color": { "a": 1, "rgb": 6323595 } }
+    { "query": "[state:理解]",   "color": { "a": 1, "rgb": 1566369 } },
+    { "query": "[state:曖昧]",   "color": { "a": 1, "rgb": 16765503 } },
+    { "query": "[state:非理解]", "color": { "a": 1, "rgb": 16729943 } },
+    { "query": "[state:未出題]", "color": { "a": 1, "rgb": 7041144 } },
+    { "query": "path:repos",     "color": { "a": 1, "rgb": 13620186 } }
   ],
   "showTags": false, "showAttachments": false, "hideUnresolved": true, "showOrphans": true,
   "textFadeMultiplier": 0, "nodeSizeMultiplier": 1.2, "lineSizeMultiplier": 1
