@@ -31,6 +31,7 @@
 | `hooks/post-commit` | commit 後に tag.sh を背景で走らせる。commit は止めない |
 | `install.sh --hook` | 今の repo に hook を置く |
 | `scripts/next.sh` | 次に問う関数を選ぶ(非理解 > 曖昧 > 霧、repo をまたいで概念の順位を見る) |
+| `scripts/open.sh` | vault を作り直して Obsidian で開く(`/hidane --vault`) |
 | `scripts/record.sh` | 問いと答えを log.md に 1 行追記(唯一の書き込み口) |
 | `SKILL.md` | Claude Code の `/hidane`。一関数一問、解説なし、行番号で指す |
 | `install.sh --skill` | ~/.claude/skills/hidane に配置 |

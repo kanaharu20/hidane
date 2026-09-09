@@ -61,5 +61,12 @@ mkdir -p "$TMP/sl/x"; { head -2 $FX/RAG/log.md | tail -1; echo '|---|---|---|---
 sh scripts/pages.sh --root "$TMP/sl" --vault "$TMP/slv" --today 2026-09-08 >/dev/null 2>&1
 { [ -f "$TMP/slv/concepts/入出力／バッファ.md" ] && grep -q '\[\[入出力／バッファ\]\]' "$TMP/slv/concepts/境界条件.md"; } && ok "P12 概念名の / は ／ に" || ng "P12 スラッシュ" "$(ls "$TMP/slv/concepts")"
 
+# O01 open.sh: vault を作り直し、URL を出す。O02 open コマンドの差し替えで開く
+rm -rf "$TMP/v3"; u=$(sh scripts/open.sh --root $FX --vault "$TMP/v3" --print)
+{ echo "$u" | grep -q '^obsidian://open?path=%2F' && ! echo "$u" | grep -q ' ' && [ -f "$TMP/v3/index.md" ]; } && ok "O01 open.sh --print は vault を作って URL を出す" || ng "O01 open" "$u"
+mkdir -p "$TMP/a b"; u=$(HIDANE_ROOT=$FX sh scripts/open.sh --vault "$TMP/a b/日本" --print)
+[ "$u" = "obsidian://open?path=$(printf '%s' "$TMP" | od -An -tx1 -v | tr -d ' \n' | sed 's/../%&/g' | tr 'a-f' 'A-F')%2F%61%20%62%2F%E6%97%A5%E6%9C%AC" ] && ok "O03 空白と日本語のパスが %XX に符号化される(既知の答えと一致)" || ng "O03 encode" "$u"
+o=$(HIDANE_OPEN=echo sh scripts/open.sh --root $FX --vault "$TMP/v3"); echo "$o" | grep -q '^obsidian://open?path=' && echo "$o" | grep -q 'Obsidian で開きました' && ok "O02 open コマンドで URL を開く" || ng "O02" "$o"
+
 echo; echo "PASS $pass / FAIL $fail"
 [ $fail -eq 0 ]
