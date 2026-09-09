@@ -21,7 +21,7 @@ case "${1:-}" in
     fi
     sed "s|__HIDANE_HOME__|$HERE|" "$HERE/hooks/post-commit" > "$hook" && chmod +x "$hook"
     echo "install.sh: 置きました: $hook"
-    echo "  最初に一度、全体に霧を敷く: sh $HERE/scripts/tag.sh --all" ;;
+    echo "  最初に一度、全体に未出題を敷く: sh $HERE/scripts/tag.sh --all" ;;
   --unhook)
     if [ -f "$hook" ] && grep -q '^# hidane-hook' "$hook"; then rm -f "$hook"; echo "install.sh: 外しました"; else echo "install.sh: hidane の hook は無い"; fi ;;
   *) sed -n '2,5p' "$0" | sed 's/^# \{0,1\}//'; exit 2 ;;

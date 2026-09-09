@@ -65,9 +65,9 @@ grep -q '新: 早期リターン' "$fn" && ok "G04 既存に無い概念は 備�
 grep -q '候補 2、呼び出し 1 回、追記 1 行、捨てた 3 行' "$TMP/o" && ok "G06 結果の 1 行(候補 2 / 呼び出し 1 / 追記 1 / 捨てた 3)" || ng "G06 結果行" "$(cat "$TMP/o")"
 short=$(cd "$R" && git rev-parse --short HEAD); grep -q "| $short |" "$fn" && ok "G07 commit の短縮ハッシュが入る" || ng "G07 hash"
 
-# G08 vault が更新され、霧の概念ページができる
-{ [ -f "$ROOT/vault/concepts/早期リターン.md" ] && grep -q '^state: 霧$' "$ROOT/vault/concepts/早期リターン.md" && grep -q 'clamp' "$ROOT/vault/concepts/早期リターン.md"; } \
-  && ok "G08 tag のあと vault に 霧 のページができる" || ng "G08 vault" "$(ls "$ROOT/vault/concepts" 2>&1)"
+# G08 vault が更新され、未出題の概念ページができる
+{ [ -f "$ROOT/vault/concepts/早期リターン.md" ] && grep -q '^state: 未出題$' "$ROOT/vault/concepts/早期リターン.md" && grep -q 'clamp' "$ROOT/vault/concepts/早期リターン.md"; } \
+  && ok "G08 tag のあと vault に 未出題 のページができる" || ng "G08 vault" "$(ls "$ROOT/vault/concepts" 2>&1)"
 
 # G09 もう一度: clamp は既知なので候補は make_buf だけ → 偽 claude の答えは全部落ちて追記 0
 HIDANE_CLAUDE="$FAKE" sh scripts/tag.sh --repo "$R" --root "$ROOT" > "$TMP/o2" 2>/dev/null

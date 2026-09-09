@@ -10,7 +10,7 @@
 #   concepts/<概念>.md   frontmatter(state, value, evidence, last, repos)+ 関連・典型的なズレ・記録・未出題
 #   repos/<repo>.md      その repo に出た概念と状態
 #   index.md             map.sh の表そのまま
-#   .obsidian/graph.json Graph view の色(理解 黄緑 / 曖昧 黄 / 非理解 赤 / 霧 灰)。無いときだけ書く
+#   .obsidian/graph.json Graph view の色(理解 黄緑 / 曖昧 黄 / 非理解 赤 / 未出題 灰)。無いときだけ書く
 # 前回あって今回無い概念ページは消す(概念の統合で名前が消えたとき)。
 set -eu
 HERE=$(cd "$(dirname "$0")" && pwd -P)
@@ -113,6 +113,8 @@ rm -f "$tsv.keep"
 
 # Graph view の色。無いときだけ書く(利用者が Obsidian 側で変えた設定を上書きしない)
 g="$VAULT/.obsidian/graph.json"
+# 旧名「霧」で作った色設定が残っていれば新名に直す(それ以外は触らない)
+[ -f "$g" ] && grep -q '\[state:霧\]' "$g" && sed -i '' 's/\[state:霧\]/[state:未出題]/' "$g" 2>/dev/null
 [ -f "$g" ] || cat > "$g" <<'JSON'
 {
   "collapse-color-groups": false,
@@ -120,7 +122,7 @@ g="$VAULT/.obsidian/graph.json"
     { "query": "[state:理解]",   "color": { "a": 1, "rgb": 9159498 } },
     { "query": "[state:曖昧]",   "color": { "a": 1, "rgb": 16771899 } },
     { "query": "[state:非理解]", "color": { "a": 1, "rgb": 16007990 } },
-    { "query": "[state:霧]",     "color": { "a": 1, "rgb": 10395294 } },
+    { "query": "[state:未出題]",     "color": { "a": 1, "rgb": 10395294 } },
     { "query": "path:repos",     "color": { "a": 1, "rgb": 6323595 } }
   ],
   "showTags": false, "showAttachments": false, "hideUnresolved": true, "showOrphans": true,

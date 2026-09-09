@@ -38,8 +38,8 @@ echo "$o" | grep -q '^- 停止後も 1 行出る(worker, 2026-09-05)$' && echo "
 o=$($N --repo api); echo "$o" | grep -q '^場所: src/server.py:10-30$' && echo "$o" | grep -q '非理解' && ok "N03 repo をまたぐ: worker で非理解の概念が api の関数を先に出す" || ng "N03 またぎ" "$o"
 o=$($N --repo worker -n 10)
 { echo "$o" | sed -n 3p | grep -q 'src/mon.c' && echo "$o" | sed -n 4p | grep -q 'src/b.c' && echo "$o" | sed -n 5p | grep -q 'src/main.c' && ! echo "$o" | grep -q heap_peek; } \
-  && ok "N04 順: 非理解 > 曖昧 > 霧。理解だけの関数(heap_peek)は出ない" || ng "N04 順" "$o"
-echo "$o" | grep -q '^| 3 | src/main.c:1-9 | main | 起動処理 | 霧 | +0 |' && ok "N05 霧の関数は値 0 で 3 番目" || ng "N05 霧" "$o"
+  && ok "N04 順: 非理解 > 曖昧 > 未出題。理解だけの関数(heap_peek)は出ない" || ng "N04 順" "$o"
+echo "$o" | grep -q '^| 3 | src/main.c:1-9 | main | 起動処理 | 未出題 | +0 |' && ok "N05 未出題の関数は値 0 で 3 番目" || ng "N05 未出題" "$o"
 pf="$ROOT/worker/pending"; [ -f "$pf" ] && [ "$(cat "$pf")" = "$(printf 'src/mon.c:1-20\tmonitor\t停止フラグの伝搬, 境界条件\t追う(境界・変異)')" ] && ok "N10 決定が pending に書かれる" || ng "N10 pending" "$(cat "$pf" 2>&1)"
 o1=$($N --repo worker); echo "$o1" | grep -q '^問いの形: ' && echo "$o1" | grep -q '「なぜ」「何が必要か」は問わない' && ok "N11 問いの形の制約が出る" || ng "N11 問いの形" "$o1"
 o2=$($N --repo api); grep -q '^src/server.py' "$ROOT/api/pending" && ok "N12 repo ごとに別の pending" || ng "N12"

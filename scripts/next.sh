@@ -2,7 +2,7 @@
 # hidane next.sh — 次に問う関数を 1 つ選ぶ。LLM は使わない。
 #
 # 使い方: next.sh [--root DIR] [--repo NAME] [--today D] [-n N]
-#   概念の順位は全 repo の値から(非理解 > 曖昧 > 霧、同じ状態なら値の低い順)。
+#   概念の順位は全 repo の値から(非理解 > 曖昧 > 未出題、同じ状態なら値の低い順)。
 #   候補の関数は今いる repo の functions.md / log.md から。すでに問うた場所は除く。
 #   理解の概念からは出さない。-n N で上位 N 件を表にする。
 # 出力は決まった形。Claude はこれをそのまま使って問いを作る。
@@ -27,7 +27,7 @@ if [ -z "$REPO" ]; then
 fi
 [ -n "$TODAY" ] || TODAY=$(date +%Y-%m-%d)
 d="$ROOT/$REPO"
-[ -f "$d/functions.md" ] || [ -f "$d/log.md" ] || { echo "next.sh: $REPO には記録が無い。commit して霧を作るか、tag.sh --commit HEAD を回してください" >&2; exit 1; }
+[ -f "$d/functions.md" ] || [ -f "$d/log.md" ] || { echo "next.sh: $REPO には記録が無い。commit するか tag.sh --commit HEAD を回して、関数に概念を付けてください" >&2; exit 1; }
 
 tmp=$(mktemp -d); trap 'rm -rf "$tmp"' EXIT
 sh "$HERE/map.sh" --root "$ROOT" --today "$TODAY" --tsv > "$tmp/map"
@@ -40,9 +40,9 @@ done | sh "$HERE/resolve.sh" --root "$ROOT" > "$tmp/alllog"
 
 awk -F'\t' -v map="$tmp/map" -v alllog="$tmp/alllog" -v n="$N" -v pending="$d/pending" '
 function trim(s) { gsub(/^[ \t]+|[ \t]+$/, "", s); return s }
-function rank(st) { return (st == "非理解" ? 0 : st == "曖昧" ? 1 : st == "霧" ? 2 : 9) }
+function rank(st) { return (st == "非理解" ? 0 : st == "曖昧" ? 1 : st == "未出題" ? 2 : 9) }
 BEGIN {
-  while ((getline l < map) > 0) { split(l, t, "\t"); c = t[1]; val[c] = t[2]; st[c] = t[5]; if (!(c in st)) st[c] = "霧" }
+  while ((getline l < map) > 0) { split(l, t, "\t"); c = t[1]; val[c] = t[2]; st[c] = t[5]; if (!(c in st)) st[c] = "未出題" }
   while ((getline l < alllog) > 0) {
     split(l, t, "\t"); repo = t[1]; split(t[2], col, "|"); z = trim(col[9]); k = split(trim(col[5]), cs, ",")
     if (z == "") continue
@@ -67,7 +67,7 @@ END {
     if (best == 9) continue                          # 理解の概念だけの関数は出さない
     m++; key[m] = sprintf("%d\t%+04d\t%s", best, bv + 100, p); P[m] = p; C[m] = bc
   }
-  if (m == 0) { print "候補なし: この repo の関数は全部問うた(または理解のみ)。commit して霧を作るか、tag.sh --commit HEAD を回す" > "/dev/stderr"; exit 1 }
+  if (m == 0) { print "候補なし: この repo の関数は全部問うた(または理解のみ)。commit するか tag.sh --commit HEAD を回して関数に概念を付ける" > "/dev/stderr"; exit 1 }
   # 並べ替え(単純な挿入ソート)
   for (i = 2; i <= m; i++) { for (j = i; j > 1 && key[j] < key[j-1]; j--) { sw = key[j]; key[j] = key[j-1]; key[j-1] = sw; sw = P[j]; P[j] = P[j-1]; P[j-1] = sw; sw = C[j]; C[j] = C[j-1]; C[j-1] = sw } }
   if (n > 1) {
@@ -77,7 +77,7 @@ END {
   }
   p = P[1]; c = C[1]
   printf("場所: %s\n関数: %s\n概念: %s\n代表: %s(%s、値 %+d)\n", p, fname[p], cand[p], c, st[c], val[c])
-  why = (st[c] == "非理解" ? "非理解の概念に付いた、まだ問うていない関数" : st[c] == "曖昧" ? "曖昧な概念に付いた、まだ問うていない関数" : "霧(証拠なし)の関数")
+  why = (st[c] == "非理解" ? "非理解の概念に付いた、まだ問うていない関数" : st[c] == "曖昧" ? "曖昧な概念に付いた、まだ問うていない関数" : "まだ問うていない関数")
   printf("理由: %s\n", why)
   if (zure[c] != "") {
     type = "追う(境界・変異)"

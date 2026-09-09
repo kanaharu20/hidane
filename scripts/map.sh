@@ -13,7 +13,7 @@
 #          当たり・一致 +1、ズレ・外れ・分からない -1、未回答 0(証拠にしない)
 #          1 行ごとに足し、±CAP で止める(歩きながら止める)
 #   鮮度 = 最後に証拠のあった日から FRESH_DAYS 日以内
-#   状態 = 証拠なし(functions.md にだけある、または未回答だけ)→ 霧
+#   状態 = 証拠なし(functions.md にだけある、または未回答だけ)→ 未出題
 #          値 >= +THRESHOLD かつ新鮮 → 理解
 #          値 <= -THRESHOLD かつ新鮮 → 非理解
 #          それ以外 → 曖昧
@@ -114,7 +114,7 @@ END {
   if (!tsv) printf("!\t1\t| 概念 | 値 | 証拠 | 最終 | 状態 | repo |\n!\t2\t|---|---|---|---|---|---|\n")
   for (c in seen) {
     v = val[c] + 0; n = cnt[c] + 0
-    if (n == 0) { st = "霧"; lastd = "-" }
+    if (n == 0) { st = "未出題"; lastd = "-" }
     else {
       lastd = last[c]
       isfresh = (jdn(today) - jdn(lastd) <= fresh)

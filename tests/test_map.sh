@@ -43,9 +43,9 @@ echo "$r" | grep -q '| -6 | 8 |' && ok "T06 8 回外しても -6 で止まる" |
 r=$($MAP --root "$TMP/cap" --today 2026-09-08 | row /dev/stdin 上限試験)
 echo "$r" | grep -q '| -3 | 9 |' && ok "T07 上限は 1 行ごとに適用(-6 → +3 で -3)" || ng "T07 歩き止め" "$r"
 
-# T08 未回答だけの概念は 霧、証拠 0、最終 -
+# T08 未回答だけの概念は 未出題、証拠 0、最終 -
 r=$(row "$TMP/out.md" 入力検証)
-echo "$r" | grep -q '| +0 | 0 | - | 霧 |' && ok "T08 未回答だけの概念は霧" || ng "T08 霧" "$r"
+echo "$r" | grep -q '| +0 | 0 | - | 未出題 |' && ok "T08 未回答だけの概念は未出題" || ng "T08 未出題" "$r"
 
 # T09 読めない行(未知の型)は stderr に出て、使えた行から外れる
 mkdir -p "$TMP/bad/x"; { head -2 "$TMP/cap/x/log.md"; echo "| 2026-09-08 | f.c:1-2 | f | 何か | 記述 | q | 当たり |  |  |"; echo "| 2026-09-08 | f.c:1-2 | f | 何か | 追う | q | 当たり |  |  |"; } > "$TMP/bad/x/log.md"
@@ -63,9 +63,9 @@ echo "$r" | grep -q 'api,worker' && ok "T11 境界条件 は api と worker の�
 # T12 log.md が無いと exit 1
 $MAP --root "$TMP/none" >/dev/null 2>&1; [ $? -eq 1 ] && ok "T12 log.md も functions.md も無しは exit 1" || ng "T12 exit code"
 
-# T13 functions.md にだけある概念は 霧、repo 列に出る、値 0 証拠 0
+# T13 functions.md にだけある概念は 未出題、repo 列に出る、値 0 証拠 0
 r=$(row "$TMP/out.md" 起動と引数処理)
-echo "$r" | grep -q '| +0 | 0 | - | 霧 | worker |' && ok "T13 functions.md だけの概念は霧" || ng "T13 functions.md" "$r"
+echo "$r" | grep -q '| +0 | 0 | - | 未出題 | worker |' && ok "T13 functions.md だけの概念は未出題" || ng "T13 functions.md" "$r"
 
 echo; echo "PASS $pass / FAIL $fail"
 [ $fail -eq 0 ]

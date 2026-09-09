@@ -1,5 +1,5 @@
 #!/bin/sh
-# hidane tag.sh — 関数に概念タグを付け、functions.md に追記する(霧の入口)。
+# hidane tag.sh — 関数に概念タグを付け、functions.md に追記する(まだ問うていない関数が地図に載る入口)。
 #
 # ここが hidane で唯一 LLM に判断させる場所。Claude がするのは
 # 「既存の概念一覧から選ぶか、無ければ新しい名前を付ける」だけ。形式はこのスクリプトが検査し、
@@ -7,7 +7,7 @@
 #
 # 使い方: tag.sh [--commit REV | --all] [--root DIR] [--repo DIR] [--dry-run] [--help]
 #   --commit REV  そのコミットが触った関数だけ(既定 HEAD。hook が使う)
-#   --all         リポジトリ全体の関数。hook を置いた最初に一度回して霧を敷く。既知の場所は飛ばす
+#   --all         リポジトリ全体の関数。hook を置いた最初に一度回して、全関数を地図に載せる。既知の場所は飛ばす
 #   --root DIR    記録の場所(既定 $HIDANE_ROOT か ~/.claude/hidane)。<root>/<repo名>/functions.md に追記
 #   --repo DIR    git リポジトリ(既定: カレント)
 #   --dry-run     LLM を呼ばず、渡すはずのプロンプトを stdout に出す
@@ -82,7 +82,7 @@ P
   done < "$1"
 }
 
-[ -f "$fn" ] || [ -n "$DRY" ] || printf '# hidane — commit 時に付けた概念(未出題の関数。霧の入口)\n\n| 日付 | 場所 | 関数 | 概念 | commit | 備考 |\n|---|---|---|---|---|---|\n' > "$fn"
+[ -f "$fn" ] || [ -n "$DRY" ] || printf '# hidane — commit 時に付けた概念(まだ問うていない関数)\n\n| 日付 | 場所 | 関数 | 概念 | commit | 備考 |\n|---|---|---|---|---|---|\n' > "$fn"
 today=$(date +%Y-%m-%d)
 good_all=0; bad_all=0; calls=0
 split -l "$MAXF" "$tmp/todo" "$tmp/chunk."

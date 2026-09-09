@@ -27,10 +27,10 @@ p="$V/concepts/境界条件.md"
 # P04 典型的なズレ に log の ズレ列が入る
 grep -q '^- 停止後も1行出る(worker, 2026-09-05)$' "$V/concepts/停止フラグの伝搬.md" && ok "P04 ズレの中身が 典型的なズレ に入る" || ng "P04 ズレ" "$(grep -A3 'ズレ' "$V/concepts/停止フラグの伝搬.md")"
 
-# P05 未出題の関数(functions.md)が霧の概念ページに出て、記録は無い
+# P05 未出題の関数(functions.md)が未出題の概念ページに出て、記録は無い
 p2="$V/concepts/起動と引数処理.md"
-{ grep -q '^state: 霧$' "$p2" && grep -q '^- 2026-09-08 \[\[worker\]\] `src/main.c:74-90` main$' "$p2" && ! grep -q '## 記録' "$p2"; } \
-  && ok "P05 functions.md の関数が 霧 のページに 未出題 として出る" || ng "P05 未出題" "$(cat "$p2")"
+{ grep -q '^state: 未出題$' "$p2" && grep -q '^- 2026-09-08 \[\[worker\]\] `src/main.c:74-90` main$' "$p2" && ! grep -q '## 記録' "$p2"; } \
+  && ok "P05 functions.md の関数が 未出題 のページに 未出題 として出る" || ng "P05 未出題" "$(cat "$p2")"
 
 # P06 入力検証 は log(未回答)と functions の両方を持つ: 記録 と 未出題 の両節がある
 p3="$V/concepts/入力検証.md"
