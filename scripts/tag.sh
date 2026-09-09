@@ -124,5 +124,6 @@ done
 [ -n "$DRY" ] && exit 0
 echo "tag.sh: 候補 $total、呼び出し $calls 回、追記 $good_all 行、捨てた $bad_all 行 → $fn"
 
-# 4. vault を更新(失敗しても記録は残っているので無視)
+# 4. vault を更新(失敗しても記録は残っているので無視)。数日に一度は概念名の統合も
 sh "$HERE/pages.sh" --root "$ROOT" >/dev/null 2>&1 || true
+sh "$HERE/lint.sh" --root "$ROOT" --if-due 2>&1 | sed 's/^/tag.sh: /' || true

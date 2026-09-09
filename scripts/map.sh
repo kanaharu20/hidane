@@ -53,7 +53,7 @@ for d in "$ROOT"/*/; do
   [ -f "$d/log.md" ] && grep '^| 20' "$d/log.md" | sed "s/^/$repo	log	/"
   [ -f "$d/functions.md" ] && grep '^| 20' "$d/functions.md" | sed "s/^/$repo	fn	/"
   true
-done | awk -F'\t' -v tsv="$TSV" \
+done | sh "$(dirname "$0")/resolve.sh" --root "$ROOT" | awk -F'\t' -v tsv="$TSV" \
   -v today="$TODAY" -v wt="$W_TRACE" -v we="$W_EDGE" -v ws="$W_SUMMARY" \
   -v th="$THRESHOLD" -v cap="$CAP" -v fresh="$FRESH_DAYS" '
 function trim(s) { gsub(/^[ \t]+|[ \t]+$/, "", s); return s }

@@ -7,7 +7,7 @@ hidane は、あなたが書いた(書かせた)関数について一問だけ�
 記録だけから「理解 / 曖昧 / 非理解 / 霧」を計算して Obsidian のグラフに色で見せる。
 
 - 点数は出さない。あるのは色だけ
-- LLM が判断するのは「この関数はどの概念か」の 1 か所だけ。状態はスクリプトが規則で決める
+- LLM が判断するのは「この関数はどの概念か」と「どの概念名が同じ意味か」の 2 か所だけ。状態はスクリプトが規則で決める
 - 記録は 1 つのファイル(`log.md`)。地図はいつでも記録から作り直せる
 - 依存は git と POSIX sh。commit 時のタグ付けと問いに Claude Code を使う
 
@@ -59,6 +59,7 @@ sh ~/CODE/hidane/scripts/tag.sh --all                    # 最初に一度、全
 | 普段 | いつも通り commit する。背景で、そのコミットが触った関数に概念が付き、霧が育つ(commit は止まらない) |
 | 確かめたいとき | Claude Code で `/hidane`。一問出る。答える。記録される。それだけ |
 | 地図を見る | `/hidane --vault`(Obsidian が開く)、または `/hidane --map`(表をその場に) |
+| 概念名を整える | `/hidane --lint`。似た概念名を統合する(hook 経由で 3 日に一度は自動で走る) |
 | 手で回す | `sh scripts/pages.sh`(vault 再生成)、`sh scripts/tag.sh --commit HEAD`(タグ付け) |
 
 `/hidane` の中で Claude がすること・しないこと:
@@ -98,6 +99,12 @@ sh ~/CODE/hidane/scripts/tag.sh --all                    # 最初に一度、全
 難しい問いに当たると大きく上がり、易しい問いを外すと大きく下がる。1 回の当たりや外れでは状態は動かない。
 定数(重み、閾値 ±4、上限 ±6、30 日)は**全部仮置き**で、環境変数 `HIDANE_W_TRACE` `HIDANE_W_EDGE` `HIDANE_W_SUMMARY` `HIDANE_THRESHOLD` `HIDANE_CAP` `HIDANE_FRESH_DAYS` で変えられる。
 
+**概念名の統合(lint)**。タグ付けは自由に新しい名前を作れるので、放っておくと似た名前が増える。
+数日に一度(既定 3 日、`HIDANE_LINT_DAYS`)、Claude に概念一覧を見せて「同じ意味の組」を挙げさせ、
+`aliases.md` に「旧名 → 新名」を 1 行足す。**記録(log.md)は書き換えない**。読む側が別名を解いて読むので、
+統合した概念の値は両方の証拠の合計になり、関連も付け直される。間違った統合は aliases.md の行を消せば戻る。
+新名は既存の名前に限り、同名・存在しない名前・循環はスクリプトが捨てる。
+
 **次に問う関数**は、概念の状態が 非理解 > 曖昧 > 霧 の順、同じ状態なら値の低い順。
 概念の順位は全リポジトリの記録から決め、候補の関数は今いるリポジトリから選ぶ。
 だからリポジトリ A で非理解になった概念は、リポジトリ B の commit で最初に問われる。
@@ -110,6 +117,8 @@ sh ~/CODE/hidane/scripts/tag.sh --all                    # 最初に一度、全
   <repo>/log.md                     問いと答え。1 回 1 行
   <repo>/functions.md               commit 時に付いた「関数 → 概念」
   <repo>/pending                    next.sh が決めた次の一問(record.sh が照合して消す)
+  aliases.md                        概念の別名(旧名 → 新名)。lint.sh が足す。行を消せば統合は戻る
+  .lint-stamp                       最後に lint を回した日
   hook.log                          hook の出力
 ~/Documents/hidane/               地図(派生データ。消しても pages.sh で戻る)
   concepts/<概念>.md                概念 1 つ = 1 ページ。人は書かない
@@ -130,14 +139,16 @@ sh ~/CODE/hidane/scripts/tag.sh --all                    # 最初に一度、全
 | `scripts/next.sh` | 次に問う関数と型を決めて `pending` に置く | なし |
 | `scripts/record.sh` | log.md に 1 行追記。`pending` と照合し、違えば書かない(exit 7) | なし |
 | `scripts/open.sh` | vault を作り直して Obsidian で開く | なし |
+| `scripts/lint.sh` | 似た概念名を統合。aliases.md に追記するだけ | **ここも** |
+| `scripts/resolve.sh` | 行の流れの概念名を aliases.md で置き換えるフィルタ(map / pages / next が通す) | なし |
 | `scripts/scope.sh` | commit が触った関数を 15 言語で切り出す([reflect](https://github.com/kanaharu20/reflect) から) | なし |
 | `hooks/post-commit` | commit 後に tag.sh を背景で走らせる。何が起きても commit は通す | なし |
-| `SKILL.md` | Claude Code の `/hidane` の手順 | 問いの文と照合 |
+| `SKILL.md` | Claude Code の `/hidane`(`--vault` `--map` `--lint`)の手順 | 問いの文と照合 |
 | `install.sh` | `--skill` / `--hook` / `--unhook` | なし |
 
 ## 設計の芯
 
-- **LLM の判断は 1 か所。** 概念タグ付けだけ。状態・型・順位・記録の形はスクリプトが決める。理由: LLM に組み立てさせた文面や判定は、同じ指示でもぶれる(前身の reflect での実測)。ぶれてよい所を 1 つに絞り、そこも「一覧から選ぶ」形にした
+- **LLM の判断は 2 か所。** 概念タグ付けと、概念名の統合だけ。状態・型・順位・記録の形はスクリプトが決める。理由: LLM に組み立てさせた文面や判定は、同じ指示でもぶれる(前身の reflect での実測)。ぶれてよい所を 1 つに絞り、そこも「一覧から選ぶ」形にした
 - **記録が唯一の真実。** 値も状態も保存しない。食い違いが起きない
 - **点数を見せない。** 点数は興味を下げ、注意をコードから自分に向ける(Butler 1988、Kluger & DeNisi 1996)。色は「このコードの霧」であって「あなたの成績」ではない
 - **霧と非理解は別。** 「まだ確かめていない」と「確かめて分からなかった」を混ぜない。出題は非理解から
@@ -147,7 +158,7 @@ sh ~/CODE/hidane/scripts/tag.sh --all                    # 最初に一度、全
 ## 検査
 
 ```sh
-sh tests/run_all.sh     # 69 件、LLM なし、数秒
+sh tests/run_all.sh     # 83 件、LLM なし、数秒
 ```
 
 各スクリプトを壊して検査が落ちることを確かめてある(空振り防止)。tag.sh の検査は `claude` を偽物に差し替えて回す。
@@ -168,4 +179,3 @@ Open Learner Model と [Mastery Grids](https://people.cs.pitt.edu/~hosseini/pape
 - 概念名は日本語。他言語はプロンプトを変えれば動くはずだが試していない
 - `tag.sh` は `claude -p` を呼ぶ。関数 8 個ごとに 1 回、1 回 10 秒前後
 - 「要約」型の判定(説明からコードを生成して照合する CGBG 方式)は未実装。今は「追う」型のみ
-- 概念名の統合(lint)は未実装。名前が散ってきたら要る

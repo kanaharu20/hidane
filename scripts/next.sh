@@ -35,8 +35,8 @@ sh "$HERE/map.sh" --root "$ROOT" --today "$TODAY" --tsv > "$tmp/map"
 for r in "$ROOT"/*/; do
   [ -f "$r/log.md" ] && grep '^| 20' "$r/log.md" | sed "s/^/$(basename "$r")	/"
   true
-done > "$tmp/alllog"
-{ [ -f "$d/functions.md" ] && grep '^| 20' "$d/functions.md" | sed 's/^/fn	/'; [ -f "$d/log.md" ] && grep '^| 20' "$d/log.md" | sed 's/^/log	/'; true; } > "$tmp/mine"
+done | sh "$HERE/resolve.sh" --root "$ROOT" > "$tmp/alllog"
+{ [ -f "$d/functions.md" ] && grep '^| 20' "$d/functions.md" | sed 's/^/fn	/'; [ -f "$d/log.md" ] && grep '^| 20' "$d/log.md" | sed 's/^/log	/'; true; } | sh "$HERE/resolve.sh" --root "$ROOT" > "$tmp/mine"
 
 awk -F'\t' -v map="$tmp/map" -v alllog="$tmp/alllog" -v n="$N" -v pending="$d/pending" '
 function trim(s) { gsub(/^[ \t]+|[ \t]+$/, "", s); return s }

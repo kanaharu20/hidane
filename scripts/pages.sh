@@ -38,11 +38,14 @@ for d in "$ROOT"/*/; do
   [ -f "$d/log.md" ] && grep '^| 20' "$d/log.md" | sed "s/^/$repo	log	/"
   [ -f "$d/functions.md" ] && grep '^| 20' "$d/functions.md" | sed "s/^/$repo	fn	/"
   true
-done | LC_ALL=C sort -t'	' -k3,3 | awk -F'\t' -v tsv="$tsv" -v vault="$VAULT" -v today="$TODAY" '
+done | sh "$HERE/resolve.sh" --root "$ROOT" | LC_ALL=C sort -t'	' -k3,3 | awk -F'\t' -v tsv="$tsv" -v vault="$VAULT" -v today="$TODAY" -v aliases="$ROOT/aliases.md" '
 function trim(s) { gsub(/^[ \t]+|[ \t]+$/, "", s); return s }
 function fname(c) { gsub("/", "／", c); return c }
 function link(a, b) { if (a == b) return; if (!((a SUBSEP b) in rel)) { rel[a SUBSEP b] = 1; related[a] = related[a] "- [[" fname(b) "]]\n" } }
 BEGIN {
+  while ((getline l < aliases) > 0) { if (l ~ /^\| 20/) { split(l, a, "|"); o = trim(a[3]); nn = trim(a[4]); if (o != "" && nn != "" && o != nn) { to[o] = nn; olds[++no] = o } } }
+  close(aliases)
+  for (i = 1; i <= no; i++) { o = olds[i]; c = to[o]; for (j = 0; j < 10 && (c in to); j++) c = to[c]; al[c] = al[c] (al[c] == "" ? "" : ", ") o }
   while ((getline l < tsv) > 0) {
     split(l, t, "\t"); c = t[1]; value[c] = t[2]; evid[c] = t[3]; last[c] = t[4]; state[c] = t[5]; repos[c] = t[6]
     order[++nc] = c
@@ -73,7 +76,9 @@ END {
   for (i = 1; i <= nc; i++) {
     c = order[i]; f = vault "/concepts/" fname(c) ".md"
     r = repos[c]; gsub(",", ", ", r)
-    printf("---\nstate: %s\nvalue: %s\nevidence: %s\nlast: %s\nrepos: [%s]\nupdated: %s\n---\n# %s\n\n", state[c], value[c], evid[c], last[c], r, today, c) > f
+    printf("---\nstate: %s\nvalue: %s\nevidence: %s\nlast: %s\nrepos: [%s]\n", state[c], value[c], evid[c], last[c], r) > f
+    if (al[c] != "") printf("aliases: [%s]\n", al[c]) > f
+    printf("updated: %s\n---\n# %s\n\n", today, c) > f
     printf("状態 **%s**(値 %s、証拠 %s、最終 %s)\n\n", state[c], value[c], evid[c], last[c]) > f
     if (related[c] != "") printf("## 関連\n%s\n", related[c]) > f
     if (zl[c] != "")      printf("## 典型的なズレ\n%s\n", zl[c]) > f
