@@ -9,7 +9,7 @@
 #   --tsv         見出し・脚注なしのタブ区切り(概念 値 証拠 最終 状態 repo)。状態は記号。pages.sh 用
 #
 # 記録の中の語彙は言語に依らない記号(lang.sh 参照):
-#   型   trace 1 / edge 2 / summary 3     結果  hit +1 / miss -1 / dunno -1 / skip 0(証拠にしない)
+#   型   trace 1 / edge 2 / summary 3     結果  hit +1 / partial 0(証拠にはなる) / miss -1 / dunno -1 / skip 0(証拠にしない)
 #   状態 known / fuzzy / unknown / unasked  表示だけ言語表を通す
 # 規則(定数は環境変数で上書きできる。全部仮置き):
 #   値   = Σ(型の重み × 符号)。1 行ごとに足し、±CAP で止める(歩きながら止める)
@@ -58,7 +58,7 @@ function jdn(d,   y, m, dd, a, yy, mm) {
   return dd + int((153*mm+2)/5) + 365*yy + int(yy/4) - int(yy/100) + int(yy/400) - 32045
 }
 function weight(t) { if (t == "trace") return wt; if (t == "edge") return we; if (t == "summary") return ws; return -1 }
-function sign(r) { if (r == "hit") return 1; if (r == "miss" || r == "dunno") return -1; if (r == "skip") return 0; return -99 }
+function sign(r) { if (r == "hit") return 1; if (r == "miss" || r == "dunno") return -1; if (r == "partial" || r == "skip") return 0; return -99 }
 function label(st) { return (st == "known" ? l_known : st == "fuzzy" ? l_fuzzy : st == "unknown" ? l_unknown : l_unasked) }
 $2 == "fn" {
   repo = $1; line = $3; split(line, col, "|")
@@ -78,7 +78,7 @@ $2 == "fn" {
   for (i = 1; i <= k; i++) {
     c = trim(cs[i]); if (c == "") continue; seen[c] = 1
     if (!(c SUBSEP repo in rep)) { rep[c SUBSEP repo] = 1; repos[c] = (repos[c] == "" ? repo : repos[c] "," repo) }
-    if (s == 0) continue
+    if (result == "skip") continue
     v = val[c] + w * s; if (v > cap) v = cap; if (v < -cap) v = -cap
     val[c] = v; cnt[c]++; if (date > last[c]) last[c] = date
   }

@@ -42,14 +42,14 @@ for d in "$ROOT"/*/; do
 done | sh "$HERE/resolve.sh" --root "$ROOT" | LC_ALL=C sort -t'	' -k3,3 | awk -F'\t' -v tsv="$tsv" -v vault="$VAULT" -v today="$TODAY" -v aliases="$ROOT/aliases.md" \
   -v l_known="$(L st_known)" -v l_fuzzy="$(L st_fuzzy)" -v l_unknown="$(L st_unknown)" -v l_unasked="$(L st_unasked)" \
   -v ty_trace="$(L ty_trace)" -v ty_edge="$(L ty_edge)" -v ty_summary="$(L ty_summary)" \
-  -v rs_hit="$(L rs_hit)" -v rs_miss="$(L rs_miss)" -v rs_dunno="$(L rs_dunno)" -v rs_skip="$(L rs_skip)" \
+  -v rs_hit="$(L rs_hit)" -v rs_miss="$(L rs_miss)" -v rs_dunno="$(L rs_dunno)" -v rs_skip="$(L rs_skip)" -v rs_partial="$(L rs_partial)" \
   -v p_state="$(L p_state)" -v p_related="$(L p_related)" -v p_zure="$(L p_zure)" -v p_records="$(L p_records)" -v p_unasked="$(L p_unasked)" \
   -v h_concept="$(L h_concept)" -v h_state="$(L h_state)" -v h_value="$(L h_value)" -v h_evidence="$(L h_evidence)" -v h_last="$(L h_last)" '
 function trim(s) { gsub(/^[ \t]+|[ \t]+$/, "", s); return s }
 function fname(c) { gsub("/", "／", c); return c }
 function label(st) { return (st == "known" ? l_known : st == "fuzzy" ? l_fuzzy : st == "unknown" ? l_unknown : l_unasked) }
 function tlabel(t) { return (t == "trace" ? ty_trace : t == "edge" ? ty_edge : t == "summary" ? ty_summary : t) }
-function rlabel(r) { return (r == "hit" ? rs_hit : r == "miss" ? rs_miss : r == "dunno" ? rs_dunno : r == "skip" ? rs_skip : r) }
+function rlabel(r) { return (r == "hit" ? rs_hit : r == "miss" ? rs_miss : r == "partial" ? rs_partial : r == "dunno" ? rs_dunno : r == "skip" ? rs_skip : r) }
 function link(a, b) { if (a == b) return; if (!((a SUBSEP b) in rel)) { rel[a SUBSEP b] = 1; related[a] = related[a] "- [[" fname(b) "]]\n" } }
 BEGIN {
   while ((getline l < aliases) > 0) { if (l ~ /^\| 20/) { split(l, a, "|"); o = trim(a[3]); nn = trim(a[4]); if (o != "" && nn != "" && o != nn) { to[o] = nn; olds[++no] = o } } }

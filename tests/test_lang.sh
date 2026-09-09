@@ -23,11 +23,11 @@ echo 'lang=ja' > "$TMP/root/config"; o=$(env -u HIDANE_LANG sh scripts/map.sh --
 o=$(HIDANE_LANG=en sh scripts/next.sh --root $FX --repo worker --today 2026-09-08); { echo "$o" | grep -q '^Place: ' && echo "$o" | grep -q '^Type: trace (trace)$' && echo "$o" | grep -q '^Question form: exactly one question'; } && ok "X06 next.sh が英語で出る(型は記号+表示)" || ng "X06 next en" "$o"
 # X07 record.sh の見出しと pages の本文が英語、frontmatter は記号
 export HIDANE_VAULT="$TMP/vault"
-HIDANE_LANG=en sh scripts/record.sh --root "$TMP/root" --repo z "a.c:1-2" f "boundary conditions" trace "q" hit >/dev/null 2>&1
+HIDANE_LANG=en sh scripts/record.sh --free --root "$TMP/root" --repo z "a.c:1-2" f "boundary conditions" trace "q" hit >/dev/null 2>&1
 { grep -q '^| Date | Place | Function |' "$TMP/root/z/log.md" && grep -q '^state: fuzzy$' "$TMP/vault/concepts/boundary conditions.md" && grep -q '^## Records$' "$TMP/vault/concepts/boundary conditions.md" && grep -q 'trace — hit' "$TMP/vault/concepts/boundary conditions.md"; } \
   && ok "X07 record/pages: 見出しと節は英語、frontmatter は記号" || ng "X07 record en" "$(cat "$TMP/vault/concepts/boundary conditions.md" 2>&1 | head -12)"
 # X08 record.sh のエラーも英語
-HIDANE_LANG=en sh scripts/record.sh --root "$TMP/root" --repo z "a.c:1-2" f "x" 追う "q" hit >/dev/null 2>"$TMP/e"; grep -q 'type must be one of' "$TMP/e" && ok "X08 record.sh のエラーが英語(旧語彙は受け付けない)" || ng "X08" "$(cat "$TMP/e")"
+HIDANE_LANG=en sh scripts/record.sh --free --root "$TMP/root" --repo z "a.c:1-2" f "x" 追う "q" hit >/dev/null 2>"$TMP/e"; grep -q 'type must be one of' "$TMP/e" && ok "X08 record.sh のエラーが英語(旧語彙は受け付けない)" || ng "X08" "$(cat "$TMP/e")"
 # X09 tag.sh の en プロンプト
 d=$(HIDANE_LANG=en sh scripts/tag.sh --repo . --root "$TMP/root" --dry-run 2>/dev/null || true)
 echo "$d" | grep -q '^For each function below' && echo "$d" | grep -q '^## Functions' && ok "X09 tag.sh のプロンプトが英語" || ng "X09 tag en" "$(echo "$d" | head -3)"

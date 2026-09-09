@@ -20,30 +20,37 @@ One function, one question per invocation. Answer, record, stop. Call again for 
 1. **Pick**: run `sh <HIDANE>/scripts/next.sh`. Use its Place / Function / Concepts / Type / Input candidates / Question form. **The type is decided by next.sh. Never change it.**
    On exit 1 (no candidates), relay the single stderr line to the user and stop.
 2. **Read**: read the range `file:a-b` with Read. **Do not show or explain it to the user.**
-3. **Ask**: fit exactly one question into the "Question form". Pick one concrete value from "Input candidates".
+3. **Fix the keys**: once the question is decided and before asking, fix 2-5 elements of the correct answer:
+   ```
+   sh <HIDANE>/scripts/keys.sh "<fact 1> @ <line>" "<fact 2> @ <line>" ...
+   ```
+   A key is one concrete, checkable fact (a return value, a function called, an order, a branch taken). "@ line" is where it lives (ranges allowed).
+   Never use a sentence that would be true of any function ("something happens and it ends"). **Never show the keys to the user.**
+4. **Ask**: fit exactly one question into the "Question form". Pick one concrete value from "Input candidates".
    - The form is always "Given <input>, what does it return / what happens?". Never ask "why", "what is needed", "what should be done" (they reveal that an answer exists).
    - At most 3 lines. Place and function first. No code quotes. No hints. Never two questions.
    - Ask in the language the user writes in.
-4. **Wait** for the answer. "I don't know" is a valid answer. Do not prompt, do not ask to rephrase.
-5. **Check**: trace the code yourself, get the correct answer, compare.
-   - hit: one line, "Correct."
-   - miss: what differs, **1-2 lines with line numbers**. No explanation, background, or suggestions.
-   - don't know / no answer: leave it. Add nothing.
-6. **Record**: run the following and show the returned line verbatim.
+5. **Wait** for the answer. "I don't know" is a valid answer. Do not prompt, do not ask to rephrase.
+6. **Judge per key**: compare the answer against each key and mark it `yes` (states that fact specifically) / `no` (does not mention it) / `contra` (says the opposite).
+   - Paraphrases count as yes. A generic statement that would fit any function does not.
+   - Do not decide hit / partial / miss yourself; record.sh derives it from the verdicts.
+7. **Record**: run the following and show its output verbatim (first line: result and line numbers of missing keys; second line: the record).
    ```
-   sh <HIDANE>/scripts/record.sh "<place>" "<function>" "<concepts>" "<type>" "<question summary, ~20 chars>" "<result>" "<what the miss was, or empty>" ""
+   sh <HIDANE>/scripts/record.sh "<place>" "<function>" "<concepts>" "<type>" "<question summary, ~20 chars>" --verdict "yes,no,contra,..." ""
    ```
-   type is `trace` / `edge` / `summary`; result is `hit` / `miss` / `dunno` / `skip`.
-   Place, function, concepts and type must be exactly what next.sh printed, or record.sh refuses (exit 7).
-7. **Stop.** No summary, no next steps, no encouragement.
+   For "don't know" / no answer, pass `dunno` / `skip` instead of `--verdict`.
+   type is `trace` / `edge` / `summary`. Place, function, concepts and type must be exactly what next.sh printed, or record.sh refuses (exit 7).
+   Add nothing after record.sh's output: no explanation, no correct answer, no encouragement.
+8. **Stop.** No summary, no next steps, no encouragement.
 
 ## Never
 
-- Explain the code before asking. Feedback stops at pointing to line numbers.
+- Explain the code before asking. Feedback stops at the line numbers record.sh prints. Never reveal what a missing key says.
+- Ask without keys in place, or rewrite keys after seeing the answer.
 - Output scores, percentages, or evaluative words ("you understand this well").
 - Record a second answer. The record is the first answer.
 - Ask more than one question per invocation, even if asked to widen the scope.
-- Write to log.md by any means other than record.sh. Never pass --free.
+- Write to log.md by any means other than record.sh. Never pass --free. Never pass hit / miss directly.
 - Read record.sh's source before running it; the usage above is complete.
 
 `<HIDANE>` is the directory containing this SKILL.md.

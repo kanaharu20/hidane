@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  <img alt="tests" src="https://img.shields.io/badge/tests-97%20passing-brightgreen">
+  <img alt="tests" src="https://img.shields.io/badge/tests-112%20passing-brightgreen">
   <img alt="deps" src="https://img.shields.io/badge/deps-git%20%2B%20POSIX%20sh-blue">
   <img alt="llm" src="https://img.shields.io/badge/LLM%20decisions-2%20places-orange">
   <img alt="status" src="https://img.shields.io/badge/status-alpha-lightgrey">
@@ -30,14 +30,20 @@ $ /hidane
   src/main.c:19 is_valid_num
   Given the string "+5", what does this function return?
 
-> It returns false.
+> It returns false, because '+' is not a digit.
 
-  Correct.
-
+  hit (keys 2 / 2)
   | 2026-09-09 09:54 | src/main.c:19-33 | is_valid_num | input validation, boundary conditions | trace | "+5" → returns? | hit |  |  |
 ```
 
-That is all. No explanation, no summary. Open Obsidian and the "input validation" node has lit up from unlit (unasked) to amber (fuzzy).
+A vague answer does not pass. Before asking, Claude fixes 2-5 "keys" (concrete facts of the correct answer) on disk;
+after the answer each key is judged present / missing / contradicted, and the script derives the result:
+
+```
+  partial (keys 3 / 4) — not mentioned: L28-29
+```
+
+Missing keys are pointed at by line number only; the fact itself is never revealed. That is all. No explanation, no summary. Open Obsidian and the "input validation" node has lit up from unlit (unasked) to amber (fuzzy).
 
 ```
 $ /hidane --map
@@ -53,7 +59,8 @@ $ /hidane --map
 ## Features
 
 - **One question.** One function, one question per call. "I don't know" is an answer. Re-answers are not recorded.
-- **No explaining.** The code is never explained before the question. A miss is pointed at by line number. No scores, no evaluative words.
+- **Strict, mechanical judging.** The correct answer is fixed as 2-5 keys *before* you answer; each key is judged present / missing / contradicted and the script decides hit / partial / miss. Vague answers earn nothing.
+- **No explaining.** The code is never explained before the question. A missing key is pointed at by line number. No scores, no evaluative words.
 - **The record is the only truth.** Values and states are never stored; they are recomputed from `log.md` every time. Delete the map and it comes back.
 - **Unasked code is on the map.** Every commit tags the functions it touched with concepts. Functions you have never been asked about show up as unlit nodes.
 - **Across repositories.** Concepts belong to you; functions belong to a repository. A concept you failed in repo A is the first thing asked when repo B commits.
@@ -122,11 +129,12 @@ Only the rows of `log.md` are stored. Value and state are recomputed every time.
 | `edge` | 2 | The same, with an empty / single / last / limit input, or one that reproduces a past miss |
 | `summary` | 3 | "What does this function do?" |
 
-| Result | Sign |
-|---|---|
-| `hit` | +1 |
-| `miss`, `dunno` | −1 |
-| `skip` | 0 (not evidence) |
+| Result | Sign | How it is decided |
+|---|---|---|
+| `hit` | +1 | every key present |
+| `partial` | 0 (counts as evidence) | some keys missing, none contradicted |
+| `miss`, `dunno` | −1 | any key contradicted / "I don't know" |
+| `skip` | 0 (not evidence) | no answer |
 
 | State | Condition |
 |---|---|
@@ -147,7 +155,9 @@ Concepts are ranked from **all repositories**: not understood > fuzzy > unasked,
 Candidate functions come from **the current repository**, excluding those already asked.
 
 `next.sh` also decides the question type (`edge` if the concept has past misses, else `trace`). The decision is written to
-`pending`, and `record.sh` refuses any record that does not match it. Claude can only choose the wording of the question.
+`pending`, and `record.sh` refuses any record that does not match it. Claude then writes the keys (`keys.sh`) before asking,
+and after the answer passes one verdict per key (`--verdict "yes,no,contra"`); `record.sh` derives hit / partial / miss.
+Claude chooses the wording of the question and judges each key; it never decides the result.
 
 </details>
 
@@ -191,6 +201,7 @@ All via environment variables. **Every constant is provisional** and tuned by us
   <repo>/log.md                     questions and answers, one row each; written only by record.sh
   <repo>/functions.md               function → concepts, tagged at commit time
   <repo>/pending                    the next question as decided by next.sh
+  <repo>/keys                       the keys fixed before the question; deleted by record.sh
   aliases.md                        concept aliases (old → new)
   .lint-stamp                       last lint date
   hook.log                          hook output
@@ -209,12 +220,12 @@ All via environment variables. **Every constant is provisional** and tuned by us
 - **No scores.** Scores lower interest and turn attention from the code to the self (Butler 1988; Kluger & DeNisi 1996). The colors say which parts of the code are lit, not how good you are.
 - **Unasked ≠ not understood.** "Never checked" and "checked and failed" are kept apart. Questions start from the failures.
 - **Never rewrite the record.** Merges are aliases; the primary record is append-only.
-- **Tests miss.** Every new test is trusted only after breaking the implementation and watching it fail. All 97 L0 tests were checked that way.
+- **Tests miss.** Every new test is trusted only after breaking the implementation and watching it fail. All 112 L0 tests were checked that way.
 
 ## Development
 
 ```sh
-sh tests/run_all.sh          # 97 tests, no LLM, seconds
+sh tests/run_all.sh          # 112 tests, no LLM, seconds
 sh tests/test_tag.sh         # LLM calls are replaced by a fake via HIDANE_CLAUDE
 ```
 
@@ -223,7 +234,8 @@ sh tests/test_tag.sh         # LLM calls are replaced by a fake via HIDANE_CLAUD
 | `scripts/map.sh` | value and state table | |
 | `scripts/pages.sh` | generate the Obsidian vault (idempotent, prunes) | |
 | `scripts/next.sh` | pick the next function and type; write `pending` | |
-| `scripts/record.sh` | append one row to `log.md`; verify against `pending` | |
+| `scripts/keys.sh` | fix the keys (facts of the correct answer) before the question | |
+| `scripts/record.sh` | derive hit / partial / miss from per-key verdicts; append one row to `log.md`; verify against `pending` | |
 | `scripts/tag.sh` | tag functions with concepts | ● |
 | `scripts/lint.sh` | merge concept names (appends to `aliases.md`) | ● |
 | `scripts/resolve.sh` | alias-resolving filter | |
