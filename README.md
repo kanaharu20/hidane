@@ -12,7 +12,9 @@
   <img alt="status" src="https://img.shields.io/badge/status-alpha-lightgrey">
 </p>
 
----
+<p align="center">
+  <img src="docs/graph.svg" alt="hidane の地図(架空のデータで描いた例)。理解=黄緑、曖昧=黄、非理解=赤、霧=灰の概念ノードが 2 つのリポジトリから引かれている" width="760">
+</p>
 
 AI にコードを書かせると、動くものは増えるのに、自分が説明できる範囲は増えない。
 hidane は、あなたのコードの関数について**一問だけ**投げ、答えを記録し、
