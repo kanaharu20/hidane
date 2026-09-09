@@ -58,4 +58,16 @@ mkdir -p "$ROOT/many"; { echo "$H"; i=1; while [ $i -le 6 ]; do
 o=$($N --repo many -n 6 2>&1); got=$(echo "$o" | sed -n '3,8p' | awk -F'|' '{ gsub(/ /,"",$3); printf("%s ", $3) }')
 [ "$got" = "new6.c:1-2 new5.c:1-2 new4.c:1-2 new3.c:1-2 new2.c:1-2 new1.c:1-2 " ] && ok "N09 6 候補が値の昇順(-6 → -1)に並ぶ" || ng "N09 並べ替え" "$got / $o"
 
+# N13-N15 作業ツリーに無い関数は候補から外す
+mkdir -p "$ROOT/tree" "$TMP/wt/src"; printf 'int alive(void)\n{\n\treturn 1;\n}\n' > "$TMP/wt/src/a.c"; printf 'int other(void)\n{\n\treturn 2;\n}\n' > "$TMP/wt/src/moved.c"
+cat > "$ROOT/tree/functions.md" <<L
+$F
+| 2026-09-08 | src/gone.c:1-4 | gone | 停止フラグの伝搬 | x |  |
+| 2026-09-08 | src/moved.c:1-4 | moved_fn | 停止フラグの伝搬 | x |  |
+| 2026-09-08 | src/a.c:1-4 | alive | 境界条件 | x |  |
+L
+o=$($N --repo tree --tree "$TMP/wt" 2>&1); echo "$o" | grep -q '^場所: src/a.c:1-4$' && ok "N13 消えたファイル・名前がずれた関数は飛ばし、生きている関数を出す(順位が低くても)" || ng "N13 stale" "$o"
+o=$($N --repo tree 2>&1); echo "$o" | grep -q '^場所: src/gone.c:1-4$' && ok "N14 --tree も git も無ければ確かめず、そのまま出す" || ng "N14 no tree" "$o"
+rm "$TMP/wt/src/a.c"; $N --repo tree --tree "$TMP/wt" >/dev/null 2>"$TMP/e"; rc=$?; [ $rc = 1 ] && grep -q '作業ツリーに無い関数 3 件は除いた' "$TMP/e" && ok "N15 全部消えていれば 候補なし に除いた件数が付く" || ng "N15" "rc=$rc $(cat "$TMP/e")"
+
 echo; echo "PASS $pass / FAIL $fail"; [ $fail -eq 0 ]

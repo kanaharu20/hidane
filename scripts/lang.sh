@@ -66,6 +66,7 @@ L() {
     en:n_none_repo) echo "has no records yet. Commit, or run tag.sh --commit HEAD, to tag functions with concepts" ;;
     ja:n_none_cand) echo "候補なし: この repo の関数は全部問うた(または理解のみ)。commit するか tag.sh --commit HEAD を回して関数に概念を付ける" ;;
     en:n_none_cand) echo "no candidates: every function in this repo has been asked (or is understood only). Commit, or run tag.sh --commit HEAD" ;;
+    ja:n_stale) echo "作業ツリーに無い関数 %d 件は除いた" ;;  en:n_stale) echo "%d functions no longer in the working tree were skipped" ;;
     ja:m_footer) echo "読んだ行 %d / 使えた行 %d(基準日 %s、閾値 ±%d、上限 ±%d、鮮度 %d 日)" ;;
     en:m_footer) echo "rows read %d / usable %d (as of %s, threshold ±%d, cap ±%d, fresh %d days)" ;;
     ja:m_bad) echo "読めない行" ;;              en:m_bad) echo "unreadable row" ;;
