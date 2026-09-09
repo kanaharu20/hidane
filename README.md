@@ -46,6 +46,7 @@ Obsidian の Graph view に、概念がノードとして並ぶ。
 git clone <this repo> ~/CODE/hidane
 sh ~/CODE/hidane/install.sh --skill          # /hidane を Claude Code に登録
 cd ~/your-repo && sh ~/CODE/hidane/install.sh --hook   # このリポジトリの commit 後にタグ付け
+sh ~/CODE/hidane/scripts/tag.sh --all                    # 最初に一度、全体に霧を敷く(関数 8 個ごとに claude 1 回)
 ```
 
 初回だけ、Obsidian で `~/Documents/hidane` を「Open folder as vault」で開く
@@ -55,7 +56,7 @@ cd ~/your-repo && sh ~/CODE/hidane/install.sh --hook   # このリポジトリ�
 
 | 場面 | すること |
 |---|---|
-| 普段 | いつも通り commit する。背景で関数に概念が付き、霧が育つ(commit は止まらない) |
+| 普段 | いつも通り commit する。背景で、そのコミットが触った関数に概念が付き、霧が育つ(commit は止まらない) |
 | 確かめたいとき | Claude Code で `/hidane`。一問出る。答える。記録される。それだけ |
 | 地図を見る | `/hidane --vault`(Obsidian が開く)、または `/hidane --map`(表をその場に) |
 | 手で回す | `sh scripts/pages.sh`(vault 再生成)、`sh scripts/tag.sh --commit HEAD`(タグ付け) |
@@ -125,7 +126,7 @@ cd ~/your-repo && sh ~/CODE/hidane/install.sh --hook   # このリポジトリ�
 |---|---|---|
 | `scripts/map.sh` | log.md と functions.md から値・状態の表。`--tsv` で機械向け | なし |
 | `scripts/pages.sh` | 表から vault を生成。冪等。消えた概念のページは掃除 | なし |
-| `scripts/tag.sh` | commit が触った関数に概念を付ける。既存の概念一覧を見せて選ばせ、形式を検査 | **ここだけ** |
+| `scripts/tag.sh` | 関数に概念を付ける(`--commit` でそのコミットの分、`--all` で全体)。既存の概念一覧を見せて選ばせ、形式を検査。8 個ずつ候補が尽きるまで | **ここだけ** |
 | `scripts/next.sh` | 次に問う関数と型を決めて `pending` に置く | なし |
 | `scripts/record.sh` | log.md に 1 行追記。`pending` と照合し、違えば書かない(exit 7) | なし |
 | `scripts/open.sh` | vault を作り直して Obsidian で開く | なし |
@@ -165,6 +166,6 @@ Open Learner Model と [Mastery Grids](https://people.cs.pitt.edu/~hosseini/pape
 
 - 作者 1 人の実データ(2 リポジトリ、16 問、15 概念)で回している段階。定数は仮置き
 - 概念名は日本語。他言語はプロンプトを変えれば動くはずだが試していない
-- `tag.sh` は `claude -p` を呼ぶ。1 commit につき 1 回、10 秒前後
+- `tag.sh` は `claude -p` を呼ぶ。関数 8 個ごとに 1 回、1 回 10 秒前後
 - 「要約」型の判定(説明からコードを生成して照合する CGBG 方式)は未実装。今は「追う」型のみ
 - 概念名の統合(lint)は未実装。名前が散ってきたら要る
