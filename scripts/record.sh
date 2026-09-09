@@ -89,7 +89,7 @@ printf '%s\n' "$line" >> "$log"
 after=$(grep -c '^| 20' "$log" || true)
 cols=$(printf '%s' "$line" | tr -cd '|' | wc -c | tr -d ' ')
 if [ "$after" -ne $((before + 1)) ] || [ "$cols" -ne 10 ]; then
-  sed -i '' '$d' "$log" 2>/dev/null || sed -i '$d' "$log"
+  sed '$d' "$log" > "$log.tmp" && mv "$log.tmp" "$log"
   echo "record.sh: $(L r_undo) ($cols)" >&2; exit 6
 fi
 [ -n "$usermsg" ] && echo "$usermsg"

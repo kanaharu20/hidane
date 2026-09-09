@@ -86,6 +86,9 @@ not understood = red, unasked = unlit.
 
 More repositories: run `install.sh` again inside each one. Change the language later: `sh ~/hidane/install.sh --lang ja`.
 
+Step-by-step walkthrough with expected outputs and troubleshooting: [docs/GUIDE.md](docs/GUIDE.md).
+Trying it out for me? Please fill in [docs/FEEDBACK.md](docs/FEEDBACK.md); `scripts/stats.sh` prints numbers only, no code.
+
 ## Usage
 
 | Command | What it does |
@@ -242,6 +245,7 @@ sh tests/test_tag.sh         # LLM calls are replaced by a fake via HIDANE_CLAUD
 | `scripts/lint.sh` | merge concept names (appends to `aliases.md`) | ● |
 | `scripts/resolve.sh` | alias-resolving filter | |
 | `scripts/open.sh` | rebuild and open the vault in Obsidian | |
+| `scripts/stats.sh` | numbers-only summary for feedback (no names) | |
 | `scripts/lang.sh` | display strings for en / ja | |
 | `scripts/scope.sh` | cut a commit into functions, 15 languages (from [reflect](https://github.com/kanaharu20/reflect)) | |
 | `hooks/post-commit` | run tag.sh in the background after a commit; never blocks | |

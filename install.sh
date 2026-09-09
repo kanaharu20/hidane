@@ -16,7 +16,7 @@ cmd="${1:-}"; lang=""
 set_lang() {
   case "$1" in en|ja) ;; *) echo "install.sh: --lang en | ja" >&2; exit 2 ;; esac
   mkdir -p "$ROOT"
-  if [ -f "$ROOT/config" ] && grep -q '^lang=' "$ROOT/config"; then sed -i '' "s/^lang=.*/lang=$1/" "$ROOT/config"; else echo "lang=$1" >> "$ROOT/config"; fi
+  if [ -f "$ROOT/config" ] && grep -q '^lang=' "$ROOT/config"; then sed "s/^lang=.*/lang=$1/" "$ROOT/config" > "$ROOT/config.tmp" && mv "$ROOT/config.tmp" "$ROOT/config"; else echo "lang=$1" >> "$ROOT/config"; fi
 }
 pick_lang() {  # 引数 > config > 端末で聞く > en
   if [ -z "$lang" ]; then

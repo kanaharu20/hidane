@@ -125,10 +125,10 @@ g="$VAULT/.obsidian/graph.json"
 # 旧名「霧」や旧配色で作った色設定が残っていれば新しくする(利用者が自分で変えた色は触らない)。
 # Obsidian が整形し直した JSON(数字の後が改行)にも効くよう、行末と非数字の両方を見る
 if [ -f "$g" ]; then
-  sed -i '' 's/\[state:霧\]/[state:unasked]/; s/\[state:未出題\]/[state:unasked]/; s/\[state:理解\]/[state:known]/; s/\[state:曖昧\]/[state:fuzzy]/; s/\[state:非理解\]/[state:unknown]/' "$g" 2>/dev/null || true
+  sed 's/\[state:霧\]/[state:unasked]/; s/\[state:未出題\]/[state:unasked]/; s/\[state:理解\]/[state:known]/; s/\[state:曖昧\]/[state:fuzzy]/; s/\[state:非理解\]/[state:unknown]/' "$g" > "$g.tmp" && mv "$g.tmp" "$g"
   for pair in 9159498:1566369 16771899:16765503 16007990:16729943 10395294:7041144 6323595:13620186; do
     o=${pair%%:*}; n=${pair##*:}
-    sed -i '' "s/\(\"rgb\": *\)$o\([^0-9]\)/\1$n\2/; s/\(\"rgb\": *\)$o\$/\1$n/" "$g" 2>/dev/null || true
+    sed "s/\(\"rgb\": *\)$o\([^0-9]\)/\1$n\2/; s/\(\"rgb\": *\)$o\$/\1$n/" "$g" > "$g.tmp" && mv "$g.tmp" "$g"
   done
 fi
 [ -f "$g" ] || cat > "$g" <<'JSON'

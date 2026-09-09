@@ -239,6 +239,7 @@ sh tests/test_tag.sh         # LLM 呼び出しは HIDANE_CLAUDE で偽物に差
 | `scripts/lint.sh` | 似た概念名を統合(`aliases.md` に追記) | ● |
 | `scripts/resolve.sh` | 別名を解くフィルタ | |
 | `scripts/open.sh` | vault を作り直して Obsidian で開く | |
+| `scripts/stats.sh` | フィードバック用の数字だけの要約(名前は出ない) | |
 | `scripts/scope.sh` | commit が触った関数を 15 言語で切り出す([reflect](https://github.com/kanaharu20/reflect) から) | |
 | `hooks/post-commit` | commit 後に tag.sh を背景で走らせる。何が起きても commit は通す | |
 | `scripts/lang.sh` | en / ja の表示語 | |
