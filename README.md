@@ -10,10 +10,11 @@
   <img alt="deps" src="https://img.shields.io/badge/deps-git%20%2B%20POSIX%20sh-blue">
   <img alt="llm" src="https://img.shields.io/badge/LLM%20decisions-2%20places-orange">
   <img alt="status" src="https://img.shields.io/badge/status-alpha-lightgrey">
+  <img alt="license" src="https://img.shields.io/badge/license-MIT-green">
 </p>
 
 <p align="center">
-  <img src="docs/graph.svg" alt="hidane の地図(架空のデータで描いた例)。理解=黄緑、曖昧=黄、非理解=赤、霧=灰の概念ノードが 2 つのリポジトリから引かれている" width="760">
+  <img src="docs/graph.svg" alt="hidane の地図(架空のデータで描いた例、2 リポジトリ 42 概念)。理解=黄緑、曖昧=黄、非理解=赤、霧=灰の概念ノードが 2 つのリポジトリから引かれている" width="820">
 </p>
 
 AI にコードを書かせると、動くものは増えるのに、自分が説明できる範囲は増えない。
@@ -249,4 +250,4 @@ alpha。作者 1 人の実データ(2 リポジトリ、21 問、39 概念)で�
 
 ## License
 
-未定(TBD)。
+[MIT](LICENSE)
