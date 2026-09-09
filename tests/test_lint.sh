@@ -2,23 +2,24 @@
 # resolve.sh と lint.sh の L0 検査。claude は偽物。
 set -u
 cd "$(dirname "$0")/.." || exit 2
+export HIDANE_LANG=ja
 TMP=$(mktemp -d); trap 'rm -rf "$TMP"' EXIT
 ROOT="$TMP/root"; mkdir -p "$ROOT/worker" "$ROOT/api"; export HIDANE_VAULT="$TMP/vault"
 pass=0; fail=0
 ok() { pass=$((pass+1)); echo "PASS $1"; }
 ng() { fail=$((fail+1)); echo "FAIL $1"; [ -n "${2:-}" ] && echo "     $2"; }
-H='| 日時 | 場所 | 関数 | 概念 | 型 | 問い | 結果 | ズレ | 備考 |
+H='| 日時 | 場所 | 関数 | 概念 | 型 | 問い | 結果 | miss | 備考 |
 |---|---|---|---|---|---|---|---|---|'
 F='| 日付 | 場所 | 関数 | 概念 | commit | 備考 |
 |---|---|---|---|---|---|'
 cat > "$ROOT/worker/log.md" <<L
 $H
-| 2026-09-05 | a.c:1-5 | a | 境界条件 | 追う | q | ズレ | n=1 |  |
-| 2026-09-06 | b.c:1-5 | b | 境界条件, ヒープ操作 | 追う | q | ズレ |  |  |
+| 2026-09-05 | a.c:1-5 | a | 境界条件 | trace | q | miss | n=1 |  |
+| 2026-09-06 | b.c:1-5 | b | 境界条件, ヒープ操作 | trace | q | miss |  |  |
 L
 cat > "$ROOT/api/log.md" <<L
 $H
-| 2026-09-07 | c.py:1-5 | c | 末尾要素の扱い | 追う | q | 分からない |  |  |
+| 2026-09-07 | c.py:1-5 | c | 末尾要素の扱い | trace | q | dunno |  |  |
 L
 cat > "$ROOT/api/functions.md" <<L
 $F
@@ -34,8 +35,8 @@ printf '# aliases\n\n| 日付 | 旧名 | 新名 | 理由 |\n|---|---|---|---|\n|
 o=$($M)
 { echo "$o" | grep -q '^| 境界条件 | -3 | 3 | 2026-09-07 | 曖昧 | api,worker |' && ! echo "$o" | grep -q '末尾要素の扱い' && ! echo "$o" | grep -q '端の処理'; } \
   && ok "L02 統合後は値が合流(−1−1−1 = −3)、repo は両方、旧名は表から消える(連鎖も解く)" || ng "L02 合流" "$o"
-r=$(printf 'x\tlog\t| 2026-09-08 | e.c:1-2 | e | 端の処理, 境界条件, 末尾要素の扱い | 追う | q | 当たり |  |  |\n' | sh scripts/resolve.sh --root "$ROOT")
-[ "$r" = "x	log	| 2026-09-08 | e.c:1-2 | e | 境界条件 | 追う | q | 当たり |  |  |" ] && ok "L03 同じ概念に解ける名前は 1 つにまとまる。前置きのタブ列は保たれる" || ng "L03 dedupe" "$r"
+r=$(printf 'x\tlog\t| 2026-09-08 | e.c:1-2 | e | 端の処理, 境界条件, 末尾要素の扱い | trace | q | hit |  |  |\n' | sh scripts/resolve.sh --root "$ROOT")
+[ "$r" = "x	log	| 2026-09-08 | e.c:1-2 | e | 境界条件 | trace | q | hit |  |  |" ] && ok "L03 同じ概念に解ける名前は 1 つにまとまる。前置きのタブ列は保たれる" || ng "L03 dedupe" "$r"
 
 # pages: 新名のページに aliases、旧名のページは無い
 sh scripts/pages.sh --root "$ROOT" --vault "$TMP/vault" --today 2026-09-08 >/dev/null

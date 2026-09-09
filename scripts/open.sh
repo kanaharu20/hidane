@@ -16,10 +16,11 @@ while [ $# -gt 0 ]; do
     *) echo "open.sh: unknown arg: $1" >&2; exit 2 ;;
   esac
 done
+. "$HERE/lang.sh"
 sh "$HERE/pages.sh" --root "$ROOT" --vault "$VAULT" >/dev/null
 # URL エンコード(空白と日本語を含むパスに備える)
 enc=$(printf '%s' "$VAULT" | od -An -tx1 -v | tr -d ' \n' | sed 's/../%&/g' | tr 'a-f' 'A-F')
 url="obsidian://open?path=$enc"
 if [ -n "$PRINT" ]; then echo "$url"; exit 0; fi
 "${HIDANE_OPEN:-open}" "$url"
-echo "open.sh: Obsidian で開きました: $VAULT"
+echo "open.sh: $(L o_opened): $VAULT"

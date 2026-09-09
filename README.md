@@ -1,12 +1,12 @@
 <h1 align="center">hidane 🔥</h1>
 
 <p align="center">
-  <b>自分のコードのうち、どこを理解していて、どこをまだ確かめていないのかを地図にする。</b><br>
-  A map of what you actually understand in your own code — built only from your answers.
+  <b>A map of what you actually understand in your own code — built only from your answers.</b><br>
+  <a href="README.ja.md">日本語</a>
 </p>
 
 <p align="center">
-  <img alt="tests" src="https://img.shields.io/badge/tests-83%20passing-brightgreen">
+  <img alt="tests" src="https://img.shields.io/badge/tests-97%20passing-brightgreen">
   <img alt="deps" src="https://img.shields.io/badge/deps-git%20%2B%20POSIX%20sh-blue">
   <img alt="llm" src="https://img.shields.io/badge/LLM%20decisions-2%20places-orange">
   <img alt="status" src="https://img.shields.io/badge/status-alpha-lightgrey">
@@ -14,12 +14,13 @@
 </p>
 
 <p align="center">
-  <img src="docs/graph.svg" alt="hidane の地図(架空のデータで描いた例、2 リポジトリ 42 概念)。信号機の色(理解=青、曖昧=黄、非理解=赤、未出題=消灯)の概念ノードが 2 つのリポジトリから引かれている" width="820">
+  <img src="docs/graph.svg" alt="hidane map drawn from fictional data: 2 repositories, 42 concepts. Traffic-light colors: understood=green, fuzzy=amber, not understood=red, unasked=unlit" width="820">
 </p>
 
-AI にコードを書かせると、動くものは増えるのに、自分が説明できる範囲は増えない。
-hidane は、あなたのコードの関数について**一問だけ**投げ、答えを記録し、
-記録だけから「理解 / 曖昧 / 非理解 / 未出題」を計算して、Obsidian のグラフに**信号機の色**で見せる。点数は出さない。
+When an AI writes your code, the amount that *works* grows; the amount you can *explain* does not.
+hidane asks you **one question** about one of your own functions, records the answer, and computes
+"understood / fuzzy / not understood / unasked" from the record alone. The result is a graph in Obsidian,
+colored like a traffic light. No scores.
 
 ## Demo
 
@@ -27,226 +28,230 @@ hidane は、あなたのコードの関数について**一問だけ**投げ、
 $ /hidane
 
   src/main.c:19 is_valid_num
-  引数に文字列 "+5" を渡したとき、この関数は何を返しますか。
+  Given the string "+5", what does this function return?
 
-> false を返します
+> It returns false.
 
-  当たり
+  Correct.
 
-  | 2026-09-09 09:54 | src/main.c:19-33 | is_valid_num | 入力検証, 境界条件 | 追う | "+5" を渡すと何を返す | 当たり |  |  |
+  | 2026-09-09 09:54 | src/main.c:19-33 | is_valid_num | input validation, boundary conditions | trace | "+5" → returns? | hit |  |  |
 ```
 
-これで終わり。解説も総括も出ない。Obsidian を開くと「入力検証」のノードが消灯(未出題)から黄(曖昧)に点る。
+That is all. No explanation, no summary. Open Obsidian and the "input validation" node has lit up from unlit (unasked) to amber (fuzzy).
 
 ```
 $ /hidane --map
 
-| 概念             | 値 | 証拠 | 最終       | 状態   | repo       |
-|------------------|----|------|------------|--------|------------|
-| 停止フラグの伝搬 | -6 |  4   | 2026-09-09 | 非理解 | worker     |
-| 境界条件         | -2 |  4   | 2026-09-09 | 曖昧   | api,worker |
-| 入力検証         | +1 |  1   | 2026-09-09 | 曖昧   | api,worker |
-| 転置索引の構築   | +0 |  0   | -          | 未出題     | api        |
+| Concept              | Value | Evidence | Last       | State          | Repo       |
+|----------------------|-------|----------|------------|----------------|------------|
+| stop flag propagation|  -6   |    4     | 2026-09-09 | not understood | worker     |
+| boundary conditions  |  -2   |    4     | 2026-09-09 | fuzzy          | api,worker |
+| input validation     |  +1   |    1     | 2026-09-09 | fuzzy          | api,worker |
+| inverted index build |  +0   |    0     | -          | unasked        | api        |
 ```
 
 ## Features
 
-- **一問だけ。** 一回の呼び出しで一関数、一問。「分からない」も答え。答え直しは記録しない
-- **解説しない。** 問う前にコードを説明しない。ズレは行番号で指すだけ。点数も評価語も出さない
-- **記録だけが真実。** 値も状態も保存しない。毎回 `log.md` から計算する。地図は消しても作り直せる
-- **未出題が地図に出る。** commit のたびに、触った関数に概念タグが付く。まだ問われていない関数は灰色のノードとして最初から地図に載る
-- **リポジトリをまたぐ。** 概念はあなたに属し、関数はリポジトリに属する。A で分からなかった概念は、B の commit で最初に問われる
-- **LLM の判断は 2 か所だけ。** 「この関数はどの概念か」と「どの概念名が同じ意味か」。状態・型・順位・記録の形はスクリプトが決める
-- **依存は git と POSIX sh。** LLM 呼び出しは Claude Code(`claude -p`)。地図の表示は Obsidian(無くても Markdown として読める)
+- **One question.** One function, one question per call. "I don't know" is an answer. Re-answers are not recorded.
+- **No explaining.** The code is never explained before the question. A miss is pointed at by line number. No scores, no evaluative words.
+- **The record is the only truth.** Values and states are never stored; they are recomputed from `log.md` every time. Delete the map and it comes back.
+- **Unasked code is on the map.** Every commit tags the functions it touched with concepts. Functions you have never been asked about show up as unlit nodes.
+- **Across repositories.** Concepts belong to you; functions belong to a repository. A concept you failed in repo A is the first thing asked when repo B commits.
+- **The LLM decides only two things.** Which concepts a function belongs to, and which concept names mean the same thing. State, question type, priority and record format are all decided by scripts.
+- **Depends on git and POSIX sh.** LLM calls go through Claude Code (`claude -p`). The map is rendered by Obsidian (optional; it is plain Markdown either way).
+- **English or Japanese.** Chosen once at setup; the record format is language-neutral.
 
 ## Quick start
 
-必要なもの: git、POSIX sh、[Claude Code](https://claude.com/claude-code)。地図を見るなら [Obsidian](https://obsidian.md)。
+Requires git, POSIX sh, and [Claude Code](https://claude.com/claude-code). [Obsidian](https://obsidian.md) to see the map.
 
 ```sh
 git clone git@github.com:kanaharu20/hidane.git ~/CODE/hidane
-sh ~/CODE/hidane/install.sh --skill                     # /hidane を Claude Code に登録
+sh ~/CODE/hidane/install.sh --skill --lang en          # register /hidane in Claude Code (asks en/ja if omitted)
 
 cd ~/your-repo
-sh ~/CODE/hidane/install.sh --hook                      # commit 後にタグ付けする hook を置く
-sh ~/CODE/hidane/scripts/tag.sh --all                   # 最初に一度、全関数に概念を付ける
+sh ~/CODE/hidane/install.sh --hook                     # tag functions after each commit
+sh ~/CODE/hidane/scripts/tag.sh --all                  # once: put every function on the map
 ```
 
-Obsidian で `~/Documents/hidane` を「Open folder as vault」で開く(初回だけ。以降は `/hidane --vault`)。
-Graph view に信号機の色が付く。理解 = 青、曖昧 = 黄、非理解 = 赤、未出題 = 消灯(暗い灰)。
+Open `~/Documents/hidane` in Obsidian with "Open folder as vault" (first time only; afterwards `/hidane --vault`).
+Graph view shows traffic-light colors: understood = green, fuzzy = amber, not understood = red, unasked = unlit.
 
 ## Usage
 
-| コマンド | すること |
+| Command | What it does |
 |---|---|
-| `/hidane` | 一問出る。答える。記録される |
-| `/hidane --map` | 概念ごとの値・状態・repo の表 |
-| `/hidane --vault` | 地図を作り直して Obsidian で開く |
-| `/hidane --lint` | 似た概念名を統合する(3 日に一度は自動で走る) |
-| `git commit` | いつも通り。背景で触った関数に概念が付く。commit は止まらない |
+| `/hidane` | One question. Answer. Recorded. |
+| `/hidane --map` | Table of concepts: value, state, repos |
+| `/hidane --vault` | Rebuild the map and open it in Obsidian |
+| `/hidane --lint` | Merge concept names that mean the same thing (also runs automatically every 3 days) |
+| `git commit` | As usual. Functions touched are tagged in the background. The commit never blocks. |
 
-スクリプトを直接使うこともできる。すべて `--help` で使い方が出る。
+The scripts work on their own too; every one prints usage with `--help`.
 
 ```sh
-sh scripts/map.sh            # 表(--tsv で機械向け)
-sh scripts/pages.sh          # Obsidian vault を生成
-sh scripts/next.sh           # 次に問う関数と型を決める
-sh scripts/tag.sh --all      # 全関数にタグ付け(--commit REV でそのコミット分)
-sh scripts/lint.sh --dry-run # 統合のプロンプトを見る
+sh scripts/map.sh            # table (--tsv for machines)
+sh scripts/pages.sh          # generate the Obsidian vault
+sh scripts/next.sh           # decide the next function and question type
+sh scripts/tag.sh --all      # tag every function (--commit REV for one commit)
+sh scripts/lint.sh --dry-run # see the merge prompt
 ```
 
 ## How it works
 
 ```
- git commit ─▶ hook ─▶ tag.sh ─▶ functions.md   関数 → 概念(未出題として地図に載る)
+ git commit ─▶ hook ─▶ tag.sh ─▶ functions.md   function → concepts (appears on the map as unasked)
                                        │
- /hidane ─▶ next.sh(次の関数と型を決める)◀┘
-        ─▶ Claude が一問(解説なし)
-        ─▶ あなたが答える
-        ─▶ Claude が実コードと照合、ズレなら行番号
-        ─▶ record.sh ─▶ log.md ─▶ pages.sh ─▶ Obsidian vault(色が変わる)
+ /hidane ─▶ next.sh (picks the function and the question type) ◀┘
+        ─▶ Claude asks one question (no explanation)
+        ─▶ you answer
+        ─▶ Claude checks against the real code; a miss is a line number
+        ─▶ record.sh ─▶ log.md ─▶ pages.sh ─▶ Obsidian vault (the color changes)
 ```
 
 <details>
-<summary><b>状態はどう決まるか</b></summary>
+<summary><b>How the state is computed</b></summary>
 
-保存するのは `log.md` の行だけ。値と状態は毎回そこから計算する。
+Only the rows of `log.md` are stored. Value and state are recomputed every time.
 
-**値** = 各行の(問いの型の重み × 結果の符号)の合計。1 行ごとに足し、±6 で止める。
+**Value** = sum over rows of (question-type weight × result sign), added one row at a time and clamped at ±6.
 
-| 型 | 重み | 問い |
+| Type | Weight | Question |
 |---|---|---|
-| 追う | 1 | 「この入力のとき何を返す / 何が起きるか」 |
-| 追う(境界・変異) | 2 | 空・1 個・末尾・上限、または過去のズレを再現する入力で同じことを問う |
-| 要約 | 3 | 「この関数は何をするか」 |
+| `trace` | 1 | "Given this input, what does it return / what happens?" |
+| `edge` | 2 | The same, with an empty / single / last / limit input, or one that reproduces a past miss |
+| `summary` | 3 | "What does this function do?" |
 
-| 結果 | 符号 |
+| Result | Sign |
 |---|---|
-| 当たり | +1 |
-| ズレ、分からない | −1 |
-| 未回答 | 0(証拠にしない) |
+| `hit` | +1 |
+| `miss`, `dunno` | −1 |
+| `skip` | 0 (not evidence) |
 
-| 状態 | 条件 |
+| State | Condition |
 |---|---|
-| 理解 | 値 ≥ +4 かつ 最後の答えから 30 日以内 |
-| 非理解 | 値 ≤ −4 かつ 30 日以内 |
-| 曖昧 | −4 < 値 < +4、または 30 日を過ぎた(値は下げない。確かさだけ落ちる) |
-| 未出題 | まだ問われていない(タグだけ、または未回答だけ) |
+| understood | value ≥ +4 and last answer within 30 days |
+| not understood | value ≤ −4 and within 30 days |
+| fuzzy | −4 < value < +4, or more than 30 days old (the value is kept; only certainty decays) |
+| unasked | never asked (tag only, or unanswered only) |
 
-難しい問いに当たると大きく上がり、易しい問いを外すと大きく下がる。1 回では状態は動かない。
-忘却は時間だけで起こり、答えると戻る。手で状態を変える手段は無い。
+A hit on a hard question moves the value a lot; a miss on an easy one moves it a lot the other way. One answer never flips the state.
+Forgetting is time-based only and answering restores it. There is no way to set a state by hand.
 
 </details>
 
 <details>
-<summary><b>次にどの関数を問うか</b></summary>
+<summary><b>Which function is asked next</b></summary>
 
-概念の順位は**全リポジトリの記録**から: 非理解 > 曖昧 > 未出題、同じ状態なら値の低い順。理解の概念からは出さない。
-候補の関数は**今いるリポジトリ**の、まだ問われていないものから。
+Concepts are ranked from **all repositories**: not understood > fuzzy > unasked, lower value first. Understood concepts are never asked.
+Candidate functions come from **the current repository**, excluding those already asked.
 
-問いの型も `next.sh` が決める(過去にズレのある概念なら 追う(境界・変異))。決定は `pending` に置かれ、
-`record.sh` はそれと一致する記録しか受け付けない。Claude が変えられるのは問いの文だけ。
+`next.sh` also decides the question type (`edge` if the concept has past misses, else `trace`). The decision is written to
+`pending`, and `record.sh` refuses any record that does not match it. Claude can only choose the wording of the question.
 
 </details>
 
 <details>
-<summary><b>概念名の統合(lint)</b></summary>
+<summary><b>Merging concept names (lint)</b></summary>
 
-タグ付けは自由に新しい名前を作れるので、似た名前が増える。数日に一度、Claude に概念一覧を見せて
-「同じ意味の組」を挙げさせ、`aliases.md` に「旧名 → 新名」を 1 行足す。
+Tagging may invent new names, so near-duplicates accumulate. Every few days Claude is shown the concept list and asked for
+"old → new" pairs, which are appended to `aliases.md`.
 
-- **`log.md` は書き換えない。** 読む側(`resolve.sh`)が別名を解いて読む
-- 統合後の値は両方の証拠の合計。repo は合わさり、関連は付け直される
-- 新名は既存の名前に限る。同名・存在しない名前・循環はスクリプトが捨てる
-- 間違った統合は `aliases.md` の行を消せば戻る
+- **`log.md` is never rewritten.** Readers resolve aliases on the fly (`resolve.sh`).
+- A merged concept's value is the sum of both sides' evidence; repos are unioned; links are recomputed.
+- The new name must already exist. Self-merges, unknown names and cycles are dropped by the script.
+- Undo a merge by deleting its line in `aliases.md`.
 
 </details>
 
 ## Configuration
 
-すべて環境変数。**定数は全部仮置き**で、使いながら決める段階。
+All via environment variables. **Every constant is provisional** and tuned by use.
 
-| 変数 | 既定 | 意味 |
+| Variable | Default | Meaning |
 |---|---|---|
-| `HIDANE_ROOT` | `~/.claude/hidane` | 記録の場所 |
-| `HIDANE_VAULT` | `~/Documents/hidane` | 地図(Obsidian vault)の場所 |
-| `HIDANE_W_TRACE` / `HIDANE_W_EDGE` / `HIDANE_W_SUMMARY` | 1 / 2 / 3 | 問いの型の重み |
-| `HIDANE_THRESHOLD` | 4 | 理解 / 非理解 の閾値 |
-| `HIDANE_CAP` | 6 | 値の上限・下限 |
-| `HIDANE_FRESH_DAYS` | 30 | これを過ぎると曖昧に落ちる |
-| `HIDANE_MAX_FUNCS` | 8 | 1 回の LLM 呼び出しに載せる関数の数(候補が尽きるまで繰り返す) |
-| `HIDANE_LINT_DAYS` | 3 | lint の間隔 |
-| `HIDANE_MODEL` | (Claude Code の既定) | タグ付けと lint に使うモデル |
-| `HIDANE_HOOK_OFF` | | 1 で hook を止める |
+| `HIDANE_LANG` | from `<root>/config`, else `en` | Display and prompt language (`en` / `ja`) |
+| `HIDANE_ROOT` | `~/.claude/hidane` | Where records live |
+| `HIDANE_VAULT` | `~/Documents/hidane` | Where the map (Obsidian vault) is written |
+| `HIDANE_W_TRACE` / `HIDANE_W_EDGE` / `HIDANE_W_SUMMARY` | 1 / 2 / 3 | Question-type weights |
+| `HIDANE_THRESHOLD` | 4 | Threshold for understood / not understood |
+| `HIDANE_CAP` | 6 | Value clamp |
+| `HIDANE_FRESH_DAYS` | 30 | Older than this becomes fuzzy |
+| `HIDANE_MAX_FUNCS` | 8 | Functions per LLM call (loops until all are tagged) |
+| `HIDANE_LINT_DAYS` | 3 | Lint interval |
+| `HIDANE_MODEL` | (Claude Code default) | Model for tagging and lint |
+| `HIDANE_HOOK_OFF` | | Set to 1 to disable the hook |
 
 <details>
-<summary><b>どこに何があるか</b></summary>
+<summary><b>Where things live</b></summary>
 
 ```
-~/.claude/hidane/                 記録(一次データ。消すと戻らない)
-  <repo>/log.md                     問いと答え。1 回 1 行。唯一の書き込み口は record.sh
-  <repo>/functions.md               commit 時に付いた「関数 → 概念」
-  <repo>/pending                    next.sh が決めた次の一問
-  aliases.md                        概念の別名(旧名 → 新名)
-  .lint-stamp                       最後に lint を回した日
-  hook.log                          hook の出力
-~/Documents/hidane/               地図(派生データ。消しても pages.sh で戻る)
-  concepts/<概念>.md                概念 1 つ = 1 ページ。人は書かない
-  repos/<repo>.md                   そのリポジトリに出た概念
-  index.md                          全概念の表
-  .obsidian/graph.json              Graph の色(初回だけ生成)
+~/.claude/hidane/                 records (primary data; not recoverable if deleted)
+  config                            lang=en|ja
+  <repo>/log.md                     questions and answers, one row each; written only by record.sh
+  <repo>/functions.md               function → concepts, tagged at commit time
+  <repo>/pending                    the next question as decided by next.sh
+  aliases.md                        concept aliases (old → new)
+  .lint-stamp                       last lint date
+  hook.log                          hook output
+~/Documents/hidane/               the map (derived; pages.sh rebuilds it)
+  concepts/<concept>.md             one page per concept; never hand-edited
+  repos/<repo>.md                   concepts seen in that repository
+  index.md                          the full table
+  .obsidian/graph.json              graph colors (written once)
 ```
 
 </details>
 
 ## Philosophy
 
-- **LLM に決めさせない。** 前身の reflect で、文面の指示(「前置きを書くな」)は 10 回中 0 回しか効かず、Claude に組み立てさせた文面や判定はぶれた。だから決めるのはスクリプト、Claude が埋めるのは「一覧から選ぶ」穴だけ
-- **点数を見せない。** 点数は興味を下げ、注意をコードから自分に向ける(Butler 1988、Kluger & DeNisi 1996)。色は「このコードの未出題」であって「あなたの成績」ではない
-- **未出題と非理解は別。** 「まだ問うていない」と「問うて分からなかった」を混ぜない。出題は非理解から
-- **記録は書き換えない。** 統合も別名で行い、一次記録は追記だけ。壊れる経路を作らない
-- **検査は空振りする。** 新しい検査を書いたら、実装を壊して落ちることを確かめてから信じる。83 件の L0 検査はすべてそうしてある
+- **Don't let the LLM decide.** In the predecessor, textual instructions ("no preamble") worked 0 times out of 10, and anything Claude assembled drifted. So scripts decide and Claude fills in blanks from a list.
+- **No scores.** Scores lower interest and turn attention from the code to the self (Butler 1988; Kluger & DeNisi 1996). The colors say which parts of the code are lit, not how good you are.
+- **Unasked ≠ not understood.** "Never checked" and "checked and failed" are kept apart. Questions start from the failures.
+- **Never rewrite the record.** Merges are aliases; the primary record is append-only.
+- **Tests miss.** Every new test is trusted only after breaking the implementation and watching it fail. All 97 L0 tests were checked that way.
 
 ## Development
 
 ```sh
-sh tests/run_all.sh          # 83 件。LLM なし、数秒
-sh tests/test_tag.sh         # LLM 呼び出しは HIDANE_CLAUDE で偽物に差し替えて検査
+sh tests/run_all.sh          # 97 tests, no LLM, seconds
+sh tests/test_tag.sh         # LLM calls are replaced by a fake via HIDANE_CLAUDE
 ```
 
-| 部品 | 役割 | LLM |
+| Part | Role | LLM |
 |---|---|---|
-| `scripts/map.sh` | 値と状態の表 | |
-| `scripts/pages.sh` | Obsidian vault を生成(冪等、掃除つき) | |
-| `scripts/next.sh` | 次の関数と型を決めて `pending` に置く | |
-| `scripts/record.sh` | `log.md` に 1 行追記。`pending` と照合 | |
-| `scripts/tag.sh` | 関数に概念を付ける | ● |
-| `scripts/lint.sh` | 似た概念名を統合(`aliases.md` に追記) | ● |
-| `scripts/resolve.sh` | 別名を解くフィルタ | |
-| `scripts/open.sh` | vault を作り直して Obsidian で開く | |
-| `scripts/scope.sh` | commit が触った関数を 15 言語で切り出す([reflect](https://github.com/kanaharu20/reflect) から) | |
-| `hooks/post-commit` | commit 後に tag.sh を背景で走らせる。何が起きても commit は通す | |
-| `SKILL.md` | Claude Code の `/hidane` の手順 | 問いの文と照合 |
+| `scripts/map.sh` | value and state table | |
+| `scripts/pages.sh` | generate the Obsidian vault (idempotent, prunes) | |
+| `scripts/next.sh` | pick the next function and type; write `pending` | |
+| `scripts/record.sh` | append one row to `log.md`; verify against `pending` | |
+| `scripts/tag.sh` | tag functions with concepts | ● |
+| `scripts/lint.sh` | merge concept names (appends to `aliases.md`) | ● |
+| `scripts/resolve.sh` | alias-resolving filter | |
+| `scripts/open.sh` | rebuild and open the vault in Obsidian | |
+| `scripts/lang.sh` | display strings for en / ja | |
+| `scripts/scope.sh` | cut a commit into functions, 15 languages (from [reflect](https://github.com/kanaharu20/reflect)) | |
+| `hooks/post-commit` | run tag.sh in the background after a commit; never blocks | |
+| `SKILL.en.md` / `SKILL.ja.md` | the `/hidane` procedure for Claude Code | wording and checking |
 
 ## Related work
 
-[reflect](https://github.com/kanaharu20/reflect) の後継。関数の切り出しなどの機構を引き継ぎ、記憶の形と状態の計算を作り直した。
+Successor to [reflect](https://github.com/kanaharu20/reflect): the function extraction is inherited; the memory and state model are new.
 
-- **Knowledge Tracing**(BKT 以降): 解答の時系列から概念ごとの習得状態を推定する。「1 回の正解はまぐれかもしれない」を閾値で取り込んだ
-- [KCGen-KT](https://arxiv.org/abs/2502.18632): LLM によるコードへの概念(KC)自動付与。既存一覧を見せて選ばせる作法
-- [Explain in Plain English / CGBG](https://arxiv.org/abs/2403.06050): 説明文を採点しない判定(要約型の判定に予定)
-- Open Learner Model / [Mastery Grids](https://people.cs.pitt.edu/~hosseini/papers/ectel2014.pdf): 概念単位の理解の可視化
-- [Anthropic, How AI Impacts Skill Formation](https://arxiv.org/abs/2601.20245): AI 利用で理解が落ちる条件と、保たれる使い方
-- Butler 1988、Kluger & DeNisi 1996: 点数と自己注意がフィードバックの効果を下げる
+- **Knowledge Tracing** (BKT onward): estimating per-concept mastery from answer sequences. "One hit may be luck" is folded into the threshold.
+- [KCGen-KT](https://arxiv.org/abs/2502.18632): LLM-generated knowledge components for code; show the existing list and let it choose.
+- [Explain in Plain English / CGBG](https://arxiv.org/abs/2403.06050): grading without grading the explanation (planned for the `summary` type).
+- Open Learner Models / [Mastery Grids](https://people.cs.pitt.edu/~hosseini/papers/ectel2014.pdf): concept-level visualization of a learner.
+- [Anthropic, How AI Impacts Skill Formation](https://arxiv.org/abs/2601.20245): when AI use erodes understanding, and which habits preserve it.
+- Butler 1988; Kluger & DeNisi 1996: scores and self-focused feedback reduce learning.
 
 ## Status
 
-alpha。作者 1 人の実データ(2 リポジトリ、21 問、39 概念)で毎日回している段階。
+Alpha. Run daily by one author on two repositories (21 questions, 38 concepts).
 
-- 定数(重み、閾値、忘却)は仮置き
-- 概念名は日本語。プロンプトを変えれば他言語でも動くはずだが未検証
-- 「要約」型の判定(CGBG 方式)は未実装。今は「追う」型のみ
-- `tag.sh` と `lint.sh` は `claude -p` を呼ぶ。関数 8 個ごとに 1 回、1 回 10〜60 秒
+- Constants (weights, thresholds, forgetting) are provisional.
+- Concept names follow the chosen language; mixed-language repositories work, and lint can merge across languages.
+- The `summary` question type is not judged yet (CGBG planned); only `trace` / `edge` are asked today.
+- `tag.sh` and `lint.sh` call `claude -p`: one call per 8 functions, 10-60 s each.
 
 ## License
 

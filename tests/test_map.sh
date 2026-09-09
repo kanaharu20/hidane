@@ -3,6 +3,7 @@
 # 方針: 正解と一致するだけでなく、入力を変えたら出力が変わることも確かめる(空振り防止)。
 set -u
 cd "$(dirname "$0")/.." || exit 2
+export HIDANE_LANG=ja
 MAP="sh scripts/map.sh"
 FX=tests/fixtures
 TMP=$(mktemp -d); trap 'rm -rf "$TMP"' EXIT
@@ -19,7 +20,7 @@ if diff -q tests/expected_map.md "$TMP/out.md" >/dev/null; then ok "T01 手タ�
 grep -q '読んだ行 15 / 使えた行 15' "$TMP/out.md" && ok "T02 読んだ行 15 / 使えた行 15" || ng "T02 行数" "$(tail -1 "$TMP/out.md")"
 
 # T03 変異: ズレ 1 行を当たりに変えると 停止フラグの伝搬 が -4 非理解 → -2 曖昧 になる
-mkdir -p "$TMP/m1/worker"; sed 's/| 停止後のログ抑止 | ズレ |/| 停止後のログ抑止 | 当たり |/' $FX/worker/log.md > "$TMP/m1/worker/log.md"
+mkdir -p "$TMP/m1/worker"; sed 's/| 停止後のログ抑止 | miss |/| 停止後のログ抑止 | hit |/' $FX/worker/log.md > "$TMP/m1/worker/log.md"
 r=$($MAP --root "$TMP/m1" --today 2026-09-08 | row /dev/stdin 停止フラグの伝搬)
 echo "$r" | grep -q '| -2 | 2 | .* | 曖昧 |' && ok "T03 変異(ズレ→当たり)で値と状態が動く" || ng "T03 変異が効かない" "$r"
 
@@ -33,13 +34,13 @@ r31=$($MAP --root $FX --today 2026-10-07 | row /dev/stdin 停止フラグの伝�
 { echo "$r30" | grep -q '非理解' && echo "$r31" | grep -q '曖昧'; } && ok "T05 鮮度の境目は 30 日(30 日は新鮮、31 日は古い)" || ng "T05 境目" "$r30 / $r31"
 
 # T06 上限: 追う型の外れを 8 回並べても値は -6 で止まる
-mkdir -p "$TMP/cap/x"; { echo '| 日時 | 場所 | 関数 | 概念 | 型 | 問い | 結果 | ズレ | 備考 |'; echo '|---|---|---|---|---|---|---|---|---|'
-  i=1; while [ $i -le 8 ]; do echo "| 2026-09-0$((i%9)) | f.c:1-2 | f | 上限試験 | 追う | q | 外れ |  |  |"; i=$((i+1)); done; } > "$TMP/cap/x/log.md"
+mkdir -p "$TMP/cap/x"; { echo '| 日時 | 場所 | 関数 | 概念 | 型 | 問い | 結果 | miss | 備考 |'; echo '|---|---|---|---|---|---|---|---|---|'
+  i=1; while [ $i -le 8 ]; do echo "| 2026-09-0$((i%9)) | f.c:1-2 | f | 上限試験 | trace | q | miss |  |  |"; i=$((i+1)); done; } > "$TMP/cap/x/log.md"
 r=$($MAP --root "$TMP/cap" --today 2026-09-08 | row /dev/stdin 上限試験)
 echo "$r" | grep -q '| -6 | 8 |' && ok "T06 8 回外しても -6 で止まる" || ng "T06 上限" "$r"
 
 # T07 歩きながら止める: -6 の後に 要約 当たり(+3)で -3 になる(末尾でまとめて止めると -5 になってしまう)
-{ echo "| 2026-09-08 | f.c:1-2 | f | 上限試験 | 要約 | q | 当たり |  |  |"; } >> "$TMP/cap/x/log.md"
+{ echo "| 2026-09-08 | f.c:1-2 | f | 上限試験 | summary | q | hit |  |  |"; } >> "$TMP/cap/x/log.md"
 r=$($MAP --root "$TMP/cap" --today 2026-09-08 | row /dev/stdin 上限試験)
 echo "$r" | grep -q '| -3 | 9 |' && ok "T07 上限は 1 行ごとに適用(-6 → +3 で -3)" || ng "T07 歩き止め" "$r"
 
@@ -48,7 +49,7 @@ r=$(row "$TMP/out.md" 入力検証)
 echo "$r" | grep -q '| +0 | 0 | - | 未出題 |' && ok "T08 未回答だけの概念は未出題" || ng "T08 未出題" "$r"
 
 # T09 読めない行(未知の型)は stderr に出て、使えた行から外れる
-mkdir -p "$TMP/bad/x"; { head -2 "$TMP/cap/x/log.md"; echo "| 2026-09-08 | f.c:1-2 | f | 何か | 記述 | q | 当たり |  |  |"; echo "| 2026-09-08 | f.c:1-2 | f | 何か | 追う | q | 当たり |  |  |"; } > "$TMP/bad/x/log.md"
+mkdir -p "$TMP/bad/x"; { head -2 "$TMP/cap/x/log.md"; echo "| 2026-09-08 | f.c:1-2 | f | 何か | 記述 | q | hit |  |  |"; echo "| 2026-09-08 | f.c:1-2 | f | 何か | trace | q | hit |  |  |"; } > "$TMP/bad/x/log.md"
 $MAP --root "$TMP/bad" --today 2026-09-08 > "$TMP/bad.out" 2> "$TMP/bad.err"
 { grep -q '読めない行' "$TMP/bad.err" && grep -q '読んだ行 2 / 使えた行 1' "$TMP/bad.out"; } && ok "T09 読めない行は数に出て、黙って消えない" || ng "T09 読めない行" "$(cat "$TMP/bad.err" "$TMP/bad.out" | tail -3)"
 

@@ -2,6 +2,7 @@
 # tag.sh と hook の L0 検査。claude は偽物(HIDANE_CLAUDE)に差し替える。LLM は呼ばない。
 set -u
 cd "$(dirname "$0")/.." || exit 2
+export HIDANE_LANG=ja
 H=$(pwd -P)
 TMP=$(mktemp -d); trap 'rm -rf "$TMP"' EXIT
 pass=0; fail=0
@@ -36,7 +37,7 @@ git add -A && git commit -qm init
 cd "$H"
 ROOT="$TMP/root"; mkdir -p "$ROOT/other"; export HIDANE_VAULT="$ROOT/vault"
 # 既存の概念を 1 つ用意(別 repo の log)
-printf '| 日時 | 場所 | 関数 | 概念 | 型 | 問い | 結果 | ズレ | 備考 |\n|---|---|---|---|---|---|---|---|---|\n| 2026-09-01 | x.c:1-2 | f | 境界条件 | 追う | q | 当たり |  |  |\n' > "$ROOT/other/log.md"
+printf '| 日時 | 場所 | 関数 | 概念 | 型 | 問い | 結果 | miss | 備考 |\n|---|---|---|---|---|---|---|---|---|\n| 2026-09-01 | x.c:1-2 | f | 境界条件 | trace | q | hit |  |  |\n' > "$ROOT/other/log.md"
 
 # 偽 claude: 呼ばれた回数を数え、良い行 1・悪い行 3 を返す
 FAKE="$TMP/claude"; cat > "$FAKE" <<'F'
@@ -66,7 +67,7 @@ grep -q '候補 2、呼び出し 1 回、追記 1 行、捨てた 3 行' "$TMP/o
 short=$(cd "$R" && git rev-parse --short HEAD); grep -q "| $short |" "$fn" && ok "G07 commit の短縮ハッシュが入る" || ng "G07 hash"
 
 # G08 vault が更新され、未出題の概念ページができる
-{ [ -f "$ROOT/vault/concepts/早期リターン.md" ] && grep -q '^state: 未出題$' "$ROOT/vault/concepts/早期リターン.md" && grep -q 'clamp' "$ROOT/vault/concepts/早期リターン.md"; } \
+{ [ -f "$ROOT/vault/concepts/早期リターン.md" ] && grep -q '^state: unasked$' "$ROOT/vault/concepts/早期リターン.md" && grep -q 'clamp' "$ROOT/vault/concepts/早期リターン.md"; } \
   && ok "G08 tag のあと vault に 未出題 のページができる" || ng "G08 vault" "$(ls "$ROOT/vault/concepts" 2>&1)"
 
 # G09 もう一度: clamp は既知なので候補は make_buf だけ → 偽 claude の答えは全部落ちて追記 0

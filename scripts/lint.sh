@@ -21,6 +21,7 @@ while [ $# -gt 0 ]; do
     *) echo "lint.sh: unknown arg: $1" >&2; exit 2 ;;
   esac
 done
+. "$HERE/lang.sh"
 CLAUDE="${HIDANE_CLAUDE:-claude}"; DAYS="${HIDANE_LINT_DAYS:-3}"
 A="$ROOT/aliases.md"; STAMP="$ROOT/.lint-stamp"
 today=$(date +%Y-%m-%d)
@@ -33,7 +34,7 @@ fi
 tmp=$(mktemp -d); trap 'rm -rf "$tmp"' EXIT
 sh "$HERE/map.sh" --root "$ROOT" --tsv > "$tmp/map" 2>/dev/null || true
 n=$(wc -l < "$tmp/map" | tr -d ' ')
-[ "$n" -ge 2 ] || { [ -n "$IFDUE" ] || echo "lint.sh: 概念が $n 個なので何もしない"; exit 0; }
+[ "$n" -ge 2 ] || { [ -n "$IFDUE" ] || printf "lint.sh: $(L l_few)\n" "$n"; exit 0; }
 
 # 概念ごとに: 状態、値、repo、付いている関数名(最大 6)
 for d in "$ROOT"/*/; do
@@ -47,7 +48,7 @@ END { for (i = 1; i <= nc; i++) { c = order[i]; printf("- %s(%s)関数: %s\n", c
 ' > "$tmp/list"
 
 {
-  cat <<'P'
+  if [ "$LANGX" = "ja" ]; then cat <<'P'
 以下は、ある開発者のコードに付いた「概念」の一覧です(概念名、状態、付いている関数名)。
 同じ意味、または一方が他方の言い換えにすぎない組があれば、統合してください。
 
@@ -63,16 +64,33 @@ END { for (i = 1; i <= nc; i++) { c = order[i]; printf("- %s(%s)関数: %s\n", c
 
 ## 概念
 P
+  else cat <<'P'
+Below is the list of "concepts" attached to one developer's code (name, state, functions it is attached to).
+If two names mean the same thing, or one is merely a paraphrase of the other, merge them.
+
+Rules:
+- The target (new name) must be a name from the list. Never invent a new name.
+- Prefer the more general name that applies to other code; prefer the one with more evidence.
+- Do not merge names of genuinely different granularity (e.g. "boundary conditions" vs "overflow detection", where one is part of the other).
+- When in doubt, do not merge. Merges can be undone, but not merging is safer.
+
+Output exactly one line per pair, tab-separated:
+old<TAB>new<TAB>reason (under 10 words)
+Nothing else. If nothing should be merged, write a single line: none
+
+## Concepts
+P
+  fi
   cat "$tmp/list"
 } > "$tmp/prompt"
 if [ -n "$DRY" ]; then cat "$tmp/prompt"; exit 0; fi
 
 "$CLAUDE" -p ${HIDANE_MODEL:+--model "$HIDANE_MODEL"} --output-format text < "$tmp/prompt" > "$tmp/answer" 2>"$tmp/err" \
-  || { echo "lint.sh: claude が失敗: $(head -c 300 "$tmp/err")" >&2; exit 4; }
+  || { echo "lint.sh: $(L t_fail): $(head -c 300 "$tmp/err")" >&2; exit 4; }
 
-[ -f "$A" ] || printf '# hidane — 概念の別名(旧名 → 新名)。lint.sh が足す。取り消すときは行を消す\n\n| 日付 | 旧名 | 新名 | 理由 |\n|---|---|---|---|\n' > "$A"
+[ -f "$A" ] || printf '# hidane — %s\n\n%s\n|---|---|---|---|\n' "$(L al_title)" "$(L al_header)" > "$A"
 cut -f1 "$tmp/map" > "$tmp/names"
-awk -F'\t' -v today="$today" -v names="$tmp/names" -v aliases="$A" '
+awk -F'\t' -v today="$today" -v names="$tmp/names" -v aliases="$A" -v t_drop="$(L t_drop)" -v l_done="$(L l_done)" '
 function trim(s) { gsub(/^[ \t\r]+|[ \t\r]+$/, "", s); return s }
 BEGIN {
   while ((getline l < names) > 0) exist[l] = 1
@@ -80,18 +98,18 @@ BEGIN {
 }
 function root(c, i) { for (i = 0; i < 10 && (c in to); i++) c = to[c]; return c }
 {
-  line = $0; sub(/\r$/, "", line); if (line ~ /^[ \t]*$/ || trim(line) == "なし") next
-  if (NF < 2) { printf("lint.sh: 捨てた(列が足りない): %s\n", line) > "/dev/stderr"; bad++; next }
+  line = $0; sub(/\r$/, "", line); if (line ~ /^[ \t]*$/ || trim(line) == "なし" || tolower(trim(line)) == "none") next
+  if (NF < 2) { printf("lint.sh: %s(列が足りない): %s\n", t_drop, line) > "/dev/stderr"; bad++; next }
   o = trim($1); n = trim($2); r = trim($3); gsub(/\|/, "｜", r)
-  if (o == n) { printf("lint.sh: 捨てた(同名): %s\n", line) > "/dev/stderr"; bad++; next }
-  if (!(o in exist)) { printf("lint.sh: 捨てた(旧名が無い): %s\n", line) > "/dev/stderr"; bad++; next }
-  if (!(n in exist)) { printf("lint.sh: 捨てた(新名が一覧に無い): %s\n", line) > "/dev/stderr"; bad++; next }
-  if (o in to) { printf("lint.sh: 捨てた(旧名はすでに別名): %s\n", line) > "/dev/stderr"; bad++; next }
-  if (root(n) == o) { printf("lint.sh: 捨てた(循環): %s\n", line) > "/dev/stderr"; bad++; next }
+  if (o == n) { printf("lint.sh: %s(同名): %s\n", t_drop, line) > "/dev/stderr"; bad++; next }
+  if (!(o in exist)) { printf("lint.sh: %s(旧名が無い): %s\n", t_drop, line) > "/dev/stderr"; bad++; next }
+  if (!(n in exist)) { printf("lint.sh: %s(新名が一覧に無い): %s\n", t_drop, line) > "/dev/stderr"; bad++; next }
+  if (o in to) { printf("lint.sh: %s(旧名はすでに別名): %s\n", t_drop, line) > "/dev/stderr"; bad++; next }
+  if (root(n) == o) { printf("lint.sh: %s(循環): %s\n", t_drop, line) > "/dev/stderr"; bad++; next }
   to[o] = n; good++
   printf("| %s | %s | %s | %s |\n", today, o, n, r) >> aliases
 }
-END { printf("lint.sh: 統合 %d 組、捨てた %d 行 → %s\n", good + 0, bad + 0, aliases) }
+END { printf("lint.sh: " l_done " → %s\n", good + 0, bad + 0, aliases) }
 ' "$tmp/answer"
 echo "$today" > "$STAMP"
 sh "$HERE/pages.sh" --root "$ROOT" >/dev/null 2>&1 || true

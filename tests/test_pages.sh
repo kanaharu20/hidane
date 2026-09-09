@@ -2,6 +2,7 @@
 # pages.sh の L0 検査。
 set -u
 cd "$(dirname "$0")/.." || exit 2
+export HIDANE_LANG=ja
 FX=tests/fixtures
 TMP=$(mktemp -d); trap 'rm -rf "$TMP"' EXIT
 V="$TMP/vault"
@@ -17,7 +18,7 @@ nc=$(ls "$V/concepts" | wc -l | tr -d ' '); nr=$(ls "$V/repos" | wc -l | tr -d '
 
 # P02 frontmatter が map と一致(境界条件: 曖昧 -3 3 2026-09-07 api, worker)
 p="$V/concepts/境界条件.md"
-{ grep -q '^state: 曖昧$' "$p" && grep -q '^value: -3$' "$p" && grep -q '^evidence: 3$' "$p" && grep -q '^last: 2026-09-07$' "$p" && grep -q '^repos: \[api, worker\]$' "$p"; } \
+{ grep -q '^state: fuzzy$' "$p" && grep -q '^value: -3$' "$p" && grep -q '^evidence: 3$' "$p" && grep -q '^last: 2026-09-07$' "$p" && grep -q '^repos: \[api, worker\]$' "$p"; } \
   && ok "P02 境界条件 の frontmatter が map と一致" || ng "P02 frontmatter" "$(sed -n '1,8p' "$p")"
 
 # P03 共起の関連リンク(境界条件 ↔ 資源獲得の順序、ヒープ操作)、自分自身は無い
@@ -29,7 +30,7 @@ grep -q '^- 停止後も1行出る(worker, 2026-09-05)$' "$V/concepts/停止フ�
 
 # P05 未出題の関数(functions.md)が未出題の概念ページに出て、記録は無い
 p2="$V/concepts/起動と引数処理.md"
-{ grep -q '^state: 未出題$' "$p2" && grep -q '^- 2026-09-08 \[\[worker\]\] `src/main.c:74-90` main$' "$p2" && ! grep -q '## 記録' "$p2"; } \
+{ grep -q '^state: unasked$' "$p2" && grep -q '^- 2026-09-08 \[\[worker\]\] `src/main.c:74-90` main$' "$p2" && ! grep -q '## 記録' "$p2"; } \
   && ok "P05 functions.md の関数が 未出題 のページに 未出題 として出る" || ng "P05 未出題" "$(cat "$p2")"
 
 # P06 入力検証 は log(未回答)と functions の両方を持つ: 記録 と 未出題 の両節がある
@@ -57,7 +58,7 @@ r="$V/repos/worker.md"
 diff -q tests/expected_map.md "$V/index.md" >/dev/null && ok "P11 index.md = map.sh の表" || ng "P11 index"
 
 # P12 概念名の / はファイル名で ／ になり、リンクも同じ
-mkdir -p "$TMP/sl/x"; { head -2 $FX/api/log.md | tail -1; echo '|---|---|---|---|---|---|---|---|---|'; echo '| 2026-09-08 | a.c:1-2 | f | 入出力/バッファ, 境界条件 | 追う | q | 当たり |  |  |'; } > "$TMP/sl/x/log.md"
+mkdir -p "$TMP/sl/x"; { head -2 $FX/api/log.md | tail -1; echo '|---|---|---|---|---|---|---|---|---|'; echo '| 2026-09-08 | a.c:1-2 | f | 入出力/バッファ, 境界条件 | trace | q | hit |  |  |'; } > "$TMP/sl/x/log.md"
 sh scripts/pages.sh --root "$TMP/sl" --vault "$TMP/slv" --today 2026-09-08 >/dev/null 2>&1
 { [ -f "$TMP/slv/concepts/入出力／バッファ.md" ] && grep -q '\[\[入出力／バッファ\]\]' "$TMP/slv/concepts/境界条件.md"; } && ok "P12 概念名の / は ／ に" || ng "P12 スラッシュ" "$(ls "$TMP/slv/concepts")"
 
@@ -65,7 +66,7 @@ sh scripts/pages.sh --root "$TMP/sl" --vault "$TMP/slv" --today 2026-09-08 >/dev
 rm -rf "$TMP/v4"; sh scripts/pages.sh --root $FX --vault "$TMP/v4" --today 2026-09-08 >/dev/null 2>&1
 printf '{"colorGroups":[{"query":"[state:霧]","color":{"a":1,"rgb": 10395294 }},{"query":"[state:理解]","color":{"a":1,"rgb": 123 }}]}\n' > "$TMP/v4/.obsidian/graph.json"
 sh scripts/pages.sh --root $FX --vault "$TMP/v4" --today 2026-09-08 >/dev/null 2>&1
-{ grep -q '\[state:未出題\]' "$TMP/v4/.obsidian/graph.json" && grep -q '"rgb": 7041144 ' "$TMP/v4/.obsidian/graph.json" && grep -q '"rgb": 123 ' "$TMP/v4/.obsidian/graph.json"; } \
+{ grep -q '\[state:unasked\]' "$TMP/v4/.obsidian/graph.json" && grep -q '"rgb": 7041144 ' "$TMP/v4/.obsidian/graph.json" && grep -q '"rgb": 123 ' "$TMP/v4/.obsidian/graph.json"; } \
   && ok "P13 旧名と旧配色は移行し、利用者の色は残る" || ng "P13 移行" "$(cat "$TMP/v4/.obsidian/graph.json")"
 # P14 Obsidian が整形した形(数字の後が改行)でも移行する
 printf '{\n  "colorGroups": [\n    {\n      "query": "[state:曖昧]",\n      "color": {\n        "a": 1,\n        "rgb": 16771899\n      }\n    }\n  ]\n}\n' > "$TMP/v4/.obsidian/graph.json"
