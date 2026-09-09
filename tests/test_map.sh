@@ -19,7 +19,7 @@ if diff -q tests/expected_map.md "$TMP/out.md" >/dev/null; then ok "T01 手タ�
 grep -q '読んだ行 15 / 使えた行 15' "$TMP/out.md" && ok "T02 読んだ行 15 / 使えた行 15" || ng "T02 行数" "$(tail -1 "$TMP/out.md")"
 
 # T03 変異: ズレ 1 行を当たりに変えると 停止フラグの伝搬 が -4 非理解 → -2 曖昧 になる
-mkdir -p "$TMP/m1/codexion"; sed 's/| 停止後のログ抑止 | ズレ |/| 停止後のログ抑止 | 当たり |/' $FX/codexion/log.md > "$TMP/m1/codexion/log.md"
+mkdir -p "$TMP/m1/worker"; sed 's/| 停止後のログ抑止 | ズレ |/| 停止後のログ抑止 | 当たり |/' $FX/worker/log.md > "$TMP/m1/worker/log.md"
 r=$($MAP --root "$TMP/m1" --today 2026-09-08 | row /dev/stdin 停止フラグの伝搬)
 echo "$r" | grep -q '| -2 | 2 | .* | 曖昧 |' && ok "T03 変異(ズレ→当たり)で値と状態が動く" || ng "T03 変異が効かない" "$r"
 
@@ -58,14 +58,14 @@ echo "$r" | grep -q '| -3 | 3 | .* | 非理解 |' && ok "T10 閾値を 3 にす�
 
 # T11 repo をまたぐ概念は repo 列に両方出る
 r=$(row "$TMP/out.md" 境界条件)
-echo "$r" | grep -q 'RAG,codexion' && ok "T11 境界条件 は RAG と codexion の両方から引かれている" || ng "T11 またぎ" "$r"
+echo "$r" | grep -q 'api,worker' && ok "T11 境界条件 は api と worker の両方から引かれている" || ng "T11 またぎ" "$r"
 
 # T12 log.md が無いと exit 1
 $MAP --root "$TMP/none" >/dev/null 2>&1; [ $? -eq 1 ] && ok "T12 log.md も functions.md も無しは exit 1" || ng "T12 exit code"
 
 # T13 functions.md にだけある概念は 霧、repo 列に出る、値 0 証拠 0
 r=$(row "$TMP/out.md" 起動と引数処理)
-echo "$r" | grep -q '| +0 | 0 | - | 霧 | codexion |' && ok "T13 functions.md だけの概念は霧" || ng "T13 functions.md" "$r"
+echo "$r" | grep -q '| +0 | 0 | - | 霧 | worker |' && ok "T13 functions.md だけの概念は霧" || ng "T13 functions.md" "$r"
 
 echo; echo "PASS $pass / FAIL $fail"
 [ $fail -eq 0 ]
