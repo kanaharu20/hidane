@@ -73,16 +73,18 @@ $ /hidane --map
 Requires git, POSIX sh, and [Claude Code](https://claude.com/claude-code). [Obsidian](https://obsidian.md) to see the map.
 
 ```sh
-git clone git@github.com:kanaharu20/hidane.git ~/CODE/hidane
-sh ~/CODE/hidane/install.sh --skill --lang en          # register /hidane in Claude Code (asks en/ja if omitted)
-
-cd ~/your-repo
-sh ~/CODE/hidane/install.sh --hook                     # tag functions after each commit
-sh ~/CODE/hidane/scripts/tag.sh --all                  # once: put every function on the map
+git clone git@github.com:kanaharu20/hidane.git ~/hidane
+cd ~/your-repo && sh ~/hidane/install.sh
 ```
 
-Open `~/Documents/hidane` in Obsidian with "Open folder as vault" (first time only; afterwards `/hidane --vault`).
-Graph view shows traffic-light colors: understood = green, fuzzy = amber, not understood = red, unasked = unlit.
+That asks `en` or `ja`, registers `/hidane` in Claude Code, adds the post-commit hook to this repository,
+tags every function with concepts (about a minute), and writes the map to `~/Documents/hidane`.
+
+Then open `~/Documents/hidane` in Obsidian with "Open folder as vault" (first time only; afterwards `/hidane --vault`)
+and run `/hidane` in Claude Code. Graph view shows traffic-light colors: understood = green, fuzzy = amber,
+not understood = red, unasked = unlit.
+
+More repositories: run `install.sh` again inside each one. Change the language later: `sh ~/hidane/install.sh --lang ja`.
 
 ## Usage
 

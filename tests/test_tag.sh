@@ -131,5 +131,17 @@ sleep 0.5; [ $rc = 0 ] && [ "$(grep -c '^| 20' "$fn")" = $((n0 + 1)) ] && ok "H0
 (cd "$R" && sh "$H/install.sh" --unhook >/dev/null && printf '#!/bin/sh\necho mine\n' > .git/hooks/post-commit && sh "$H/install.sh" --hook >/dev/null 2>&1; rc=$?; [ $rc = 5 ] && grep -q mine .git/hooks/post-commit) \
   && ok "H06 他人の hook は触らず exit 5、--unhook は hidane のだけ消す" || ng "H06 上書き防止"
 
+# I01 install.sh 引数なし: skill + hook + 全関数タグ + 地図、を非対話で一度に
+R2="$TMP/setup"; mkdir -p "$R2/src"; (cd "$R2" && git init -q && git config user.email t@t && git config user.name t && printf 'int one(void)\n{\n\treturn 1;\n}\n' > src/one.c && git add -A && git commit -qm init)
+cat > "$FAKE" <<'F'
+#!/bin/sh
+grep '^### ' | sed 's/^### //' | awk -F'\t' '{ printf("%s\t%s\t定数の返却\n", $1, $2) }'
+F
+ROOT2="$TMP/root2"; export HIDANE_VAULT="$TMP/vault2"
+(cd "$R2" && HIDANE_ROOT="$ROOT2" HIDANE_SKILL_DIR="$TMP/skill2" HIDANE_CLAUDE="$FAKE" sh "$H/install.sh" --lang ja < /dev/null > "$TMP/setup.out" 2>&1); rc=$?
+{ [ $rc = 0 ] && [ -f "$TMP/skill2/SKILL.md" ] && grep -q hidane-hook "$R2/.git/hooks/post-commit" && grep -q '| src/one.c:1-4 | one | 定数の返却 |' "$ROOT2/setup/functions.md" && [ -f "$TMP/vault2/concepts/定数の返却.md" ] && grep -q 'Obsidian' "$TMP/setup.out"; } \
+  && ok "I01 install.sh 一発で skill・hook・タグ付け・地図まで揃う" || ng "I01 setup" "rc=$rc $(cat "$TMP/setup.out")"
+(cd "$TMP" && HIDANE_ROOT="$ROOT2" HIDANE_SKILL_DIR="$TMP/skill2" sh "$H/install.sh" --lang ja < /dev/null > "$TMP/setup2.out" 2>&1); grep -q 'git リポジトリの外' "$TMP/setup2.out" && ok "I02 リポジトリの外では skill だけ置いて案内する" || ng "I02" "$(cat "$TMP/setup2.out")"
+
 echo; echo "PASS $pass / FAIL $fail"
 [ $fail -eq 0 ]
