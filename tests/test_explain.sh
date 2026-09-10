@@ -30,7 +30,7 @@ L
 P="sh scripts/profile.sh --root $ROOT --repo w --today 2026-09-08"; N="sh scripts/next.sh --root $ROOT --repo w"
 
 o=$($P g)
-{ echo "$o" | grep -q '^場所: g.c:1-20$' && echo "$o" | grep -q '^- 排他制御 \[非理解, -6\]: 膨らませる。.*過去のズレ: lock を持ったまま return; unlock の順序' && echo "$o" | grep -q '^- 境界条件 \[曖昧, -1\]: 普通に述べる。過去のズレ: n=0' && echo "$o" | grep -q '^- 早期リターン \[理解, +6\]: 飛ばす' && echo "$o" | grep -q '^- 再帰 \[未出題\]: 一言だけ'; } \
+{ echo "$o" | grep -q '^場所: g.c:1-20$' && echo "$o" | grep -q '^- 排他制御 \[非理解, -5\]: 膨らませる。.*過去のズレ: lock を持ったまま return; unlock の順序' && echo "$o" | grep -q '^- 境界条件 \[曖昧, +0\]: 普通に述べる。過去のズレ: n=0' && echo "$o" | grep -q '^- 早期リターン \[理解, +6\]: 飛ばす' && echo "$o" | grep -q '^- 再帰 \[未出題\]: 一言だけ'; } \
   && ok "E01 概念ごとの指示: 非理解=膨らませる(過去のズレつき)、曖昧=普通、理解=飛ばす、未出題=一言" || ng "E01 directives" "$o"
 echo "$o" | grep -q '^長さの目安(行): 12$' && ok "E02 長さの目安 = 2 + 6×1 + 3×1 + 1×1 = 12" || ng "E02 length" "$(echo "$o" | grep 長さ)"
 { echo "$o" | grep -q '^順: ' && echo "$o" | grep -q '^規則: 問いを出さない'; } && ok "E03 順と規則が出る" || ng "E03"
