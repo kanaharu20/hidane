@@ -10,4 +10,4 @@ First version shared with testers.
 - Cross-repository concept ranking; `lint` merges concept names via aliases without rewriting records
 - English / Japanese chosen at setup; language-neutral record vocabulary
 - One-command setup (`install.sh`), `install.sh --update`, `migrate.sh` for record-format changes
-- 117 L0 tests, no LLM needed
+- 125 L0 tests, no LLM needed; run_all.sh checks that the READMEs state the real count

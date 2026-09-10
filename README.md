@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  <img alt="tests" src="https://img.shields.io/badge/tests-112%20passing-brightgreen">
+  <img alt="tests" src="https://img.shields.io/badge/tests-125%20passing-brightgreen">
   <img alt="deps" src="https://img.shields.io/badge/deps-git%20%2B%20POSIX%20sh-blue">
   <img alt="llm" src="https://img.shields.io/badge/LLM%20decisions-2%20places-orange">
   <img alt="status" src="https://img.shields.io/badge/status-alpha-lightgrey">
@@ -88,6 +88,14 @@ More repositories: run `install.sh` again inside each one. Change the language l
 
 Step-by-step walkthrough with expected outputs and troubleshooting: [docs/GUIDE.md](docs/GUIDE.md).
 Trying it out for me? Please fill in [docs/FEEDBACK.md](docs/FEEDBACK.md); `scripts/stats.sh` prints numbers only, no code.
+
+## What is sent to Claude, and what it costs
+
+- **At commit time** (the hook) and with `tag.sh --all`: the **source of the touched functions** is sent to Claude through `claude -p`, and concept names come back. One call per 8 functions, ~10 s, in the background; the commit never waits. The hook prints one line on every commit so it is never silent; `HIDANE_HOOK_OFF=1` or `install.sh --unhook` stops it.
+- **Every few days** (`lint`): the list of concept names and the function names they are attached to, no source.
+- **During `/hidane`**: Claude Code reads the one function it asks about, as it would for any request.
+- Records (`~/.claude/hidane/`) and the map (`~/Documents/hidane/`) stay on your machine. Nothing else leaves it.
+- Cost is on your own Claude Code plan. For a 40-function repository the initial tagging is about 5 calls.
 
 ## Usage
 
@@ -235,12 +243,13 @@ All via environment variables. **Every constant is provisional** and tuned by us
 - **No scores.** Scores lower interest and turn attention from the code to the self (Butler 1988; Kluger & DeNisi 1996). The colors say which parts of the code are lit, not how good you are.
 - **Unasked ≠ not understood.** "Never checked" and "checked and failed" are kept apart. Questions start from the failures.
 - **Never rewrite the record.** Merges are aliases; the primary record is append-only.
-- **Tests miss.** Every new test is trusted only after breaking the implementation and watching it fail. All 112 L0 tests were checked that way.
+- **Tests miss.** Every new test is trusted only after breaking the implementation and watching it fail. All 125 L0 tests were checked that way, and `run_all.sh` fails if this README's test count drifts from reality.
+- **Why POSIX sh.** Zero dependencies means anyone with git can run it, and Claude Code can call the scripts without a runtime. The price is dense sh + awk that is harder to read than it should be; the tests are what keep it safe to change. Known debt.
 
 ## Development
 
 ```sh
-sh tests/run_all.sh          # 112 tests, no LLM, seconds
+sh tests/run_all.sh          # 125 tests, no LLM, seconds
 sh tests/test_tag.sh         # LLM calls are replaced by a fake via HIDANE_CLAUDE
 ```
 
@@ -264,6 +273,7 @@ sh tests/test_tag.sh         # LLM calls are replaced by a fake via HIDANE_CLAUD
 ## Related work
 
 Successor to [reflect](https://github.com/kanaharu20/reflect): the function extraction is inherited; the memory and state model are new.
+reflect records cannot be imported automatically (no concept column); see [docs/MIGRATING-from-reflect.ja.md](docs/MIGRATING-from-reflect.ja.md).
 
 - **Knowledge Tracing** (BKT onward): estimating per-concept mastery from answer sequences. "One hit may be luck" is folded into the threshold.
 - [KCGen-KT](https://arxiv.org/abs/2502.18632): LLM-generated knowledge components for code; show the existing list and let it choose.

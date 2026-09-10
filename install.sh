@@ -44,6 +44,8 @@ install_hook() {  # $1 = git root
   fi
   sed "s|__HIDANE_HOME__|$HERE|" "$HERE/hooks/post-commit" > "$hook" && chmod +x "$hook"
   say "  hook を置いた: $hook" "  hook installed: $hook"
+  say "    commit のたびに、触った関数のソースが背景で Claude(claude -p)に送られ、概念名が返る。commit は待たない。止めるには HIDANE_HOOK_OFF=1 か install.sh --unhook" \
+      "    after every commit the touched functions' source is sent to Claude (claude -p) in the background and concept names come back. The commit never waits. Stop it with HIDANE_HOOK_OFF=1 or install.sh --unhook"
 }
 
 case "$cmd" in

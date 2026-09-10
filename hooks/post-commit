@@ -11,5 +11,7 @@ H="${HIDANE_HOME:-__HIDANE_HOME__}"
 [ -f "$H/scripts/tag.sh" ] || exit 0
 command -v "${HIDANE_CLAUDE:-claude}" >/dev/null 2>&1 || exit 0
 root="${HIDANE_ROOT:-$HOME/.claude/hidane}"; mkdir -p "$root" 2>/dev/null || exit 0
+n=$(git diff-tree --no-commit-id --name-only -r HEAD 2>/dev/null | wc -l | tr -d ' ')
+echo "hidane: sending the functions touched in this commit ($n files) to Claude in the background to tag concepts. log: $root/hook.log  off: HIDANE_HOOK_OFF=1" >&2
 ( nohup sh "$H/scripts/tag.sh" --commit HEAD --repo "$(pwd)" >> "$root/hook.log" 2>&1 & ) >/dev/null 2>&1
 exit 0

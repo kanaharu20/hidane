@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  <img alt="tests" src="https://img.shields.io/badge/tests-83%20passing-brightgreen">
+  <img alt="tests" src="https://img.shields.io/badge/tests-125%20passing-brightgreen">
   <img alt="deps" src="https://img.shields.io/badge/deps-git%20%2B%20POSIX%20sh-blue">
   <img alt="llm" src="https://img.shields.io/badge/LLM%20decisions-2%20places-orange">
   <img alt="status" src="https://img.shields.io/badge/status-alpha-lightgrey">
@@ -228,7 +228,8 @@ sh ~/hidane/install.sh --update      # Claude Code なら /hidane --update
 - **点数を見せない。** 点数は興味を下げ、注意をコードから自分に向ける(Butler 1988、Kluger & DeNisi 1996)。色は「このコードの未出題」であって「あなたの成績」ではない
 - **未出題と非理解は別。** 「まだ問うていない」と「問うて分からなかった」を混ぜない。出題は非理解から
 - **記録は書き換えない。** 統合も別名で行い、一次記録は追記だけ。壊れる経路を作らない
-- **検査は空振りする。** 新しい検査を書いたら、実装を壊して落ちることを確かめてから信じる。112 件の L0 検査はすべてそうしてある
+- **検査は空振りする。** 新しい検査を書いたら、実装を壊して落ちることを確かめてから信じる。125 件の L0 検査はすべてそうしてあり、この README の検査数が実数とずれたら `run_all.sh` が落ちる
+- **なぜ POSIX sh か。** 依存ゼロなら git がある人は誰でも動かせ、Claude Code からもランタイム無しで呼べる。代償として sh と awk が密で読みにくい。検査がそれを支えている。分かっている負債
 
 ## Development
 
@@ -257,6 +258,7 @@ sh tests/test_tag.sh         # LLM 呼び出しは HIDANE_CLAUDE で偽物に差
 ## Related work
 
 [reflect](https://github.com/kanaharu20/reflect) の後継。関数の切り出しなどの機構を引き継ぎ、記憶の形と状態の計算を作り直した。
+reflect の記録は形が違うので自動では移らない。手順は [docs/MIGRATING-from-reflect.ja.md](docs/MIGRATING-from-reflect.ja.md)。
 
 - **Knowledge Tracing**(BKT 以降): 解答の時系列から概念ごとの習得状態を推定する。「1 回の正解はまぐれかもしれない」を閾値で取り込んだ
 - [KCGen-KT](https://arxiv.org/abs/2502.18632): LLM によるコードへの概念(KC)自動付与。既存一覧を見せて選ばせる作法
