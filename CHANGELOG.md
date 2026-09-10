@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.2.0 — 2026-09-10
+
+- `/hidane --explain [place]`: explanations calibrated to the map (skip / expand / normal / one sentence per concept,
+  decided by `profile.sh`; Claude writes only the prose). Logged in `explained.md`; the function is asked first 1-3 days
+  later and not on the same day.
+- `next.sh` skips functions no longer present in the working tree.
+- Keys fixed before the question; hit / partial / miss derived from per-key verdicts; `partial` result.
+- 137 L0 tests; `run_all.sh` checks that the READMEs state the real count.
+
 ## 0.1.0 — 2026-09-09
 
 First version shared with testers.
