@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  <img alt="tests" src="https://img.shields.io/badge/tests-137%20passing-brightgreen">
+  <img alt="tests" src="https://img.shields.io/badge/tests-125%20passing-brightgreen">
   <img alt="deps" src="https://img.shields.io/badge/deps-git%20%2B%20POSIX%20sh-blue">
   <img alt="llm" src="https://img.shields.io/badge/LLM%20decisions-2%20places-orange">
   <img alt="status" src="https://img.shields.io/badge/status-alpha-lightgrey">
@@ -161,19 +161,6 @@ sh scripts/lint.sh --dry-run # 統合のプロンプトを見る
 </details>
 
 <details>
-<summary><b>地図に合わせた解説</b></summary>
-
-`/hidane --explain` は hidane が唯一コードを解説する場所で、どう解説するかを地図で決める。`profile.sh` がその関数の概念を引き、
-概念ごとに指示を出す: **飛ばす**(理解。名前も出さない)、**膨らませる**(非理解。過去のズレから始め、行を指す)、**普通に**(曖昧)、
-**一言**(未出題)。長さと順も決める。Claude は文だけを書く。熟達度逆転効果(Kalyuga 2003)をスクリプトにしたもので、
-同じ関数でも読む人が違えば解説が変わる。
-
-解説を求めた事実は `explained.md` に残る。その関数は同じ日には問われず、1〜3 日後に**最優先で**問われる
-(解説のあとに思い出す練習をするのが一番残る。Roediger & Karpicke 2006)。記録の備考に「解説の N 日後」が付くので、当たりを文脈つきで読める。
-
-</details>
-
-<details>
 <summary><b>概念名の統合(lint)</b></summary>
 
 タグ付けは自由に新しい名前を作れるので、似た名前が増える。数日に一度、Claude に概念一覧を見せて
@@ -241,7 +228,7 @@ sh ~/hidane/install.sh --update      # Claude Code なら /hidane --update
 - **点数を見せない。** 点数は興味を下げ、注意をコードから自分に向ける(Butler 1988、Kluger & DeNisi 1996)。色は「このコードの未出題」であって「あなたの成績」ではない
 - **未出題と非理解は別。** 「まだ問うていない」と「問うて分からなかった」を混ぜない。出題は非理解から
 - **記録は書き換えない。** 統合も別名で行い、一次記録は追記だけ。壊れる経路を作らない
-- **検査は空振りする。** 新しい検査を書いたら、実装を壊して落ちることを確かめてから信じる。137 件の L0 検査はすべてそうしてあり、この README の検査数が実数とずれたら `run_all.sh` が落ちる
+- **検査は空振りする。** 新しい検査を書いたら、実装を壊して落ちることを確かめてから信じる。125 件の L0 検査はすべてそうしてあり、この README の検査数が実数とずれたら `run_all.sh` が落ちる
 - **なぜ POSIX sh か。** 依存ゼロなら git がある人は誰でも動かせ、Claude Code からもランタイム無しで呼べる。代償として sh と awk が密で読みにくい。検査がそれを支えている。分かっている負債
 
 ## Development

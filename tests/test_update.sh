@@ -25,11 +25,11 @@ sh scripts/migrate.sh --root "$TMP/none" | grep -q 'no records' && ok "U04 記�
 cp -R "$H" "$TMP/src" && (cd "$TMP/src" && git config user.email t@t && git config user.name t && git add -A && git commit -qm wip --allow-empty)
 BARE="$TMP/bare.git"; git clone -q --bare "$TMP/src" "$BARE"
 git clone -q "$BARE" "$TMP/h1"; git clone -q "$BARE" "$TMP/h2"
-(cd "$TMP/h2" && git config user.email t@t && git config user.name t && echo "9.9.9" > VERSION && echo "# new" >> CHANGELOG.md && git add -A && git commit -qm bump && git push -q origin HEAD)
+(cd "$TMP/h2" && git config user.email t@t && git config user.name t && echo "0.1.1" > VERSION && echo "# new" >> CHANGELOG.md && git add -A && git commit -qm bump && git push -q origin HEAD)
 ROOT2="$TMP/root2"; mkdir -p "$ROOT2"; echo 'lang=ja' > "$ROOT2/config"
 o=$(cd "$TMP" && HIDANE_ROOT="$ROOT2" HIDANE_SKILL_DIR="$TMP/skill" HIDANE_VAULT="$TMP/vault" sh "$TMP/h1/install.sh" --update 2>&1); rc=$?
-{ [ $rc = 0 ] && [ "$(cat "$TMP/h1/VERSION")" = "9.9.9" ] && [ "$(cat "$TMP/skill/VERSION")" = "9.9.9" ] && echo "$o" | grep -q "$(cat "$H/VERSION") → 9.9.9" && [ "$(cat "$TMP/skill/HOME")" = "$(cd "$TMP/h1" && pwd -P)" ] && [ "$(cat "$ROOT2/.version")" = 1 ]; } \
+{ [ $rc = 0 ] && [ "$(cat "$TMP/h1/VERSION")" = "0.1.1" ] && [ "$(cat "$TMP/skill/VERSION")" = "0.1.1" ] && echo "$o" | grep -q '0.1.0 → 0.1.1' && [ "$(cat "$TMP/skill/HOME")" = "$(cd "$TMP/h1" && pwd -P)" ] && [ "$(cat "$ROOT2/.version")" = 1 ]; } \
   && ok "U05 --update: pull → skill 更新 → 移行、版の差を出す" || ng "U05 update" "rc=$rc $o"
-o=$(cd "$TMP" && HIDANE_ROOT="$ROOT2" HIDANE_SKILL_DIR="$TMP/skill" HIDANE_VAULT="$TMP/vault" sh "$TMP/h1/install.sh" --update 2>&1); echo "$o" | grep -q '9.9.9 → 9.9.9' && ok "U06 最新なら版は変わらず、失敗もしない" || ng "U06" "$o"
-[ "$(sh "$TMP/h1/install.sh" --version)" = "9.9.9" ] && ok "U07 --version" || ng "U07"
+o=$(cd "$TMP" && HIDANE_ROOT="$ROOT2" HIDANE_SKILL_DIR="$TMP/skill" HIDANE_VAULT="$TMP/vault" sh "$TMP/h1/install.sh" --update 2>&1); echo "$o" | grep -q '0.1.1 → 0.1.1' && ok "U06 最新なら版は変わらず、失敗もしない" || ng "U06" "$o"
+[ "$(sh "$TMP/h1/install.sh" --version)" = "0.1.1" ] && ok "U07 --version" || ng "U07"
 echo; echo "PASS $pass / FAIL $fail"; [ $fail -eq 0 ]

@@ -5,7 +5,6 @@
 #   概念の順位は全 repo の値から(unknown > fuzzy > unasked、同じ状態なら値の低い順)。
 #   候補の関数は今いる repo の functions.md / log.md から。すでに問うた場所は除く。
 #   作業ツリー(git の root、または --tree)に、その場所にその関数名が今も無ければ除く(消えた・ずれた関数)。
-#   解説した関数(explained.md): 同じ日は候補から外す。1〜3 日後なら最優先で問う(テスト効果)。備考に「解説の N 日後」を付ける。
 #   known の概念からは出さない。-n N で上位 N 件を表にする。
 # 出力は決まった形。Claude はこれをそのまま使って問いを作る。
 # 型もここで決める(過去のズレがある概念 → edge、無ければ trace)。決めた内容は
@@ -51,7 +50,6 @@ stale=0
 { if [ -f "$d/functions.md" ]; then grep '^| 20' "$d/functions.md" | while IFS= read -r row; do if alive "$row"; then printf 'fn\t%s\n' "$row"; else printf 'stale\t%s\n' "$row"; fi; done; fi
   [ -f "$d/log.md" ] && grep '^| 20' "$d/log.md" | sed 's/^/log	/'; true; } | sh "$HERE/resolve.sh" --root "$ROOT" > "$tmp/mine"
 stale=$(grep -c '^stale	' "$tmp/mine" || true)
-[ -f "$d/explained.md" ] && grep '^| 20' "$d/explained.md" > "$tmp/explained" || : > "$tmp/explained"
 
 awk -F'\t' -v map="$tmp/map" -v alllog="$tmp/alllog" -v n="$N" -v pending="$d/pending" \
   -v l_known="$(L st_known)" -v l_fuzzy="$(L st_fuzzy)" -v l_unknown="$(L st_unknown)" -v l_unasked="$(L st_unasked)" \
@@ -60,15 +58,11 @@ awk -F'\t' -v map="$tmp/map" -v alllog="$tmp/alllog" -v n="$N" -v pending="$d/pe
   -v n_zure="$(L n_zure)" -v n_type="$(L n_type)" -v n_inputs="$(L n_inputs)" -v n_form="$(L n_form)" \
   -v why_unknown="$(L n_why_unknown)" -v why_fuzzy="$(L n_why_fuzzy)" -v why_unasked="$(L n_why_unasked)" \
   -v in_edge="$(L n_inputs_edge)" -v in_trace="$(L n_inputs_trace)" -v form_text="$(L n_form_text)" -v edge_hint="$(L n_edge_hint)" \
-  -v none_cand="$(L n_none_cand)" -v stale="$stale" -v stale_note="$(printf "$(L n_stale)" "$stale")" -v explained="$tmp/explained" -v today="$TODAY" -v n_explained="$(L n_explained)" -v h_concept="$(L h_concept)" -v h_state="$(L h_state)" -v h_value="$(L h_value)" -v h_place="$(L n_place)" -v h_func="$(L n_func)" '
+  -v none_cand="$(L n_none_cand)" -v stale="$stale" -v stale_note="$(printf "$(L n_stale)" "$stale")" -v h_concept="$(L h_concept)" -v h_state="$(L h_state)" -v h_value="$(L h_value)" -v h_place="$(L n_place)" -v h_func="$(L n_func)" '
 function trim(s) { gsub(/^[ \t]+|[ \t]+$/, "", s); return s }
 function rank(st) { return (st == "unknown" ? 0 : st == "fuzzy" ? 1 : st == "unasked" ? 2 : 9) }
 function label(st) { return (st == "known" ? l_known : st == "fuzzy" ? l_fuzzy : st == "unknown" ? l_unknown : l_unasked) }
-function jdn(d,   y, m, dd, a, yy, mm) { y = substr(d,1,4)+0; m = substr(d,6,2)+0; dd = substr(d,9,2)+0; a = int((14-m)/12); yy = y+4800-a; mm = m+12*a-3
-  return dd + int((153*mm+2)/5) + 365*yy + int(yy/4) - int(yy/100) + int(yy/400) - 32045 }
 BEGIN {
-  while ((getline l < explained) > 0) { split(l, col, "|"); ep = trim(col[3]); ed = substr(trim(col[2]), 1, 10); ago = jdn(today) - jdn(ed)
-    if (!(ep in exp_ago) || ago < exp_ago[ep]) exp_ago[ep] = ago }
   while ((getline l < map) > 0) { split(l, t, "\t"); c = t[1]; val[c] = t[2]; st[c] = t[5]; if (!(c in st)) st[c] = "unasked" }
   while ((getline l < alllog) > 0) {
     split(l, t, "\t"); repo = t[1]; split(t[2], col, "|"); z = trim(col[9]); k = split(trim(col[5]), cs, ",")
@@ -87,12 +81,10 @@ END {
   m = 0
   for (p in cand) {
     if (p in asked) continue
-    if ((p in exp_ago) && exp_ago[p] == 0) continue            # 解説した当日は問わない
     best = 99; bv = 999; bc = ""
     k = split(cand[p], cs, ", ")
     for (i = 1; i <= k; i++) { c = cs[i]; r = rank(st[c]); v = val[c] + 0; if (r < best || (r == best && v < bv)) { best = r; bv = v; bc = c } }
     if (best == 9) continue
-    if ((p in exp_ago) && exp_ago[p] >= 1 && exp_ago[p] <= 3) { best = -1; note[p] = sprintf(n_explained, exp_ago[p]) }   # 1〜3 日後は最優先
     m++; key[m] = sprintf("%d\t%+04d\t%s", best, bv + 100, p); P[m] = p; C[m] = bc
   }
   if (m == 0) { print none_cand (stale > 0 ? " (" stale_note ")" : "") > "/dev/stderr"; exit 1 }
@@ -104,10 +96,10 @@ END {
   }
   p = P[1]; c = C[1]
   printf("%s: %s\n%s: %s\n%s: %s\n%s: %s(%s, %+d)\n", n_place, p, n_func, fname[p], n_concepts, cand[p], n_lead, c, label(st[c]), val[c])
-  printf("%s: %s%s\n", n_why, (st[c] == "unknown" ? why_unknown : st[c] == "fuzzy" ? why_fuzzy : why_unasked), (note[p] != "" ? " / " note[p] : ""))
+  printf("%s: %s\n", n_why, (st[c] == "unknown" ? why_unknown : st[c] == "fuzzy" ? why_fuzzy : why_unasked))
   if (zure[c] != "") { type = "edge"; printf("%s(%s):\n%s", n_zure, c, zure[c]); printf("%s: edge (%s) — %s\n%s: %s\n", n_type, ty_edge, edge_hint, n_inputs, in_edge) }
   else { type = "trace"; printf("%s: trace (%s)\n%s: %s\n", n_type, ty_trace, n_inputs, in_trace) }
   printf("%s: %s\n", n_form, form_text)
-  printf("%s\t%s\t%s\t%s\t%s\n", p, fname[p], cand[p], type, note[p]) > pending
+  printf("%s\t%s\t%s\t%s\n", p, fname[p], cand[p], type) > pending
   close(pending)
 }' "$tmp/mine"

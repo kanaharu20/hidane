@@ -13,7 +13,6 @@ One function, one question per invocation. Answer, record, stop. Call again for 
 - `--vault` … run `sh <HIDANE>/scripts/open.sh`, show its single output line, stop. No question.
 - `--map` … run `sh <HIDANE>/scripts/map.sh`, show the table as is, stop. No question.
 - `--lint` … run `sh <HIDANE>/scripts/lint.sh`, show its output as is, stop. No question.
-- `--explain [place or function]` … the "Explain" steps below. No question.
 - `--update` … run `sh "$(cat <HIDANE>/HOME)/install.sh" --update` to get the latest version, show its output as is, stop. No question.
 - none … follow the steps below.
 
@@ -44,17 +43,6 @@ One function, one question per invocation. Answer, record, stop. Call again for 
    type is `trace` / `edge` / `summary`. Place, function, concepts and type must be exactly what next.sh printed, or record.sh refuses (exit 7).
    Add nothing after record.sh's output: no explanation, no correct answer, no encouragement.
 8. **Stop.** No summary, no next steps, no encouragement.
-
-## Explain (`--explain`)
-
-1. Run `sh <HIDANE>/scripts/profile.sh <place or function>` (no argument = the function last asked). On exit 1, relay the stderr line and stop.
-2. Read the range with Read.
-3. Write the explanation **exactly as the directives say**.
-   - "skip" concepts are not even named. "expand" concepts come first, starting from the past misses, showing how the concept works in this function with line numbers. "one sentence" concepts get one sentence.
-   - Stay within the length guide. Follow the given order.
-   - No quiz. No scores or evaluative words ("you understand this well"). Quote at most 3 lines of code.
-   - Write in the language the user writes in.
-4. Stop. Do not offer a follow-up question.
 
 ## Never
 

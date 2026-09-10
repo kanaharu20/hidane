@@ -74,8 +74,7 @@ else
 fi
 
 if [ -z "$FREE" ] && [ -f "$pending" ]; then
-  want=$(cut -f1-4 "$pending"); pnote=$(cut -f5 -s "$pending"); got=$(printf '%s\t%s\t%s\t%s' "$place" "$func" "$concepts" "$type")
-  [ -n "$pnote" ] && note=$( [ -n "$note" ] && printf '%s; %s' "$pnote" "$note" || printf '%s' "$pnote")
+  want=$(cat "$pending"); got=$(printf '%s\t%s\t%s\t%s' "$place" "$func" "$concepts" "$type")
   if [ "$want" != "$got" ]; then
     printf 'record.sh: %s\n  %s: %s\n  %s: %s\n  %s\n' "$(L r_pending)" "$(L r_decided)" "$(printf '%s' "$want" | tr '\t' '|')" "$(L r_given)" "$(printf '%s' "$got" | tr '\t' '|')" "$(L r_free)" >&2
     exit 7

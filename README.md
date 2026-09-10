@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  <img alt="tests" src="https://img.shields.io/badge/tests-137%20passing-brightgreen">
+  <img alt="tests" src="https://img.shields.io/badge/tests-125%20passing-brightgreen">
   <img alt="deps" src="https://img.shields.io/badge/deps-git%20%2B%20POSIX%20sh-blue">
   <img alt="llm" src="https://img.shields.io/badge/LLM%20decisions-2%20places-orange">
   <img alt="status" src="https://img.shields.io/badge/status-alpha-lightgrey">
@@ -105,7 +105,6 @@ Trying it out for me? Please fill in [docs/FEEDBACK.md](docs/FEEDBACK.md); `scri
 | `/hidane --map` | Table of concepts: value, state, repos |
 | `/hidane --vault` | Rebuild the map and open it in Obsidian |
 | `/hidane --lint` | Merge concept names that mean the same thing (also runs automatically every 3 days) |
-| `/hidane --explain [place]` | Explain one function at *your* level: known concepts skipped, not-understood ones expanded from your past misses. No argument = the function last asked |
 | `/hidane --update` | Get the latest version and migrate records |
 | `git commit` | As usual. Functions touched are tagged in the background. The commit never blocks. |
 
@@ -177,21 +176,6 @@ Claude chooses the wording of the question and judges each key; it never decides
 </details>
 
 <details>
-<summary><b>Explanations calibrated to the map</b></summary>
-
-`/hidane --explain` is the one place hidane explains code, and it uses the map to decide how. `profile.sh` looks up the
-function's concepts and emits a directive per concept: **skip** (understood; not even named), **expand** (not understood;
-start from your past misses, point at lines), **normal** (fuzzy), **one sentence** (unasked). It also fixes the length and
-the order. Claude only writes the prose. This is the expertise-reversal effect (Kalyuga 2003) turned into a script: the
-same function gets a different explanation for a different reader.
-
-The request is logged in `explained.md`. The function is not asked on the same day, and is asked **first** 1-3 days later
-(retrieval after explanation is where learning sticks; Roediger & Karpicke 2006). The record then carries the note
-"N days after an explanation" so the hit is read in context.
-
-</details>
-
-<details>
 <summary><b>Merging concept names (lint)</b></summary>
 
 Tagging may invent new names, so near-duplicates accumulate. Every few days Claude is shown the concept list and asked for
@@ -259,13 +243,13 @@ All via environment variables. **Every constant is provisional** and tuned by us
 - **No scores.** Scores lower interest and turn attention from the code to the self (Butler 1988; Kluger & DeNisi 1996). The colors say which parts of the code are lit, not how good you are.
 - **Unasked ≠ not understood.** "Never checked" and "checked and failed" are kept apart. Questions start from the failures.
 - **Never rewrite the record.** Merges are aliases; the primary record is append-only.
-- **Tests miss.** Every new test is trusted only after breaking the implementation and watching it fail. All 137 L0 tests were checked that way, and `run_all.sh` fails if this README's test count drifts from reality.
+- **Tests miss.** Every new test is trusted only after breaking the implementation and watching it fail. All 125 L0 tests were checked that way, and `run_all.sh` fails if this README's test count drifts from reality.
 - **Why POSIX sh.** Zero dependencies means anyone with git can run it, and Claude Code can call the scripts without a runtime. The price is dense sh + awk that is harder to read than it should be; the tests are what keep it safe to change. Known debt.
 
 ## Development
 
 ```sh
-sh tests/run_all.sh          # 137 tests, no LLM, seconds
+sh tests/run_all.sh          # 125 tests, no LLM, seconds
 sh tests/test_tag.sh         # LLM calls are replaced by a fake via HIDANE_CLAUDE
 ```
 
