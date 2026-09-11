@@ -9,7 +9,7 @@
 - `explained.sh` logs requests; explanations never change values, states or colors.
 - Keys fixed before the question; hit / partial / miss derived from per-key verdicts; `partial` result.
 - `next.sh` skips functions no longer present in the working tree.
-- 137 L0 tests.
+- 139 L0 tests.
 
 ## 0.1.0 — 2026-09-09
 

@@ -36,4 +36,7 @@ echo "$d" | grep -q '^For each function below' && echo "$d" | grep -q '^## Funct
 HIDANE_ROOT="$TMP/root2" HIDANE_SKILL_DIR="$TMP/skill" sh install.sh --skill --lang en >/dev/null && { [ "$(cat "$TMP/root2/config")" = "lang=en" ] && grep -q '^description: Pick one function' "$TMP/skill/SKILL.md"; } && ok "X10 install --skill --lang en: config と英語 SKILL" || ng "X10 install en" "$(cat "$TMP/root2/config" 2>&1; head -3 "$TMP/skill/SKILL.md")"
 HIDANE_ROOT="$TMP/root2" HIDANE_SKILL_DIR="$TMP/skill" sh install.sh --skill --lang ja >/dev/null && { [ "$(cat "$TMP/root2/config")" = "lang=ja" ] && grep -q '^description: 自分のコード' "$TMP/skill/SKILL.md"; } && ok "X11 --lang ja に切り替えると config も SKILL も日本語" || ng "X11 install ja"
 HIDANE_ROOT="$TMP/root2" sh install.sh --lang xx >/dev/null 2>&1; [ $? = 2 ] && ok "X12 未知の言語は exit 2" || ng "X12"
+# X13 help.sh は言語ごとの固定文。版とコマンド一覧が入る
+h=$(HIDANE_LANG=ja sh scripts/help.sh --root "$TMP/root"); { echo "$h" | grep -q "^hidane $(cat VERSION) — " && echo "$h" | grep -q '/hidane <聞きたいこと>' && echo "$h" | grep -q -- '/hidane --help, -h'; } && ok "X13 help.sh(ja)" || ng "X13 help ja" "$h"
+h=$(HIDANE_LANG=en sh scripts/help.sh --root "$TMP/root"); { echo "$h" | grep -q '/hidane <anything>' && echo "$h" | grep -q 'Records:'; } && ok "X14 help.sh(en)" || ng "X14 help en" "$h"
 echo; echo "PASS $pass / FAIL $fail"; [ $fail -eq 0 ]

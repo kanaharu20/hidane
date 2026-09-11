@@ -117,6 +117,7 @@ Explanations never change values, states or colors. Reading is not evidence of u
 | `lint.sh` | merge concept names | ● |
 | `resolve.sh` | resolve aliases | |
 | `explained.sh` | log an explanation request | |
+| `help.sh` | fixed usage text (en / ja) | |
 | (no script) | explanation level, decided by Claude from index and concept pages | ● |
 | `scope.sh` | cut a commit into functions (15 languages, from reflect) | |
 | `migrate.sh` | record-format migrations | |

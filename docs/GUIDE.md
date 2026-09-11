@@ -95,6 +95,7 @@ Other commands:
 | `/hidane --map` | table of concepts: value, state, repos |
 | `/hidane --vault` | rebuild the map and open it in Obsidian |
 | `/hidane --lint` | merge concept names that mean the same (also automatic every 3 days) |
+| `/hidane --help` | usage |
 | `/hidane <anything>` | an explanation at your level: `/hidane what is printf?`, `/hidane the part I missed in the last question`, `/hidane where am I weak`. Claude reads the map first, skips what you understand, starts from what you got wrong. Reading changes no color |
 
 ## 4. Day to day

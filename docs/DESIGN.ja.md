@@ -117,6 +117,7 @@ commit のたび、hook が触った関数のソースを `claude -p` に送り�
 | `lint.sh` | 概念名の統合 | ● |
 | `resolve.sh` | 別名を解く | |
 | `explained.sh` | 求めた解説を残す | |
+| `help.sh` | 使い方の固定文(en / ja) | |
 | `profile`(無し) | 解説の粒度は Claude が index と概念ページから決める | ● |
 | `scope.sh` | commit を関数に切る(15 言語、reflect から) | |
 | `migrate.sh` | 記録の形式の移行 | |

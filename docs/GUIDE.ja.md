@@ -95,6 +95,7 @@ Claude Code が `sh .../scripts/next.sh` などの実行許可を毎回聞いて
 | `/hidane --map` | 概念ごとの値・状態・repo の表をその場に出す |
 | `/hidane --vault` | 地図を作り直して Obsidian で開く |
 | `/hidane --lint` | 似た概念名を統合する(3 日に一度は自動) |
+| `/hidane --help` | 使い方を出す |
 | `/hidane <聞きたいこと>` | 自分に合わせた解説。`/hidane printf って何？`、`/hidane さっきの問いで触れていなかった所`、`/hidane 自分の弱い所は`。Claude が先に地図を読み、理解している概念は飛ばし、間違えた所から話す。解説を読んでも色は変わらない |
 
 ## 4. 普段

@@ -10,6 +10,7 @@ description: 自分のコードのまだ問うていない関数から 1 つ選�
 
 ## 引数(`$ARGUMENTS`)
 
+- `--help` / `-h` … `sh <HIDANE>/scripts/help.sh` を実行し、その出力をそのまま見せて終わる。問いは出さない。
 - `--vault` … `sh <HIDANE>/scripts/open.sh` を実行して Obsidian で地図を開き、その出力 1 行だけを見せて終わる。問いは出さない。
 - `--map` … `sh <HIDANE>/scripts/map.sh` を実行し、表をそのまま見せて終わる。問いは出さない。
 - `--lint` … `sh <HIDANE>/scripts/lint.sh` を実行して似た概念名を統合し、その出力をそのまま見せて終わる。問いは出さない。

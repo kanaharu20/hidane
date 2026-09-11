@@ -62,6 +62,7 @@ cd 使いたいリポジトリ && sh ~/hidane/install.sh
 | `/hidane --vault` | 地図を作り直して Obsidian で開く |
 | `/hidane --lint` | 似た概念名を統合(3 日に一度は自動) |
 | `/hidane --update` | 最新版にして記録を移行 |
+| `/hidane --help` | 使い方 |
 
 commit のとき、触った関数のソースが自分の Claude(`claude -p`)に送られて概念名が返る。hook はそのたびに 1 行出すので黙って動くことはない。
 `HIDANE_HOOK_OFF=1` か `install.sh --unhook` で止まる。記録と地図は手元にだけある。費用は自分の Claude Code の範囲で、40 関数なら最初のタグ付けが 5 回前後。
@@ -88,14 +89,14 @@ LLM に判断させるのは 3 か所だけ。関数にどの概念を付ける�
 
 - 作者 1 人が 2 リポジトリで 25 問答えた段階。重み(1 / 2 / 3)、閾値(±4)、忘却(30 日)は全部仮置き
 - 「何をするか」型の問い(summary)の判定は、まだ Claude の読みに頼っている。説明からコードを生成して照合する方式(CGBG)は入れていない
-- 依存を git と POSIX sh だけにした代わりに、sh と awk が密で読みにくい。137 件の検査がそれを支えている
+- 依存を git と POSIX sh だけにした代わりに、sh と awk が密で読みにくい。139 件の検査がそれを支えている
 - Linux は動くはずだが未検証。`/hidane --vault` は macOS の `open` を使う
 - Claude が SKILL の手順をどこまで守るかは、実走の会話記録で確かめている。文面の指示は効かないことがある
 
 ## 開発
 
 ```sh
-sh tests/run_all.sh     # 137 件。LLM は呼ばない。数秒
+sh tests/run_all.sh     # 139 件。LLM は呼ばない。数秒
 ```
 
 新しい検査は、実装を壊して落ちるのを見てから信じる。`run_all.sh` は検査の数がこの README とずれると落ちる。
