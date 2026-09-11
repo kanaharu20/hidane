@@ -55,7 +55,8 @@ r="$V/repos/worker.md"
 { [ "$(grep -c '^| \[\[' "$r")" = 12 ] && grep -q '| \[\[停止フラグの伝搬\]\] | 非理解 | -4 |' "$r"; } && ok "P10 repo ページに 12 概念、重複なし" || ng "P10 repo" "$(grep -c '^| \[\[' "$r") rows"
 
 # P11 index.md は map.sh の表と同じ
-diff -q tests/expected_map.md "$V/index.md" >/dev/null && ok "P11 index.md = map.sh の表" || ng "P11 index"
+sed -n '/^| 概念 | 値/,$p' "$V/index.md" > "$TMP/idx"; diff -q tests/expected_map.md "$TMP/idx" >/dev/null && ok "P11 index.md の表 = map.sh の表(先頭に全体と最近の解説)" || ng "P11 index" "$(diff tests/expected_map.md "$TMP/idx" | head -3)"
+{ grep -q '^## 全体$' "$V/index.md" && grep -q '^理解 0 / 曖昧 9 / 非理解 1 / 未出題 2$' "$V/index.md" && grep -q '^答えた問い 15、最後に答えた日 2026-09-08$' "$V/index.md" && grep -q '^## 最近求めた解説$' "$V/index.md" && grep -q '(まだ無い)' "$V/index.md"; } && ok "P15 index.md の先頭に全体の段階と最近の解説(無ければ「まだ無い」)" || ng "P15 index header" "$(head -12 "$V/index.md")"
 
 # P12 概念名の / はファイル名で ／ になり、リンクも同じ
 mkdir -p "$TMP/sl/x"; { head -2 $FX/api/log.md | tail -1; echo '|---|---|---|---|---|---|---|---|---|'; echo '| 2026-09-08 | a.c:1-2 | f | 入出力/バッファ, 境界条件 | trace | q | hit |  |  |'; } > "$TMP/sl/x/log.md"

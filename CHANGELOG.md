@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.0 — 2026-09-11
+
+- `/hidane --explain <topic>`: the map as memory. Claude reads `index.md` (overall stage, recent explanations, concept
+  table) and the pages of the 3-5 nearest concepts, then explains at the reader's level: understood skipped,
+  not-understood from past misses, unasked in a sentence. Any topic, including ones outside the map's vocabulary.
+- `index.md` now opens with the overall stage and the last 5 explanations requested.
+- `explained.sh` logs requests; explanations never change values, states or colors.
+- Keys fixed before the question; hit / partial / miss derived from per-key verdicts; `partial` result.
+- `next.sh` skips functions no longer present in the working tree.
+- 135 L0 tests.
+
 ## 0.1.0 — 2026-09-09
 
 First version shared with testers.

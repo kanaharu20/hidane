@@ -67,6 +67,15 @@ L() {
     ja:n_none_cand) echo "候補なし: この repo の関数は全部問うた(または理解のみ)。commit するか tag.sh --commit HEAD を回して関数に概念を付ける" ;;
     en:n_none_cand) echo "no candidates: every function in this repo has been asked (or is understood only). Commit, or run tag.sh --commit HEAD" ;;
     ja:n_stale) echo "作業ツリーに無い関数 %d 件は除いた" ;;  en:n_stale) echo "%d functions no longer in the working tree were skipped" ;;
+    ja:x_usage) echo "引数は 対象 [概念, 概念]" ;;      en:x_usage) echo "args: topic [concept, concept]" ;;
+    ja:x_unknown) echo "地図に無い概念は捨てた" ;;      en:x_unknown) echo "dropped a concept not on the map" ;;
+    ja:x_title) echo "求めた解説(状態には影響しない)" ;;  en:x_title) echo "explanations requested (never affects state)" ;;
+    ja:x_header) echo "| 日時 | repo | 対象 | 概念 |" ;;  en:x_header) echo "| Date | Repo | Topic | Concepts |" ;;
+    ja:i_overall) echo "全体" ;;                         en:i_overall) echo "Overall" ;;
+    ja:i_answered) echo "答えた問い %d、最後に答えた日 %s" ;;  en:i_answered) echo "%d questions answered, last on %s" ;;
+    ja:i_recent) echo "最近求めた解説" ;;               en:i_recent) echo "Recent explanations requested" ;;
+    ja:i_none) echo "(まだ無い)" ;;                     en:i_none) echo "(none yet)" ;;
+    ja:i_table) echo "概念" ;;                          en:i_table) echo "Concepts" ;;
     ja:m_footer) echo "読んだ行 %d / 使えた行 %d(基準日 %s、閾値 ±%d、上限 ±%d、鮮度 %d 日)" ;;
     en:m_footer) echo "rows read %d / usable %d (as of %s, threshold ±%d, cap ±%d, fresh %d days)" ;;
     ja:m_bad) echo "読めない行" ;;              en:m_bad) echo "unreadable row" ;;

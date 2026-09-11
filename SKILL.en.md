@@ -13,6 +13,7 @@ One function, one question per invocation. Answer, record, stop. Call again for 
 - `--vault` … run `sh <HIDANE>/scripts/open.sh`, show its single output line, stop. No question.
 - `--map` … run `sh <HIDANE>/scripts/map.sh`, show the table as is, stop. No question.
 - `--lint` … run `sh <HIDANE>/scripts/lint.sh`, show its output as is, stop. No question.
+- `--explain <topic>` … the "Explain" steps below. No question. The topic is free text (a function, a concept, printf, "is this design ok").
 - `--update` … run `sh "$(cat <HIDANE>/HOME)/install.sh" --update` to get the latest version, show its output as is, stop. No question.
 - none … follow the steps below.
 
@@ -43,6 +44,17 @@ One function, one question per invocation. Answer, record, stop. Call again for 
    type is `trace` / `edge` / `summary`. Place, function, concepts and type must be exactly what next.sh printed, or record.sh refuses (exit 7).
    Add nothing after record.sh's output: no explanation, no correct answer, no encouragement.
 8. **Stop.** No summary, no next steps, no encouragement.
+
+## Explain (`--explain <topic>`)
+
+The map is a memory of what this person understands. Read it before explaining and calibrate to them.
+
+1. **Entry point**: Read `~/Documents/hidane/index.md` (path changes with `HIDANE_VAULT`; if missing, run `sh <HIDANE>/scripts/pages.sh` first). Take in "Overall" (counts per state, questions answered), "Recent explanations requested", and the concept table.
+2. **Follow the trail**: pick 3-5 concepts related to the topic from the table and Read `concepts/<concept>.md` for each: past misses, the user's functions tagged with it, records. If the topic is not in the map's vocabulary (printf, say), map it yourself to the nearest concepts. If nothing is near, calibrate to "Overall".
+3. **Set the level**: understood concepts are skipped (assumed, not even named). Not-understood ones get the careful treatment, starting from the past misses, pointing at lines. Fuzzy: normal. Unasked: one sentence. If the same topic appears under "Recent explanations", continue from there instead of repeating basics.
+4. **Write**: use the user's own functions as examples when they fit (`file:a-b`). No quiz. No scores or evaluative words. Quote at most 3 lines of code. Write in the user's language.
+5. **Log it**: `sh <HIDANE>/scripts/explained.sh "<topic>" "<mapped concept, concept>"` (1-2 names from the table; `""` if none). Show its one output line. State and colors do not change.
+6. Stop. Do not offer a follow-up question.
 
 ## Never
 

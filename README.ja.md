@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  <img alt="tests" src="https://img.shields.io/badge/tests-125%20passing-brightgreen">
+  <img alt="tests" src="https://img.shields.io/badge/tests-135%20passing-brightgreen">
   <img alt="deps" src="https://img.shields.io/badge/deps-git%20%2B%20POSIX%20sh-blue">
   <img alt="llm" src="https://img.shields.io/badge/LLM%20decisions-2%20places-orange">
   <img alt="status" src="https://img.shields.io/badge/status-alpha-lightgrey">
@@ -161,6 +161,20 @@ sh scripts/lint.sh --dry-run # 統合のプロンプトを見る
 </details>
 
 <details>
+<summary><b>記憶としての地図: 合わせた解説</b></summary>
+
+`/hidane --explain <対象>` は hidane が唯一解説する場所で、地図を「その人が何を理解しているかの記憶」として使う。
+書く前に Claude が `index.md`(全体の段階、最近求めた解説、概念の表)を読み、対象に近い概念を 3〜5 個選んでそのページ
+(過去のズレ、その人の関数、記録)を読む。理解している概念は飛ばし、非理解は過去のズレから丁寧に、曖昧は普通に、未出題は一言。
+地図の語彙に無い対象(printf など)は、Claude がその場で近い概念に結びつける。
+地図全体を渡すのではなく**辿る手がかりを渡す**: `index.md` が固定の入口で、概念の数にしか比例しない。
+
+求めた解説は `explained.md` に残り「最近求めた解説」に出るので、次回は繰り返さず続きから話せる。
+**解説は値も状態も色も変えない**。読んだことは理解の証拠ではないから。熟達度逆転効果(Kalyuga 2003)を、自分の記録を熟達度の模型にして適用したもの。
+
+</details>
+
+<details>
 <summary><b>概念名の統合(lint)</b></summary>
 
 タグ付けは自由に新しい名前を作れるので、似た名前が増える。数日に一度、Claude に概念一覧を見せて
@@ -209,6 +223,7 @@ sh ~/hidane/install.sh --update      # Claude Code なら /hidane --update
   <repo>/log.md                     問いと答え。1 回 1 行。唯一の書き込み口は record.sh
   <repo>/functions.md               commit 時に付いた「関数 → 概念」
   <repo>/pending                    next.sh が決めた次の一問
+  explained.md                      求めた解説(対象と結びつけた概念)。状態には影響しない
   <repo>/keys                       問う前に固定した鍵。record.sh が消す
   aliases.md                        概念の別名(旧名 → 新名)
   .lint-stamp                       最後に lint を回した日
@@ -228,7 +243,7 @@ sh ~/hidane/install.sh --update      # Claude Code なら /hidane --update
 - **点数を見せない。** 点数は興味を下げ、注意をコードから自分に向ける(Butler 1988、Kluger & DeNisi 1996)。色は「このコードの未出題」であって「あなたの成績」ではない
 - **未出題と非理解は別。** 「まだ問うていない」と「問うて分からなかった」を混ぜない。出題は非理解から
 - **記録は書き換えない。** 統合も別名で行い、一次記録は追記だけ。壊れる経路を作らない
-- **検査は空振りする。** 新しい検査を書いたら、実装を壊して落ちることを確かめてから信じる。125 件の L0 検査はすべてそうしてあり、この README の検査数が実数とずれたら `run_all.sh` が落ちる
+- **検査は空振りする。** 新しい検査を書いたら、実装を壊して落ちることを確かめてから信じる。135 件の L0 検査はすべてそうしてあり、この README の検査数が実数とずれたら `run_all.sh` が落ちる
 - **なぜ POSIX sh か。** 依存ゼロなら git がある人は誰でも動かせ、Claude Code からもランタイム無しで呼べる。代償として sh と awk が密で読みにくい。検査がそれを支えている。分かっている負債
 
 ## Development
@@ -249,6 +264,7 @@ sh tests/test_tag.sh         # LLM 呼び出しは HIDANE_CLAUDE で偽物に差
 | `scripts/lint.sh` | 似た概念名を統合(`aliases.md` に追記) | ● |
 | `scripts/resolve.sh` | 別名を解くフィルタ | |
 | `scripts/open.sh` | vault を作り直して Obsidian で開く | |
+| `scripts/explained.sh` | 求めた解説を残す(状態には触れない) | |
 | `scripts/stats.sh` | フィードバック用の数字だけの要約(名前は出ない) | |
 | `scripts/scope.sh` | commit が触った関数を 15 言語で切り出す([reflect](https://github.com/kanaharu20/reflect) から) | |
 | `hooks/post-commit` | commit 後に tag.sh を背景で走らせる。何が起きても commit は通す | |

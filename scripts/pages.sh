@@ -31,7 +31,18 @@ mkdir -p "$VAULT/concepts" "$VAULT/repos" "$VAULT/.obsidian"
 
 tsv=$(mktemp); trap 'rm -f "$tsv"' EXIT
 sh "$HERE/map.sh" --root "$ROOT" --today "$TODAY" --tsv > "$tsv"
-sh "$HERE/map.sh" --root "$ROOT" --today "$TODAY" > "$VAULT/index.md"
+{
+  # 先頭: 全体の段階(状態ごとの数、答えた数と最終日)、最近求めた解説。Claude が解説の前に読む入口
+  printf '# hidane\n\n## %s\n\n' "$(L i_overall)"
+  awk -F'\t' -v k="$(L st_known)" -v f="$(L st_fuzzy)" -v u="$(L st_unknown)" -v a="$(L st_unasked)" '{ n[$5]++ } END { printf("%s %d / %s %d / %s %d / %s %d\n", k, n["known"]+0, f, n["fuzzy"]+0, u, n["unknown"]+0, a, n["unasked"]+0) }' "$tsv"
+  q=0; lastd="-"
+  for dd in "$ROOT"/*/; do [ -f "$dd/log.md" ] || continue; q=$((q + $(grep -c '^| 20' "$dd/log.md" || true))); l=$(grep '^| 20' "$dd/log.md" | cut -d'|' -f2 | cut -c2-11 | sort | tail -1); [ "$l" \> "$lastd" ] && lastd="$l"; done
+  printf "$(L i_answered)\n\n" "$q" "$lastd"
+  printf '## %s\n\n' "$(L i_recent)"
+  if [ -f "$ROOT/explained.md" ] && grep -q '^| 20' "$ROOT/explained.md"; then grep '^| 20' "$ROOT/explained.md" | tail -5 | sed 's/^/- /'; else printf '%s\n' "$(L i_none)"; fi
+  printf '\n## %s\n\n' "$(L i_table)"
+  sh "$HERE/map.sh" --root "$ROOT" --today "$TODAY"
+} > "$VAULT/index.md"
 
 # 行を集めて awk に渡す(map.sh と同じ流し方)
 for d in "$ROOT"/*/; do

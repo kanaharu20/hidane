@@ -6,7 +6,7 @@
 </p>
 
 <p align="center">
-  <img alt="tests" src="https://img.shields.io/badge/tests-125%20passing-brightgreen">
+  <img alt="tests" src="https://img.shields.io/badge/tests-135%20passing-brightgreen">
   <img alt="deps" src="https://img.shields.io/badge/deps-git%20%2B%20POSIX%20sh-blue">
   <img alt="llm" src="https://img.shields.io/badge/LLM%20decisions-2%20places-orange">
   <img alt="status" src="https://img.shields.io/badge/status-alpha-lightgrey">
@@ -105,6 +105,7 @@ Trying it out for me? Please fill in [docs/FEEDBACK.md](docs/FEEDBACK.md); `scri
 | `/hidane --map` | Table of concepts: value, state, repos |
 | `/hidane --vault` | Rebuild the map and open it in Obsidian |
 | `/hidane --lint` | Merge concept names that mean the same thing (also runs automatically every 3 days) |
+| `/hidane --explain <topic>` | An explanation calibrated to *you*. Claude reads the map first: understood concepts are skipped, not-understood ones are explained from your past misses. Any topic: a function, a concept, printf, a design question |
 | `/hidane --update` | Get the latest version and migrate records |
 | `git commit` | As usual. Functions touched are tagged in the background. The commit never blocks. |
 
@@ -176,6 +177,22 @@ Claude chooses the wording of the question and judges each key; it never decides
 </details>
 
 <details>
+<summary><b>The map as memory: calibrated explanations</b></summary>
+
+`/hidane --explain <topic>` is the one place hidane explains, and it treats the map as a memory of what you understand.
+Before writing, Claude reads `index.md` (overall stage, recent explanations, the concept table), picks the 3-5 concepts
+nearest to the topic and reads their pages (past misses, your functions, records). Understood concepts are skipped,
+not-understood ones are explained carefully from your past misses, fuzzy ones normally, unasked ones in a sentence.
+Topics outside the map's vocabulary are mapped to the nearest concepts by Claude on the spot.
+The map hands Claude the trail, not the whole map: `index.md` is the fixed entry point and grows only with the number of concepts.
+
+The request is logged (`explained.md`) and shows up under "Recent explanations", so the next explanation continues
+rather than repeats. **Explanations never change values, states or colors**: reading is not evidence of understanding.
+This is the expertise-reversal effect (Kalyuga 2003) applied with your own record as the expertise model.
+
+</details>
+
+<details>
 <summary><b>Merging concept names (lint)</b></summary>
 
 Tagging may invent new names, so near-duplicates accumulate. Every few days Claude is shown the concept list and asked for
@@ -224,6 +241,7 @@ All via environment variables. **Every constant is provisional** and tuned by us
   <repo>/log.md                     questions and answers, one row each; written only by record.sh
   <repo>/functions.md               function → concepts, tagged at commit time
   <repo>/pending                    the next question as decided by next.sh
+  explained.md                      explanations requested (topic, mapped concepts); never affects state
   <repo>/keys                       the keys fixed before the question; deleted by record.sh
   aliases.md                        concept aliases (old → new)
   .lint-stamp                       last lint date
@@ -243,13 +261,13 @@ All via environment variables. **Every constant is provisional** and tuned by us
 - **No scores.** Scores lower interest and turn attention from the code to the self (Butler 1988; Kluger & DeNisi 1996). The colors say which parts of the code are lit, not how good you are.
 - **Unasked ≠ not understood.** "Never checked" and "checked and failed" are kept apart. Questions start from the failures.
 - **Never rewrite the record.** Merges are aliases; the primary record is append-only.
-- **Tests miss.** Every new test is trusted only after breaking the implementation and watching it fail. All 125 L0 tests were checked that way, and `run_all.sh` fails if this README's test count drifts from reality.
+- **Tests miss.** Every new test is trusted only after breaking the implementation and watching it fail. All 135 L0 tests were checked that way, and `run_all.sh` fails if this README's test count drifts from reality.
 - **Why POSIX sh.** Zero dependencies means anyone with git can run it, and Claude Code can call the scripts without a runtime. The price is dense sh + awk that is harder to read than it should be; the tests are what keep it safe to change. Known debt.
 
 ## Development
 
 ```sh
-sh tests/run_all.sh          # 125 tests, no LLM, seconds
+sh tests/run_all.sh          # 135 tests, no LLM, seconds
 sh tests/test_tag.sh         # LLM calls are replaced by a fake via HIDANE_CLAUDE
 ```
 
@@ -264,6 +282,7 @@ sh tests/test_tag.sh         # LLM calls are replaced by a fake via HIDANE_CLAUD
 | `scripts/lint.sh` | merge concept names (appends to `aliases.md`) | ● |
 | `scripts/resolve.sh` | alias-resolving filter | |
 | `scripts/open.sh` | rebuild and open the vault in Obsidian | |
+| `scripts/explained.sh` | log an explanation request (never touches state) | |
 | `scripts/stats.sh` | numbers-only summary for feedback (no names) | |
 | `scripts/lang.sh` | display strings for en / ja | |
 | `scripts/scope.sh` | cut a commit into functions, 15 languages (from [reflect](https://github.com/kanaharu20/reflect)) | |
