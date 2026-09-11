@@ -85,7 +85,7 @@ The mechanics in detail: [docs/DESIGN.md](docs/DESIGN.md).
 
 ## Limits, and what is not done
 
-- One author, two repositories, about 30 answers so far. Weights (1 / 2 / 3), threshold (±4) and forgetting (30 days) are all provisional
+- One author, two repositories, 25 answers so far. Weights (1 / 2 / 3), threshold (±4) and forgetting (30 days) are all provisional
 - The "what does this function do" question type (summary) is still judged by Claude reading the answer; grading by generating code from the explanation (CGBG) is not in
 - Zero dependencies beyond git and POSIX sh came at the price of dense sh and awk. 135 tests are what make it safe to change
 - Linux should work but is untested; `/hidane --vault` uses macOS `open`
