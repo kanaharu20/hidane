@@ -31,7 +31,7 @@ hit (keys 2 / 2)
 ```
 
 The elements of the correct answer were fixed as 2-5 "keys" before you answered, and each key is judged present / missing / contradicted.
-Fall short and you get "partial (keys 3 / 4), not mentioned: L28-29", line numbers only. It does not tell you what is there. You go and read.
+Fall short and you get "partial (keys 3 / 4), not mentioned: L28-29", line numbers only. It does not tell you what is there. You go and read. If reading is not enough, `/hidane --explain` explains starting from the keys you missed.
 No explanation, no summary. That is how the asking side behaves.
 
 As answers accumulate, concepts light up in Obsidian's graph view. Understood is green, fuzzy amber, not understood red, never asked stays unlit.
@@ -88,14 +88,14 @@ The mechanics in detail: [docs/DESIGN.md](docs/DESIGN.md).
 
 - One author, two repositories, 25 answers so far. Weights (1 / 2 / 3), threshold (±4) and forgetting (30 days) are all provisional
 - The "what does this function do" question type (summary) is still judged by Claude reading the answer; grading by generating code from the explanation (CGBG) is not in
-- Zero dependencies beyond git and POSIX sh came at the price of dense sh and awk. 135 tests are what make it safe to change
+- Zero dependencies beyond git and POSIX sh came at the price of dense sh and awk. 137 tests are what make it safe to change
 - Linux should work but is untested; `/hidane --vault` uses macOS `open`
 - How closely Claude follows the SKILL steps is checked by reading real session transcripts. Prose instructions sometimes do not take
 
 ## Development
 
 ```sh
-sh tests/run_all.sh     # 135 tests, no LLM, seconds
+sh tests/run_all.sh     # 137 tests, no LLM, seconds
 ```
 
 A new test is trusted only after breaking the implementation and watching it fail. `run_all.sh` also fails if the test count in this README drifts from reality.

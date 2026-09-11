@@ -94,5 +94,6 @@ if [ "$after" -ne $((before + 1)) ] || [ "$cols" -ne 10 ]; then
 fi
 [ -n "$usermsg" ] && echo "$usermsg"
 echo "$line"
+case "$result" in partial|miss) [ -n "$usermsg" ] && echo "$(L r_hint)" ;; esac
 if [ -z "$FREE" ]; then rm -f "$pending" "$keys"; fi
 sh "$HERE/pages.sh" --root "$ROOT" >/dev/null 2>&1 || true

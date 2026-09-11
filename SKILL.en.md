@@ -14,6 +14,7 @@ One function, one question per invocation. Answer, record, stop. Call again for 
 - `--map` … run `sh <HIDANE>/scripts/map.sh`, show the table as is, stop. No question.
 - `--lint` … run `sh <HIDANE>/scripts/lint.sh`, show its output as is, stop. No question.
 - `--explain <topic>` … the "Explain" steps below. No question. The topic is free text (a function, a concept, printf, "is this design ok").
+- `--explain` (no topic) … the function of the last question. Find log.md with `sh <HIDANE>/scripts/record.sh --path`; the last row gives place, function and the miss column. **Start from the keys marked "not mentioned" / "contradicted"** in that column.
 - `--update` … run `sh "$(cat <HIDANE>/HOME)/install.sh" --update` to get the latest version, show its output as is, stop. No question.
 - none … follow the steps below.
 
@@ -51,7 +52,7 @@ The map is a memory of what this person understands. Read it before explaining a
 
 1. **Entry point**: Read `~/Documents/hidane/index.md` (path changes with `HIDANE_VAULT`; if missing, run `sh <HIDANE>/scripts/pages.sh` first). Take in "Overall" (counts per state, questions answered), "Recent explanations requested", and the concept table.
 2. **Follow the trail**: pick 3-5 concepts related to the topic from the table and Read `concepts/<concept>.md` for each: past misses, the user's functions tagged with it, records. If the topic is not in the map's vocabulary (printf, say), map it yourself to the nearest concepts. If nothing is near, calibrate to "Overall".
-3. **Set the level**: understood concepts are skipped (assumed, not even named). Not-understood ones get the careful treatment, starting from the past misses, pointing at lines. Fuzzy: normal. Unasked: one sentence. If the same topic appears under "Recent explanations", continue from there instead of repeating basics.
+3. **Set the level**: understood concepts are skipped (assumed, not even named). Called without a topic, explain the missed keys of the last question first, pointing at their lines, and leave the keys that were hit alone. Not-understood ones get the careful treatment, starting from the past misses, pointing at lines. Fuzzy: normal. Unasked: one sentence. If the same topic appears under "Recent explanations", continue from there instead of repeating basics.
 4. **Open with two lines "From the map"** (before the explanation, so the reader sees what was read and what changed):
    ```
    From the map: not understood <concept, concept> → starting there. Fuzzy <concept>. Used <N> past misses
