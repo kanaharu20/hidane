@@ -1,297 +1,119 @@
-<h1 align="center">hidane 🔥</h1>
+# hidane 🔥
 
-<p align="center">
-  <b>自分のコードのうち、どこを理解していて、どこをまだ確かめていないのかを地図にする。</b><br>
-  <a href="README.md">English</a>
-</p>
+[English](README.md)
 
-<p align="center">
-  <img alt="tests" src="https://img.shields.io/badge/tests-135%20passing-brightgreen">
-  <img alt="deps" src="https://img.shields.io/badge/deps-git%20%2B%20POSIX%20sh-blue">
-  <img alt="llm" src="https://img.shields.io/badge/LLM%20decisions-2%20places-orange">
-  <img alt="status" src="https://img.shields.io/badge/status-alpha-lightgrey">
-  <img alt="license" src="https://img.shields.io/badge/license-MIT-green">
-</p>
-
-<p align="center">
-  <img src="docs/graph.svg" alt="hidane の地図(架空のデータで描いた例、2 リポジトリ 42 概念)。信号機の色(理解=青、曖昧=黄、非理解=赤、未出題=消灯)の概念ノードが 2 つのリポジトリから引かれている" width="820">
-</p>
+自分のコードのうち、どこを理解していて、どこをまだ確かめていないのかを地図にする。
+地図は二人が読む。自分と、Claude。
 
 AI にコードを書かせると、動くものは増えるのに、自分が説明できる範囲は増えない。
-hidane は、あなたのコードの関数について**一問だけ**投げ、答えを記録し、
-記録だけから「理解 / 曖昧 / 非理解 / 未出題」を計算して、Obsidian のグラフに**信号機の色**で見せる。点数は出さない。
+その差を、点数ではなく色で見えるようにしたかった。そして同じ地図を Claude にも読ませれば、
+解説の粒度がその人に合う。知っていることは飛ばし、前に間違えた所から話す。
 
-## Demo
+<p align="center">
+  <img src="docs/graph.svg" alt="架空のデータで描いた地図。2 リポジトリ、42 概念。青緑=理解、黄=曖昧、赤=非理解、暗い灰=未出題" width="820">
+</p>
 
-```
-$ /hidane
+## 何が起きるか
 
-  src/main.c:19 is_valid_num
-  引数に文字列 "+5" を渡したとき、この関数は何を返しますか。
-
-> '+' は数字でないので false を返します
-
-  当たり(鍵 2 / 2)
-  | 2026-09-09 09:54 | src/main.c:19-33 | is_valid_num | 入力検証, 境界条件 | trace | "+5" を渡すと何を返す | hit |  |  |
-```
-
-曖昧な答えは通らない。Claude は問う前に正解の要素を 2〜5 個の「鍵」としてディスクに固定し、
-答えのあと鍵ごとに ある / ない / 逆 を判定する。結果はスクリプトが決める:
+commit するたび、触った関数に「概念」が付く(境界条件、部分失敗の巻き戻し、条件変数の待機と通知、など)。
+Claude Code で `/hidane` と打つと、その中から関数を 1 つ選んで一問だけ出る。
 
 ```
-  部分(鍵 3 / 4) — 触れていない: L28-29
+src/main.c:19 is_valid_num
+引数に文字列 "+5" を渡したとき、この関数は何を返しますか。
 ```
 
-足りない鍵は行番号で指すだけで、中身は教えない。これで終わり。解説も総括も出ない。Obsidian を開くと「入力検証」のノードが消灯(未出題)から黄(曖昧)に点る。
+自分の言葉で答える。「分からない」も答え。
 
 ```
-$ /hidane --map
-
-| 概念             | 値 | 証拠 | 最終       | 状態   | repo       |
-|------------------|----|------|------------|--------|------------|
-| 停止フラグの伝搬 | -6 |  4   | 2026-09-09 | 非理解 | worker     |
-| 境界条件         | -2 |  4   | 2026-09-09 | 曖昧   | api,worker |
-| 入力検証         | +1 |  1   | 2026-09-09 | 曖昧   | api,worker |
-| 転置索引の構築   | +0 |  0   | -          | 未出題     | api        |
+当たり(鍵 2 / 2)
+| 2026-09-09 09:54 | src/main.c:19-33 | is_valid_num | 入力検証, 境界条件 | trace | "+5" を渡すと何を返す | hit |  |  |
 ```
 
-## Features
+正解の要素は答える前に 2〜5 個「鍵」として固定されていて、鍵ごとに ある / ない / 逆 を判定する。
+足りなければ「部分(鍵 3 / 4)、触れていない: L28-29」と行番号だけ返る。中身は教えない。読みに行く。
+解説も総括も出ない。それが問う側の流儀。
 
-- **一問だけ。** 一回の呼び出しで一関数、一問。「分からない」も答え。答え直しは記録しない
-- **照合は厳しく、機械的に。** 正解の要素を答えの**前**に 2〜5 個の鍵として固定し、鍵ごとに ある / ない / 逆 を判定、結果(当たり / 部分 / ズレ)はスクリプトが決める。曖昧な答えは何も得ない
-- **解説しない。** 問う前にコードを説明しない。足りない鍵は行番号で指すだけ。点数も評価語も出さない
-- **記録だけが真実。** 値も状態も保存しない。毎回 `log.md` から計算する。地図は消しても作り直せる
-- **未出題が地図に出る。** commit のたびに、触った関数に概念タグが付く。まだ問われていない関数は灰色のノードとして最初から地図に載る
-- **リポジトリをまたぐ。** 概念はあなたに属し、関数はリポジトリに属する。A で分からなかった概念は、B の commit で最初に問われる
-- **LLM の判断は 2 か所だけ。** 「この関数はどの概念か」と「どの概念名が同じ意味か」。状態・型・順位・記録の形はスクリプトが決める
-- **依存は git と POSIX sh。** LLM 呼び出しは Claude Code(`claude -p`)。地図の表示は Obsidian(無くても Markdown として読める)
+答えが溜まると Obsidian の Graph view で概念に色が付く。理解は青緑、曖昧は黄、非理解は赤、まだ問われていないものは消灯。
+信号機と同じ。最初はほぼ全部が消えていて、答えるたびに 1 つずつ点く。
 
-## Quick start
+解説が欲しいときは `/hidane --explain printf` のように頼む。Claude は先に地図を読む。
+理解している概念は名前も出さず、非理解の概念は前に間違えた所から丁寧に、自分の関数を例にして話す。
+printf のように地図に無いものは、その場で近い概念に結びつける。解説を読んでも色は変わらない。読んだことは理解の証拠ではないから。
 
-必要なもの: git、POSIX sh、[Claude Code](https://claude.com/claude-code)。地図を見るなら [Obsidian](https://obsidian.md)。
+## 試す
+
+git、[Claude Code](https://claude.com/claude-code)、できれば [Obsidian](https://obsidian.md)。
 
 ```sh
-git clone git@github.com:kanaharu20/hidane.git ~/CODE/hidane
-sh ~/CODE/hidane/install.sh --skill --lang ja           # /hidane を Claude Code に登録(--lang 省略時は聞かれる)
-
-cd ~/your-repo
-sh ~/CODE/hidane/install.sh --hook                      # commit 後にタグ付けする hook を置く
-sh ~/CODE/hidane/scripts/tag.sh --all                   # 最初に一度、全関数に概念を付ける
+git clone git@github.com:kanaharu20/hidane.git ~/hidane
+cd 使いたいリポジトリ && sh ~/hidane/install.sh
 ```
 
-Obsidian で `~/Documents/hidane` を「Open folder as vault」で開く(初回だけ。以降は `/hidane --vault`)。
-Graph view に信号機の色が付く。理解 = 青、曖昧 = 黄、非理解 = 赤、未出題 = 消灯(暗い灰)。
+言語(en / ja)を聞かれ、`/hidane` が登録され、このリポジトリに hook が置かれ、全関数に概念が付き(1 分前後)、
+地図が `~/Documents/hidane` にできる。Obsidian でそのフォルダを「Open folder as vault」で開く。あとは `/hidane`。
 
-## Usage
-
-| コマンド | すること |
+| | |
 |---|---|
-| `/hidane` | 一問出る。答える。記録される |
-| `/hidane --map` | 概念ごとの値・状態・repo の表 |
+| `/hidane` | 一問 |
+| `/hidane --explain <対象>` | 自分に合わせた解説。関数でも概念でも printf でも |
+| `/hidane --map` | 概念ごとの値と状態の表 |
 | `/hidane --vault` | 地図を作り直して Obsidian で開く |
-| `/hidane --lint` | 似た概念名を統合する(3 日に一度は自動で走る) |
-| `git commit` | いつも通り。背景で触った関数に概念が付く。commit は止まらない |
+| `/hidane --lint` | 似た概念名を統合(3 日に一度は自動) |
+| `/hidane --update` | 最新版にして記録を移行 |
 
-スクリプトを直接使うこともできる。すべて `--help` で使い方が出る。
+commit のとき、触った関数のソースが自分の Claude(`claude -p`)に送られて概念名が返る。hook はそのたびに 1 行出すので黙って動くことはない。
+`HIDANE_HOOK_OFF=1` か `install.sh --unhook` で止まる。記録と地図は手元にだけある。費用は自分の Claude Code の範囲で、40 関数なら最初のタグ付けが 5 回前後。
 
-```sh
-sh scripts/map.sh            # 表(--tsv で機械向け)
-sh scripts/pages.sh          # Obsidian vault を生成
-sh scripts/next.sh           # 次に問う関数と型を決める
-sh scripts/tag.sh --all      # 全関数にタグ付け(--commit REV でそのコミット分)
-sh scripts/lint.sh --dry-run # 統合のプロンプトを見る
-```
+詳しい手順と困ったときの対処は [docs/GUIDE.ja.md](docs/GUIDE.ja.md)。
 
-## How it works
+## 決めていること
 
-```
- git commit ─▶ hook ─▶ tag.sh ─▶ functions.md   関数 → 概念(未出題として地図に載る)
-                                       │
- /hidane ─▶ next.sh(次の関数と型を決める)◀┘
-        ─▶ Claude が一問(解説なし)
-        ─▶ あなたが答える
-        ─▶ Claude が実コードと照合、ズレなら行番号
-        ─▶ record.sh ─▶ log.md ─▶ pages.sh ─▶ Obsidian vault(色が変わる)
-```
+点数を出さない。点数は興味を下げ、注意をコードから自分に向ける(Butler 1988、Kluger & DeNisi 1996)。色は「このコードのどこが点いているか」であって、成績ではない。
 
-<details>
-<summary><b>状態はどう決まるか</b></summary>
+記録は追記だけ。値も状態も保存せず、毎回 `log.md` から計算する。概念名の統合も別名で行い、元の行は書き換えない。地図は消しても作り直せる。
 
-保存するのは `log.md` の行だけ。値と状態は毎回そこから計算する。
+LLM に判断させるのは 3 か所だけ。関数にどの概念を付けるか、どの概念名が同じ意味か、解説の粒度。
+前の 2 つは既存の一覧から選ばせ、形式はスクリプトが検査する。当たりかどうか、次に何を問うか、問いの型は、全部スクリプトが決める。
+前身の reflect で、Claude に任せた判断と文面の指示は同じ入力でもぶれた。だから決めるのはスクリプト、Claude が埋めるのは穴だけにした。
 
-**値** = 各行の(問いの型の重み × 結果の符号)の合計。1 行ごとに足し、±6 で止める。
+「まだ問うていない」と「問うて分からなかった」は別の状態。混ぜない。問いは後者から出す。
 
-記録の中の語彙は言語に依らない記号(型 `trace` / `edge` / `summary`、結果 `hit` / `miss` / `dunno` / `skip`、状態 `known` / `fuzzy` / `unknown` / `unasked`)。表示だけ言語表を通す。
+概念はその人に属し、関数はリポジトリに属する。A で分からなかった概念は、B の commit で最初に問われる。
 
-| 型 | 重み | 問い |
-|---|---|---|
-| 追う(`trace`) | 1 | 「この入力のとき何を返す / 何が起きるか」 |
-| 追う(境界・変異)(`edge`) | 2 | 空・1 個・末尾・上限、または過去のズレを再現する入力で同じことを問う |
-| 要約(`summary`) | 3 | 「この関数は何をするか」 |
+仕組みの細部は [docs/DESIGN.ja.md](docs/DESIGN.ja.md)。
 
-| 結果 | 符号 | 決まり方 |
-|---|---|---|
-| 当たり(`hit`) | +1 | 鍵が全部ある |
-| 部分(`partial`) | 0(証拠には数える) | 足りない鍵があり、逆は無い |
-| ズレ(`miss`)、分からない(`dunno`) | −1 | 逆の鍵が 1 つでもある / 「分からない」 |
-| 未回答(`skip`) | 0(証拠にしない) | 答えなかった |
+## できないこと、まだのこと
 
-| 状態 | 条件 |
-|---|---|
-| 理解 | 値 ≥ +4 かつ 最後の答えから 30 日以内 |
-| 非理解 | 値 ≤ −4 かつ 30 日以内 |
-| 曖昧 | −4 < 値 < +4、または 30 日を過ぎた(値は下げない。確かさだけ落ちる) |
-| 未出題 | まだ問われていない(タグだけ、または未回答だけ) |
+- 作者 1 人が 2 リポジトリで 30 問ほど答えた段階。重み(1 / 2 / 3)、閾値(±4)、忘却(30 日)は全部仮置き
+- 「何をするか」型の問い(summary)の判定は、まだ Claude の読みに頼っている。説明からコードを生成して照合する方式(CGBG)は入れていない
+- 依存を git と POSIX sh だけにした代わりに、sh と awk が密で読みにくい。135 件の検査がそれを支えている
+- Linux は動くはずだが未検証。`/hidane --vault` は macOS の `open` を使う
+- Claude が SKILL の手順をどこまで守るかは、実走の会話記録で確かめている。文面の指示は効かないことがある
 
-難しい問いに当たると大きく上がり、易しい問いを外すと大きく下がる。1 回では状態は動かない。
-忘却は時間だけで起こり、答えると戻る。手で状態を変える手段は無い。
-
-</details>
-
-<details>
-<summary><b>次にどの関数を問うか</b></summary>
-
-概念の順位は**全リポジトリの記録**から: 非理解 > 曖昧 > 未出題、同じ状態なら値の低い順。理解の概念からは出さない。
-候補の関数は**今いるリポジトリ**の、まだ問われていないものから。
-
-問いの型も `next.sh` が決める(過去にズレのある概念なら 追う(境界・変異))。決定は `pending` に置かれ、
-`record.sh` はそれと一致する記録しか受け付けない。Claude は問う前に鍵を置き(`keys.sh`)、答えのあと鍵ごとの判定
-(`--verdict "yes,no,contra"`)を渡す。当たり / 部分 / ズレ は `record.sh` が決める。Claude が決めるのは問いの文と鍵ごとの判定だけ。
-
-</details>
-
-<details>
-<summary><b>記憶としての地図: 合わせた解説</b></summary>
-
-`/hidane --explain <対象>` は hidane が唯一解説する場所で、地図を「その人が何を理解しているかの記憶」として使う。
-書く前に Claude が `index.md`(全体の段階、最近求めた解説、概念の表)を読み、対象に近い概念を 3〜5 個選んでそのページ
-(過去のズレ、その人の関数、記録)を読む。理解している概念は飛ばし、非理解は過去のズレから丁寧に、曖昧は普通に、未出題は一言。
-地図の語彙に無い対象(printf など)は、Claude がその場で近い概念に結びつける。
-地図全体を渡すのではなく**辿る手がかりを渡す**: `index.md` が固定の入口で、概念の数にしか比例しない。
-
-求めた解説は `explained.md` に残り「最近求めた解説」に出るので、次回は繰り返さず続きから話せる。
-**解説は値も状態も色も変えない**。読んだことは理解の証拠ではないから。熟達度逆転効果(Kalyuga 2003)を、自分の記録を熟達度の模型にして適用したもの。
-
-</details>
-
-<details>
-<summary><b>概念名の統合(lint)</b></summary>
-
-タグ付けは自由に新しい名前を作れるので、似た名前が増える。数日に一度、Claude に概念一覧を見せて
-「同じ意味の組」を挙げさせ、`aliases.md` に「旧名 → 新名」を 1 行足す。
-
-- **`log.md` は書き換えない。** 読む側(`resolve.sh`)が別名を解いて読む
-- 統合後の値は両方の証拠の合計。repo は合わさり、関連は付け直される
-- 新名は既存の名前に限る。同名・存在しない名前・循環はスクリプトが捨てる
-- 間違った統合は `aliases.md` の行を消せば戻る
-
-</details>
-
-## 更新する
+## 開発
 
 ```sh
-sh ~/hidane/install.sh --update      # Claude Code なら /hidane --update
+sh tests/run_all.sh     # 135 件。LLM は呼ばない。数秒
 ```
 
-最新版を取り、`/hidane` を入れ直し、記録の形式が変わっていれば移行する(`migrate.sh`、何度回しても同じ、書き換える前に `.bak` を残す)。
-版はタグ(`v0.1.0`)で切り、[CHANGELOG.md](CHANGELOG.md) に書く。
+新しい検査は、実装を壊して落ちるのを見てから信じる。`run_all.sh` は検査の数がこの README とずれても落ちる。
 
-## Configuration
-
-すべて環境変数。**定数は全部仮置き**で、使いながら決める段階。
-
-| 変数 | 既定 | 意味 |
+| 変数 | 既定 | |
 |---|---|---|
-| `HIDANE_LANG` | `<root>/config` の値、無ければ `en` | 表示とプロンプトの言語(`en` / `ja`) |
-| `HIDANE_ROOT` | `~/.claude/hidane` | 記録の場所 |
-| `HIDANE_VAULT` | `~/Documents/hidane` | 地図(Obsidian vault)の場所 |
-| `HIDANE_W_TRACE` / `HIDANE_W_EDGE` / `HIDANE_W_SUMMARY` | 1 / 2 / 3 | 問いの型の重み |
-| `HIDANE_THRESHOLD` | 4 | 理解 / 非理解 の閾値 |
-| `HIDANE_CAP` | 6 | 値の上限・下限 |
-| `HIDANE_FRESH_DAYS` | 30 | これを過ぎると曖昧に落ちる |
-| `HIDANE_MAX_FUNCS` | 8 | 1 回の LLM 呼び出しに載せる関数の数(候補が尽きるまで繰り返す) |
+| `HIDANE_LANG` | config、無ければ en | 表示とプロンプトの言語 |
+| `HIDANE_ROOT` | `~/.claude/hidane` | 記録 |
+| `HIDANE_VAULT` | `~/Documents/hidane` | 地図 |
+| `HIDANE_W_TRACE` / `_EDGE` / `_SUMMARY` | 1 / 2 / 3 | 型の重み |
+| `HIDANE_THRESHOLD` / `HIDANE_CAP` | 4 / 6 | 閾値と上限 |
+| `HIDANE_FRESH_DAYS` | 30 | 忘却 |
+| `HIDANE_MAX_FUNCS` | 8 | 1 回の LLM 呼び出しに載せる関数 |
 | `HIDANE_LINT_DAYS` | 3 | lint の間隔 |
-| `HIDANE_MODEL` | (Claude Code の既定) | タグ付けと lint に使うモデル |
 | `HIDANE_HOOK_OFF` | | 1 で hook を止める |
 
-<details>
-<summary><b>どこに何があるか</b></summary>
+reflect(前身)の記録は形が違うので自動では移らない。[docs/MIGRATING-from-reflect.ja.md](docs/MIGRATING-from-reflect.ja.md)。
+版は [CHANGELOG.md](CHANGELOG.md)。
 
-```
-~/.claude/hidane/                 記録(一次データ。消すと戻らない)
-  config                            lang=en|ja
-  <repo>/log.md                     問いと答え。1 回 1 行。唯一の書き込み口は record.sh
-  <repo>/functions.md               commit 時に付いた「関数 → 概念」
-  <repo>/pending                    next.sh が決めた次の一問
-  explained.md                      求めた解説(対象と結びつけた概念)。状態には影響しない
-  <repo>/keys                       問う前に固定した鍵。record.sh が消す
-  aliases.md                        概念の別名(旧名 → 新名)
-  .lint-stamp                       最後に lint を回した日
-  hook.log                          hook の出力
-~/Documents/hidane/               地図(派生データ。消しても pages.sh で戻る)
-  concepts/<概念>.md                概念 1 つ = 1 ページ。人は書かない
-  repos/<repo>.md                   そのリポジトリに出た概念
-  index.md                          全概念の表
-  .obsidian/graph.json              Graph の色(初回だけ生成)
-```
+## ライセンス
 
-</details>
-
-## Philosophy
-
-- **LLM に決めさせない。** 前身の reflect で、文面の指示(「前置きを書くな」)は 10 回中 0 回しか効かず、Claude に組み立てさせた文面や判定はぶれた。だから決めるのはスクリプト、Claude が埋めるのは「一覧から選ぶ」穴だけ
-- **点数を見せない。** 点数は興味を下げ、注意をコードから自分に向ける(Butler 1988、Kluger & DeNisi 1996)。色は「このコードの未出題」であって「あなたの成績」ではない
-- **未出題と非理解は別。** 「まだ問うていない」と「問うて分からなかった」を混ぜない。出題は非理解から
-- **記録は書き換えない。** 統合も別名で行い、一次記録は追記だけ。壊れる経路を作らない
-- **検査は空振りする。** 新しい検査を書いたら、実装を壊して落ちることを確かめてから信じる。135 件の L0 検査はすべてそうしてあり、この README の検査数が実数とずれたら `run_all.sh` が落ちる
-- **なぜ POSIX sh か。** 依存ゼロなら git がある人は誰でも動かせ、Claude Code からもランタイム無しで呼べる。代償として sh と awk が密で読みにくい。検査がそれを支えている。分かっている負債
-
-## Development
-
-```sh
-sh tests/run_all.sh          # 83 件。LLM なし、数秒
-sh tests/test_tag.sh         # LLM 呼び出しは HIDANE_CLAUDE で偽物に差し替えて検査
-```
-
-| 部品 | 役割 | LLM |
-|---|---|---|
-| `scripts/map.sh` | 値と状態の表 | |
-| `scripts/pages.sh` | Obsidian vault を生成(冪等、掃除つき) | |
-| `scripts/next.sh` | 次の関数と型を決めて `pending` に置く | |
-| `scripts/keys.sh` | 問う前に鍵(正解の要素)を固定 | |
-| `scripts/record.sh` | 鍵ごとの判定から 当たり / 部分 / ズレ を決め、`log.md` に 1 行追記。`pending` と照合 | |
-| `scripts/tag.sh` | 関数に概念を付ける | ● |
-| `scripts/lint.sh` | 似た概念名を統合(`aliases.md` に追記) | ● |
-| `scripts/resolve.sh` | 別名を解くフィルタ | |
-| `scripts/open.sh` | vault を作り直して Obsidian で開く | |
-| `scripts/explained.sh` | 求めた解説を残す(状態には触れない) | |
-| `scripts/stats.sh` | フィードバック用の数字だけの要約(名前は出ない) | |
-| `scripts/scope.sh` | commit が触った関数を 15 言語で切り出す([reflect](https://github.com/kanaharu20/reflect) から) | |
-| `hooks/post-commit` | commit 後に tag.sh を背景で走らせる。何が起きても commit は通す | |
-| `scripts/lang.sh` | en / ja の表示語 | |
-| `SKILL.en.md` / `SKILL.ja.md` | Claude Code の `/hidane` の手順 | 問いの文と照合 |
-
-## Related work
-
-[reflect](https://github.com/kanaharu20/reflect) の後継。関数の切り出しなどの機構を引き継ぎ、記憶の形と状態の計算を作り直した。
-reflect の記録は形が違うので自動では移らない。手順は [docs/MIGRATING-from-reflect.ja.md](docs/MIGRATING-from-reflect.ja.md)。
-
-- **Knowledge Tracing**(BKT 以降): 解答の時系列から概念ごとの習得状態を推定する。「1 回の正解はまぐれかもしれない」を閾値で取り込んだ
-- [KCGen-KT](https://arxiv.org/abs/2502.18632): LLM によるコードへの概念(KC)自動付与。既存一覧を見せて選ばせる作法
-- [Explain in Plain English / CGBG](https://arxiv.org/abs/2403.06050): 説明文を採点しない判定(要約型の判定に予定)
-- Open Learner Model / [Mastery Grids](https://people.cs.pitt.edu/~hosseini/papers/ectel2014.pdf): 概念単位の理解の可視化
-- [Anthropic, How AI Impacts Skill Formation](https://arxiv.org/abs/2601.20245): AI 利用で理解が落ちる条件と、保たれる使い方
-- Butler 1988、Kluger & DeNisi 1996: 点数と自己注意がフィードバックの効果を下げる
-
-## Status
-
-alpha。作者 1 人の実データ(2 リポジトリ、21 問、39 概念)で毎日回している段階。
-
-- 定数(重み、閾値、忘却)は仮置き
-- 概念名は選んだ言語で付く。日本語と英語のリポジトリが混在してもよく、lint は言語をまたいで統合できる
-- 「要約」型の判定(CGBG 方式)は未実装。今は「追う」型のみ
-- `tag.sh` と `lint.sh` は `claude -p` を呼ぶ。関数 8 個ごとに 1 回、1 回 10〜60 秒
-
-## License
-
-[MIT](LICENSE)
+MIT
