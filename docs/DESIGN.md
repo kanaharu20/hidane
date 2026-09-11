@@ -80,8 +80,9 @@ The new name must already exist; self-merges, unknown names and cycles are dropp
 
 1. Read `index.md`: overall stage (counts per state, questions answered), the last 5 explanations requested, the concept table
 2. Pick the 3-5 concepts nearest to the topic and read their pages (past misses, the person's functions, records). Topics outside the vocabulary are mapped to the nearest concepts by Claude on the spot
-3. Understood: skipped. Not understood: carefully, from the past misses, pointing at lines. Fuzzy: normal. Unasked: one sentence
-4. `explained.sh` logs the topic and the mapped concepts
+3. Two opening lines "From the map" (the not-understood concepts it starts from, how many past misses were used, what was skipped). No values, no evaluative words
+4. Understood: skipped. Not understood: carefully, from the past misses, pointing at lines. Fuzzy: normal. Unasked: one sentence
+5. `explained.sh` logs the topic and the mapped concepts
 
 The map hands Claude a trail, not the whole map: `index.md` grows only with the number of concepts.
 Explanations never change values, states or colors. Reading is not evidence of understanding.

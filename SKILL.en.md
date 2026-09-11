@@ -52,9 +52,15 @@ The map is a memory of what this person understands. Read it before explaining a
 1. **Entry point**: Read `~/Documents/hidane/index.md` (path changes with `HIDANE_VAULT`; if missing, run `sh <HIDANE>/scripts/pages.sh` first). Take in "Overall" (counts per state, questions answered), "Recent explanations requested", and the concept table.
 2. **Follow the trail**: pick 3-5 concepts related to the topic from the table and Read `concepts/<concept>.md` for each: past misses, the user's functions tagged with it, records. If the topic is not in the map's vocabulary (printf, say), map it yourself to the nearest concepts. If nothing is near, calibrate to "Overall".
 3. **Set the level**: understood concepts are skipped (assumed, not even named). Not-understood ones get the careful treatment, starting from the past misses, pointing at lines. Fuzzy: normal. Unasked: one sentence. If the same topic appears under "Recent explanations", continue from there instead of repeating basics.
-4. **Write**: use the user's own functions as examples when they fit (`file:a-b`). No quiz. No scores or evaluative words. Quote at most 3 lines of code. Write in the user's language.
-5. **Log it**: `sh <HIDANE>/scripts/explained.sh "<topic>" "<mapped concept, concept>"` (1-2 names from the table; `""` if none). Show its one output line. State and colors do not change.
-6. Stop. Do not offer a follow-up question.
+4. **Open with two lines "From the map"** (before the explanation, so the reader sees what was read and what changed):
+   ```
+   From the map: not understood <concept, concept> → starting there. Fuzzy <concept>. Used <N> past misses
+   Skipped: <understood concepts, or "none">. If the topic is off the map: "<topic> mapped to <concept>"
+   ```
+   State names and concept names only. No values, percentages or evaluative words.
+5. **Write**: use the user's own functions as examples when they fit (`file:a-b`). No quiz. No scores or evaluative words. Quote at most 3 lines of code. Write in the user's language.
+6. **Log it**: `sh <HIDANE>/scripts/explained.sh "<topic>" "<mapped concept, concept>"` (1-2 names from the table; `""` if none). Show its one output line. State and colors do not change.
+7. Stop. Do not offer a follow-up question.
 
 ## Never
 

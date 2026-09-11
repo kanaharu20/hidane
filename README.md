@@ -39,7 +39,8 @@ A traffic light. At first almost everything is dark, and it lights up one answer
 
 When you want an explanation, ask for it: `/hidane --explain printf`. Claude reads the map first.
 Concepts you understand are not even named; concepts you do not understand are explained carefully, starting from what you got wrong, using your own functions as examples.
-Something outside the map, like printf, gets mapped to the nearest concepts on the spot. Reading an explanation changes no color. Reading is not evidence of understanding.
+Something outside the map, like printf, gets mapped to the nearest concepts on the spot. The explanation opens with two lines, "From the map: not understood …, skipped: …", so you can see what was read and what it changed.
+Reading an explanation changes no color. Reading is not evidence of understanding.
 
 ## Try it
 
