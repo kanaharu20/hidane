@@ -29,9 +29,10 @@ One function, one question per invocation. Answer, record, stop. Call again for 
    sh <HIDANE>/scripts/keys.sh "<fact 1> @ <line>" "<fact 2> @ <line>" ...
    ```
    A key is one concrete, checkable fact (a return value, a function called, an order, a branch taken). "@ line" is where it lives (ranges allowed).
+   **Keys are only the facts that decide the answer to this question.** If the question is "what does it return", the keys are the return value and the branches or comparisons that decide it. Do not make keys out of things the question did not ask for, such as how a lock is taken or an intermediate arithmetic value (if the answer is correct without it, it is not a key).
    Never use a sentence that would be true of any function ("something happens and it ends"). **Never show the keys to the user.**
 4. **Ask**: fit exactly one question into the "Question form". Pick one concrete value from "Input candidates".
-   - The form is always "Given <input>, what does it return / what happens?". Never ask "why", "what is needed", "what should be done" (they reveal that an answer exists).
+   - The form is always "Given <input>, what does it return / what happens?". Never ask "why", "what is needed", "what should be done" (they reveal that an answer exists). Do not widen the question with "including the process" or "and why".
    - At most 3 lines. Place and function first. No code quotes. No hints. Never two questions.
    - Ask in the language the user writes in.
 5. **Wait** for the answer. "I don't know" is a valid answer. Do not prompt, do not ask to rephrase.
