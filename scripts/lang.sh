@@ -97,8 +97,8 @@ L() {
     ja:r_missing) echo "触れていない" ;;          en:r_missing) echo "not mentioned" ;;
     ja:r_contra) echo "逆" ;;                    en:r_contra) echo "contradicted" ;;
     ja:r_keys_of) echo "鍵 %d / %d" ;;           en:r_keys_of) echo "keys %d / %d" ;;
-    ja:r_hint) echo "解説が要るなら /hidane --explain(触れていない鍵から、地図に合わせて説明する)" ;;
-    en:r_hint) echo "for an explanation: /hidane --explain (starts from the missing keys, at your level)" ;;
+    ja:r_hint) echo "解説が要るなら「/hidane さっきの問いで触れていなかった所」のように聞く(地図に合わせて説明する)" ;;
+    en:r_hint) echo "for an explanation, ask in words: \"/hidane the part I missed in the last question\" (explained at your level)" ;;
     ja:k_nopending) echo "next.sh の決定(pending)が無い。先に next.sh を回す" ;;
     en:k_nopending) echo "no pending decision from next.sh; run next.sh first" ;;
     ja:k_count) echo "鍵は 2〜5 個" ;;           en:k_count) echo "give 2-5 keys" ;;

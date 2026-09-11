@@ -2,7 +2,7 @@
 
 ## 0.2.0 — 2026-09-11
 
-- `/hidane --explain <topic>`: the map as memory. Claude reads `index.md` (overall stage, recent explanations, concept
+- `/hidane <anything>`: the map as memory. Claude reads `index.md` (overall stage, recent explanations, concept
   table) and the pages of the 3-5 nearest concepts, then explains at the reader's level: understood skipped,
   not-understood from past misses, unasked in a sentence. Any topic, including ones outside the map's vocabulary.
 - `index.md` now opens with the overall stage and the last 5 explanations requested.

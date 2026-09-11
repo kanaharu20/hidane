@@ -76,7 +76,7 @@ The new name must already exist; self-merges, unknown names and cycles are dropp
 
 ## Explaining
 
-`/hidane --explain <topic>` is the one place hidane explains, and it treats the map as a memory of what the person understands.
+`/hidane <anything>` (text without a flag) is the one place hidane explains, and it treats the map as a memory of what the person understands.
 
 1. Read `index.md`: overall stage (counts per state, questions answered), the last 5 explanations requested, the concept table
 2. Pick the 3-5 concepts nearest to the topic and read their pages (past misses, the person's functions, records). Topics outside the vocabulary are mapped to the nearest concepts by Claude on the spot

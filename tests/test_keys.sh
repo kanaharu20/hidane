@@ -27,7 +27,7 @@ o=$($R "a.c:1-9" f "境界条件" edge "q" --verdict "yes,yes,yes,yes"); rc=$?
 pend; fourkeys
 o=$($R "a.c:1-9" f "境界条件" edge "q" --verdict "yes,yes,no,yes")
 { echo "$o" | sed -n 1p | grep -q '^部分(鍵 3 / 4) — 触れていない: L28-29$' && echo "$o" | grep -q '| partial | 触れていない: 作った分だけ join する @28-29 |'; } && ok "V02 no が 1 つ → partial。ユーザーには行番号、log には鍵の文" || ng "V02" "$o"
-echo "$o" | sed -n 3p | grep -q '^解説が要るなら /hidane --explain' && ok "V02b partial のとき 3 行目に --explain への案内" || ng "V02b hint" "$o"
+echo "$o" | sed -n 3p | grep -q '^解説が要るなら「/hidane ' && ok "V02b partial のとき 3 行目に解説の案内" || ng "V02b hint" "$o"
 pend; fourkeys
 o=$($R "a.c:1-9" f "境界条件" edge "q" --verdict "yes,contra,no,no")
 { echo "$o" | sed -n 1p | grep -q '^ズレ(鍵 1 / 4) — 触れていない: L28-29, #4 — 逆: L27$' && echo "$o" | grep -q '| miss | 逆: wake_all を呼ぶ @27; 触れていない: 作った分だけ join する @28-29; 触れていない: 1 を返す |'; } && ok "V03 contra があれば miss。行の無い鍵は #番号" || ng "V03" "$o"

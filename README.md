@@ -31,13 +31,13 @@ hit (keys 2 / 2)
 ```
 
 The elements of the correct answer were fixed as 2-5 "keys" before you answered, and each key is judged present / missing / contradicted.
-Fall short and you get "partial (keys 3 / 4), not mentioned: L28-29", line numbers only. It does not tell you what is there. You go and read. If reading is not enough, `/hidane --explain` explains starting from the keys you missed.
+Fall short and you get "partial (keys 3 / 4), not mentioned: L28-29", line numbers only. It does not tell you what is there. You go and read. If reading is not enough, ask `/hidane the part I missed in the last question` and it explains from there.
 No explanation, no summary. That is how the asking side behaves.
 
 As answers accumulate, concepts light up in Obsidian's graph view. Understood is green, fuzzy amber, not understood red, never asked stays unlit.
 A traffic light. At first almost everything is dark, and it lights up one answer at a time.
 
-When you want an explanation, ask for it: `/hidane --explain printf`. Claude reads the map first.
+When you want an explanation, just ask after `/hidane`: `/hidane what is printf?`. Claude reads the map first.
 Concepts you understand are not even named; concepts you do not understand are explained carefully, starting from what you got wrong, using your own functions as examples.
 Something outside the map, like printf, gets mapped to the nearest concepts on the spot. The explanation opens with two lines, "From the map: not understood …, skipped: …", so you can see what was read and what it changed.
 Reading an explanation changes no color. Reading is not evidence of understanding.
@@ -57,7 +57,7 @@ Open that folder in Obsidian with "Open folder as vault". Then `/hidane`.
 | | |
 |---|---|
 | `/hidane` | one question |
-| `/hidane --explain <topic>` | an explanation at your level: a function, a concept, printf |
+| `/hidane <anything>` | an explanation at your level: a function, a concept, printf, "where am I weak" |
 | `/hidane --map` | the table of concepts, values and states |
 | `/hidane --vault` | rebuild the map and open it in Obsidian |
 | `/hidane --lint` | merge concept names that mean the same (also automatic every 3 days) |
