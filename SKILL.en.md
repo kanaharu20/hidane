@@ -16,6 +16,7 @@ One function, one question per invocation. Answer, record, stop. Call again for 
 - `--explain <topic>` … the "Explain" steps below. No question. The topic is free text (a function, a concept, printf, "is this design ok").
 - `--explain` (no topic) … the function of the last question. Find log.md with `sh <HIDANE>/scripts/record.sh --path`; the last row gives place, function and the miss column. **Start from the keys marked "not mentioned" / "contradicted"** in that column.
 - `--update` … run `sh "$(cat <HIDANE>/HOME)/install.sh" --update` to get the latest version, show its output as is, stop. No question.
+- text that does not start with a flag (`/hidane what is _us?`) … treat as `--explain <that text>`.
 - none … follow the steps below.
 
 ## Steps
