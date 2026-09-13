@@ -89,14 +89,14 @@ The mechanics in detail: [docs/DESIGN.md](docs/DESIGN.md).
 
 - One author, two repositories, 25 answers so far. Weights (1 / 2 / 3), threshold (±4) and forgetting (30 days) are all provisional
 - The "what does this function do" question type (summary) is still judged by Claude reading the answer; grading by generating code from the explanation (CGBG) is not in
-- Zero dependencies beyond git and POSIX sh came at the price of dense sh and awk. 139 tests are what make it safe to change
+- Zero dependencies beyond git and POSIX sh came at the price of dense sh and awk. 142 tests are what make it safe to change
 - Linux should work but is untested; `/hidane --vault` uses macOS `open`
 - How closely Claude follows the SKILL steps is checked by reading real session transcripts. Prose instructions sometimes do not take
 
 ## Development
 
 ```sh
-sh tests/run_all.sh     # 139 tests, no LLM, seconds
+sh tests/run_all.sh     # 142 tests, no LLM, seconds
 ```
 
 A new test is trusted only after breaking the implementation and watching it fail. `run_all.sh` also fails if the test count in this README drifts from reality.

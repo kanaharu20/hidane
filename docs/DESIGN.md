@@ -44,7 +44,7 @@ Every constant is provisional and can be changed through environment variables (
 
 ## Keys
 
-Before the answer is heard, Claude fixes 2-5 elements of the correct answer with `keys.sh` ("sets stopped @ 26").
+Before the answer is heard, Claude fixes 2-5 elements of the correct answer with `keys.sh` ("sets stopped @ 26"). A key is an outcome, never a reason: `keys.sh` rejects keys containing "because" (exit 2).
 After the answer, each key gets yes / no / contra, and `record.sh --verdict` derives the result:
 
 - all yes → hit
@@ -57,7 +57,7 @@ Claude cannot write hit / miss directly (`--free` is for hand entry).
 ## Which function is asked next
 
 Concepts are ranked from all repositories: not understood > fuzzy > unasked, lower value first. Understood concepts are never asked.
-Candidates come from the current repository, excluding functions already asked and functions no longer present in the working tree.
+Candidates come from the current repository, excluding functions already asked (same file and function name, so a shifted line range does not bring a function back) and functions no longer present in the working tree.
 
 The question type is decided here too (`edge` if the concept has past misses, else `trace`). The decision goes to `pending`,
 and `record.sh` refuses any record that does not match it (exit 7). Claude decides only the wording and the keys.

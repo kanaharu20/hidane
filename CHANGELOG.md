@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.1 — 2026-09-13
+
+- `next.sh` excludes asked functions by file + function name, not by line range. A function whose lines shifted after an
+  edit was being asked again (one function was asked four times).
+- `keys.sh` rejects keys that carry a reason ("because" / 「ので」). Keys are outcomes only; the SKILL says a key runs
+  to the end of the flow (what the called function returns, where it exits).
+- Question form: name one observable (what it returns / what is called next / where it exits). "What happens to the
+  loop" is no longer an allowed form.
+- 142 L0 tests.
+
 ## 0.2.0 — 2026-09-11
 
 - `/hidane <anything>`: the map as memory. Claude reads `index.md` (overall stage, recent explanations, concept

@@ -18,6 +18,8 @@ $K "a" "b" "c" "d" "e" "f" >/dev/null 2>&1; rc=$?; [ $rc = 2 ] && ok "K03 鍵 6 
 fourkeys; [ "$(sed -n 3p "$ROOT/p/keys")" = "$(printf '3\t作った分だけ join する @ 28-29')" ] && ok "K04 鍵は番号つきで保存される" || ng "K04" "$(cat "$ROOT/p/keys")"
 [ "$($K --show | wc -l | tr -d ' ')" = 4 ] && ok "K05 --show で 4 行" || ng "K05"
 $K "a|b" "c" >/dev/null; grep -q 'a｜b' "$ROOT/p/keys" && ok "K06 鍵の | は ｜ に" || ng "K06"
+$K "59 行は is_done だけを見るので終わらない @59" "1 を返す" >/dev/null 2>"$TMP/e"; rc=$?; { [ $rc = 2 ] && grep -q '鍵 1 は理由を含む' "$TMP/e" && [ ! -f "$ROOT/p/keys" ]; } && ok "K07 「ので」を含む鍵は exit 2、鍵は残らない" || ng "K07" "rc=$rc $(cat "$TMP/e")"
+$K "loop continues because is_done is false" "returns 1" >/dev/null 2>&1; rc=$?; [ $rc = 2 ] && ok "K08 because を含む鍵も exit 2" || ng "K08" "rc=$rc"
 
 # --verdict → 結果
 fourkeys

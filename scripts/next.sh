@@ -3,7 +3,7 @@
 #
 # 使い方: next.sh [--root DIR] [--repo NAME] [--tree DIR] [--today D] [-n N]
 #   概念の順位は全 repo の値から(unknown > fuzzy > unasked、同じ状態なら値の低い順)。
-#   候補の関数は今いる repo の functions.md / log.md から。すでに問うた場所は除く。
+#   候補の関数は今いる repo の functions.md / log.md から。すでに問うた関数(同じファイル・同じ名前。行がずれても同じ)は除く。
 #   作業ツリー(git の root、または --tree)に、その場所にその関数名が今も無ければ除く(消えた・ずれた関数)。
 #   known の概念からは出さない。-n N で上位 N 件を表にする。
 # 出力は決まった形。Claude はこれをそのまま使って問いを作る。
@@ -72,15 +72,16 @@ BEGIN {
 }
 {
   kind = $1; split($2, col, "|"); place = trim(col[3]); fnm = trim(col[4]); k = split(trim(col[5]), cs, ",")
-  if (kind == "log") { asked[place] = 1; next }
+  f = place; sub(/:[^:]*$/, "", f); fk = f "\t" fnm
+  if (kind == "log") { asked[fk] = 1; next }
   if (kind == "stale") next
   if (place in seenp) next; seenp[place] = 1
-  for (i = 1; i <= k; i++) { c = trim(cs[i]); if (c == "") continue; cand[place] = cand[place] (cand[place] == "" ? "" : ", ") c; fname[place] = fnm }
+  for (i = 1; i <= k; i++) { c = trim(cs[i]); if (c == "") continue; cand[place] = cand[place] (cand[place] == "" ? "" : ", ") c; fname[place] = fnm; fkey[place] = fk }
 }
 END {
   m = 0
   for (p in cand) {
-    if (p in asked) continue
+    if (fkey[p] in asked) continue
     best = 99; bv = 999; bc = ""
     k = split(cand[p], cs, ", ")
     for (i = 1; i <= k; i++) { c = cs[i]; r = rank(st[c]); v = val[c] + 0; if (r < best || (r == best && v < bv)) { best = r; bv = v; bc = c } }

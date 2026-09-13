@@ -59,8 +59,8 @@ L() {
     en:n_inputs_edge) echo "one of: empty / a single element / the last element / exactly the limit / a value that reproduces a past miss" ;;
     ja:n_inputs_trace) echo "普通の値を 1 つ" ;;
     en:n_inputs_trace) echo "one ordinary value" ;;
-    ja:n_form_text) echo "「<場所> <関数>。<入力> のとき、何を返す / 何が起きるか」の 1 問だけ。「なぜ」「何が必要か」は問わない" ;;
-    en:n_form_text) echo "exactly one question: \"<place> <function>. Given <input>, what does it return / what happens?\" Never ask \"why\" or \"what is needed\"" ;;
+    ja:n_form_text) echo "「<場所> <関数>。<入力> のとき、何を返す / 次に何が呼ばれる / どこで抜けるか」の 1 問だけ。観測できるものを名指しする(「ループはどうなるか」のような曖昧な対象は不可)。「なぜ」「何が必要か」は問わない" ;;
+    en:n_form_text) echo "exactly one question: \"<place> <function>. Given <input>, what does it return / what is called next / where does it exit?\" Name something observable (not \"what happens to the loop\"). Never ask \"why\" or \"what is needed\"" ;;
     ja:n_edge_hint) echo "過去のズレを突く入力を選ぶ" ;;  en:n_edge_hint) echo "pick an input that hits a past miss" ;;
     ja:n_none_repo) echo "には記録が無い。commit するか tag.sh --commit HEAD を回して、関数に概念を付けてください" ;;
     en:n_none_repo) echo "has no records yet. Commit, or run tag.sh --commit HEAD, to tag functions with concepts" ;;
@@ -103,6 +103,8 @@ L() {
     en:k_nopending) echo "no pending decision from next.sh; run next.sh first" ;;
     ja:k_count) echo "鍵は 2〜5 個" ;;           en:k_count) echo "give 2-5 keys" ;;
     ja:k_empty) echo "空の鍵" ;;                 en:k_empty) echo "empty key" ;;
+    ja:k_reason) echo "鍵 %d は理由を含む(「ので」「because」)。鍵は起きる結果だけ(何を返す、何が呼ばれる、どこで抜ける)" ;;
+    en:k_reason) echo "key %d carries a reason (\"because\"). A key is only an outcome (what is returned, what is called, where it exits)" ;;
     ja:k_saved) echo "鍵 %d 個を固定した(ユーザーには見せない)" ;; en:k_saved) echo "%d keys fixed (do not show them to the user)" ;;
     ja:r_place) echo "場所は file:a-b の形" ;;   en:r_place) echo "place must look like file:a-b" ;;
     ja:r_concepts) echo "概念が空" ;;            en:r_concepts) echo "concepts are empty" ;;

@@ -47,6 +47,10 @@ o2=$($N --repo api); grep -q '^src/server.py' "$ROOT/api/pending" && ok "N12 rep
 # 問うた場所は除かれる
 printf '| 2026-09-08 | src/mon.c:1-20 | monitor | 停止フラグの伝搬, 境界条件 | trace | q | dunno |  |  |\n' >> "$ROOT/worker/log.md"
 o=$($N --repo worker); echo "$o" | grep -q '^場所: src/b.c:1-5$' && ok "N06 問うた関数は候補から外れ、同じ概念の別の関数へ" || ng "N06 除外" "$o"
+# 行がずれても同じ関数なら問うた扱い(ファイル + 関数名で除く)
+mkdir -p "$ROOT/shift"; printf '%s\n| 2026-09-08 | src/mon.c:1-20 | monitor | 停止フラグの伝搬 |  |  |\n| 2026-09-08 | src/mon.c:3-22 | monitor | 停止フラグの伝搬 |  |  |\n| 2026-09-08 | src/other.c:1-4 | monitor | 停止フラグの伝搬 |  |  |\n' "$F" > "$ROOT/shift/functions.md"
+printf '%s\n| 2026-09-09 | src/mon.c:1-20 | monitor | 停止フラグの伝搬 | edge | q | miss | x |  |\n' "$H" > "$ROOT/shift/log.md"
+o=$($N --repo shift 2>&1); echo "$o" | grep -q '^場所: src/other.c:1-4$' && ok "N16 行がずれた同じ関数は再出題しない(別ファイルの同名は出る)" || ng "N16 shift" "$o"
 mkdir -p "$ROOT/empty"; $N --repo empty >/dev/null 2>"$TMP/e"; rc=$?; [ $rc = 1 ] && grep -q '記録が無い' "$TMP/e" && ok "N07 記録の無い repo は exit 1 と案内" || ng "N07 空" "rc=$rc"
 mkdir -p "$ROOT/done"; printf '%s\n| 2026-09-08 | x.c:1-2 | f | ヒープ操作 | trace | q | hit |  |  |\n' "$H" > "$ROOT/done/log.md"
 $N --repo done >/dev/null 2>"$TMP/e"; rc=$?; [ $rc = 1 ] && grep -q '候補なし' "$TMP/e" && ok "N08 全部問うた repo は exit 1「候補なし」" || ng "N08 候補なし" "rc=$rc $(cat "$TMP/e")"
