@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.0 — 2026-09-13
+
+- `/hidane --weak`: weak spots on one page. `weak.sh` picks the not-understood / fuzzy concepts that have recorded
+  misses, lists every miss (across repositories, newest first) and the functions tagged with them in the current
+  repository, and writes the two opening lines. Claude folds the misses into a pattern, lays out the chain, and
+  points at the step where the misses land, in the reader's own lines. Logged via `explained.sh`; no state change.
+- 154 L0 tests.
+
 ## 0.2.1 — 2026-09-13
 
 - `next.sh` excludes asked functions by file + function name, not by line range. A function whose lines shifted after an

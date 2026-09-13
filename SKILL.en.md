@@ -15,6 +15,7 @@ One function, one question per invocation. Answer, record, stop. Call again for 
 - `--map` … run `sh <HIDANE>/scripts/map.sh`, show the table as is, stop. No question.
 - `--lint` … run `sh <HIDANE>/scripts/lint.sh`, show its output as is, stop. No question.
 - `--update` … run `sh "$(cat <HIDANE>/HOME)/install.sh" --update` to get the latest version, show its output as is, stop. No question.
+- `--weak` … the "Weak spots" steps below. No question.
 - text that does not start with a flag (`/hidane what is _us?`, `/hidane the part I missed in the last question`) … the "Explain" steps below. No question.
 - none … follow the steps below.
 
@@ -66,6 +67,22 @@ The map is a memory of what this person understands. Read it before explaining a
 5. **Write**: use the user's own functions as examples when they fit (`file:a-b`). No quiz. No scores or evaluative words. Quote at most 3 lines of code. Write in the user's language.
 6. **Log it**: `sh <HIDANE>/scripts/explained.sh "<topic>" "<mapped concept, concept>"` (1-2 names from the table; `""` if none). Show its one output line. State and colors do not change.
 7. Stop. Do not offer a follow-up question.
+
+## Weak spots (`--weak`)
+
+Fold the past misses into one page and show the reader where they stumble. The script reads the map; Claude writes the page.
+
+1. Run `sh <HIDANE>/scripts/weak.sh`. On exit 1 show its single stderr line and stop.
+   Output: two opening lines (From the map / Skipped), one heading per concept with every miss (newest first), and the functions tagged with that concept in the current repository.
+2. Put the **two opening lines verbatim** at the top of the page. Do not reword them.
+3. Read 3-5 of the listed functions that sit closest to the misses (`file:a-b`). The `@line` in a miss is from that day; find the spot in the current code.
+4. Write three sections, with exactly these headings.
+   - **The pattern**: fold the misses into one shape ("the story stops where the flag is set"). Quote up to 3 miss texts, then say the common shape in 2-3 sentences. One pattern per concept if there are several.
+   - **The chain**: the flow to follow for that concept as a numbered chain of 3-5 steps, and which steps the misses land on ("the misses are at steps 2 and 4").
+   - **Step by step**: explain each step by pointing at lines in the reader's own functions (`file:a-b`). Steps with misses get the careful treatment; steps that were hit get one sentence. Where it connects to another concept, point at the one line of the reader's code that makes the connection.
+5. No scores, ratios or judgement words ("understands well", "weak" as a verdict). Code quotes 3 lines at most. No question. In the user's language.
+6. Run `sh <HIDANE>/scripts/explained.sh "weak spots" "<concept, concept>"` (1-2 of the not-understood concepts from the first line). Show its one output line. State and colors do not change.
+7. Stop. No "shall I ask a question next".
 
 ## Never
 

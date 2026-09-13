@@ -42,6 +42,22 @@ Concepts you understand are not even named; concepts you do not understand are e
 Something outside the map, like printf, gets mapped to the nearest concepts on the spot. The explanation opens with two lines, "From the map: not understood …, skipped: …", so you can see what was read and what it changed.
 Reading an explanation changes no color. Reading is not evidence of understanding.
 
+`/hidane --weak` points that explanation at your own weak spots. It lays out every past miss, folds them into one pattern, turns the flow into a chain, and shows which step you stumble on, in the lines of your own code.
+
+```
+From the map: not understood stop-flag propagation, waking all waiters → starting there. Fuzzy timeout check. Used 3 past misses
+Skipped: none
+
+The pattern: "one more line after stop", "forgot wake_all", "the other workers' logs stop too; never mentioned wake_all and return 1".
+All three end the story where stopped = 1 is set. Setting it stops nobody.
+A thread stops only when it comes to read the flag itself.
+
+The chain: 1 set (src/stop.c:30-35) → 2 wake (src/stop.c:41-53) → 3 the woken side reads it (src/slot.c:58) → 4 clean up and leave (src/slot.c:56-65)
+The misses are at steps 2 and 4.
+```
+
+This page cannot be written without the map. Which misses fold into the pattern, and which step of the chain gets the careful treatment, both come from the records.
+
 ## Try it
 
 git, [Claude Code](https://claude.com/claude-code), and ideally [Obsidian](https://obsidian.md).
@@ -58,6 +74,7 @@ Open that folder in Obsidian with "Open folder as vault". Then `/hidane`.
 |---|---|
 | `/hidane` | one question |
 | `/hidane <anything>` | an explanation at your level: a function, a concept, printf, "where am I weak" |
+| `/hidane --weak` | weak spots on one page: misses folded into a pattern, the chain, the step you stumble on, in your own lines |
 | `/hidane --map` | the table of concepts, values and states |
 | `/hidane --vault` | rebuild the map and open it in Obsidian |
 | `/hidane --lint` | merge concept names that mean the same (also automatic every 3 days) |
@@ -89,14 +106,14 @@ The mechanics in detail: [docs/DESIGN.md](docs/DESIGN.md).
 
 - One author, two repositories, 25 answers so far. Weights (1 / 2 / 3), threshold (±4) and forgetting (30 days) are all provisional
 - The "what does this function do" question type (summary) is still judged by Claude reading the answer; grading by generating code from the explanation (CGBG) is not in
-- Zero dependencies beyond git and POSIX sh came at the price of dense sh and awk. 142 tests are what make it safe to change
+- Zero dependencies beyond git and POSIX sh came at the price of dense sh and awk. 154 tests are what make it safe to change
 - Linux should work but is untested; `/hidane --vault` uses macOS `open`
 - How closely Claude follows the SKILL steps is checked by reading real session transcripts. Prose instructions sometimes do not take
 
 ## Development
 
 ```sh
-sh tests/run_all.sh     # 142 tests, no LLM, seconds
+sh tests/run_all.sh     # 154 tests, no LLM, seconds
 ```
 
 A new test is trusted only after breaking the implementation and watching it fail. `run_all.sh` also fails if the test count in this README drifts from reality.

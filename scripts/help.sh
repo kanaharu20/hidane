@@ -13,6 +13,7 @@ hidane $v — 自分のコードのどこを理解していて、どこをまだ
   /hidane                    一問。まだ問うていない関数から 1 つ選び、答えを記録する
   /hidane <聞きたいこと>      解説。地図を先に読み、理解している概念は飛ばし、間違えた所から話す
                              例: /hidane printf って何？  /hidane 自分の弱い所は  /hidane さっきの問いで触れていなかった所
+  /hidane --weak             弱い所を 1 枚に。ズレを型にまとめ、鎖のどの段で躓いているかを自分のコードの行で示す
   /hidane --map              概念ごとの値と状態の表
   /hidane --vault            地図を作り直して Obsidian で開く
   /hidane --lint             似た概念名を統合する(3 日に一度は自動)
@@ -30,6 +31,7 @@ hidane $v — a map of which parts of your code you understand and which you hav
   /hidane                    one question about a function not yet asked; the answer is recorded
   /hidane <anything>         an explanation at your level: the map is read first, understood concepts are skipped
                              e.g. /hidane what is printf?   /hidane where am I weak   /hidane the part I missed in the last question
+  /hidane --weak             weak spots on one page: misses folded into a pattern, the chain, the step you stumble on, in your own lines
   /hidane --map              the table of concepts, values and states
   /hidane --vault            rebuild the map and open it in Obsidian
   /hidane --lint             merge concept names that mean the same (also automatic every 3 days)

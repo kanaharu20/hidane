@@ -70,7 +70,15 @@ L() {
     ja:x_usage) echo "引数は 対象 [概念, 概念]" ;;      en:x_usage) echo "args: topic [concept, concept]" ;;
     ja:x_unknown) echo "地図に無い概念は捨てた" ;;      en:x_unknown) echo "dropped a concept not on the map" ;;
     ja:x_title) echo "求めた解説(状態には影響しない)" ;;  en:x_title) echo "explanations requested (never affects state)" ;;
-    ja:x_header) echo "| 日時 | repo | 対象 | 概念 |" ;;  en:x_header) echo "| Date | Repo | Topic | Concepts |" ;;
+    ja:x_header) echo "| 日時 | repo | 対象 | 概念 |" ;;
+    ja:w_head1) echo "地図から: 非理解 %s → ここから書く。曖昧 %s。過去のズレ %d 件を使った" ;;
+    en:w_head1) echo "From the map: not understood %s → starting there. Fuzzy %s. Used %d past misses" ;;
+    ja:w_head2) echo "飛ばした概念: %s" ;;                en:w_head2) echo "Skipped: %s" ;;
+    ja:w_none_skip) echo "なし" ;;                       en:w_none_skip) echo "none" ;;
+    ja:w_concept) echo "ズレ %d 件" ;;                    en:w_concept) echo "%d misses" ;;
+    ja:w_funcs) echo "%s でこの概念が付いた関数" ;;        en:w_funcs) echo "functions tagged with it in %s" ;;
+    ja:w_nofuncs) echo "(今いる repo にこの概念の関数は無い)" ;;  en:w_nofuncs) echo "(no function with this concept in the current repo)" ;;
+    ja:w_none) echo "ズレの記録がまだ無い。一問答えると材料ができる" ;;  en:w_none) echo "no misses recorded yet; answer a question first" ;;  en:x_header) echo "| Date | Repo | Topic | Concepts |" ;;
     ja:i_overall) echo "全体" ;;                         en:i_overall) echo "Overall" ;;
     ja:i_answered) echo "答えた問い %d、最後に答えた日 %s" ;;  en:i_answered) echo "%d questions answered, last on %s" ;;
     ja:i_recent) echo "最近求めた解説" ;;               en:i_recent) echo "Recent explanations requested" ;;
