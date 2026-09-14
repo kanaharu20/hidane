@@ -78,7 +78,7 @@ cd 使いたいリポジトリ && sh ~/hidane/install.sh
 | `/hidane --map` | 概念ごとの値と状態の表 |
 | `/hidane --vault` | 地図を作り直して Obsidian で開く |
 | `/hidane --lint` | 似た概念名を統合(3 日に一度は自動) |
-| `/hidane --tag` | まだ地図に無い関数に概念を付ける。commit 前でも。commit 時は hook が自動 |
+| `/hidane --tag` | まだ地図に無い関数に概念を付ける(背景で。commit 前でも)。commit 時は hook が自動 |
 | `/hidane --update` | 最新版にして記録を移行 |
 | `/hidane --help` | 使い方 |
 
@@ -107,14 +107,14 @@ LLM に判断させるのは 3 か所だけ。関数にどの概念を付ける�
 
 - 作者 1 人が 2 リポジトリで 25 問答えた段階。重み(1 / 2 / 3)、閾値(±4)、忘却(30 日)は全部仮置き
 - 「何をするか」型の問い(summary)の判定は、まだ Claude の読みに頼っている。説明からコードを生成して照合する方式(CGBG)は入れていない
-- 依存を git と POSIX sh だけにした代わりに、sh と awk が密で読みにくい。156 件の検査がそれを支えている
+- 依存を git と POSIX sh だけにした代わりに、sh と awk が密で読みにくい。158 件の検査がそれを支えている
 - Linux は動くはずだが未検証。`/hidane --vault` は macOS の `open` を使う
 - Claude が SKILL の手順をどこまで守るかは、実走の会話記録で確かめている。文面の指示は効かないことがある
 
 ## 開発
 
 ```sh
-sh tests/run_all.sh     # 156 件。LLM は呼ばない。数秒
+sh tests/run_all.sh     # 158 件。LLM は呼ばない。数秒
 ```
 
 新しい検査は、実装を壊して落ちるのを見てから信じる。`run_all.sh` は検査の数がこの README とずれると落ちる。

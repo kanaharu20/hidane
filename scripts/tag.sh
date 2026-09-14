@@ -5,19 +5,20 @@
 # 「既存の概念一覧から選ぶか、無ければ新しい名前を付ける」だけ。形式はこのスクリプトが検査し、
 # 検査に落ちた行は捨てて stderr に出す。値や状態には一切触れない。
 #
-# 使い方: tag.sh [--commit REV | --all] [--root DIR] [--repo DIR] [--dry-run] [--help]
+# 使い方: tag.sh [--commit REV | --all] [--bg] [--root DIR] [--repo DIR] [--dry-run] [--help]
 #   --commit REV  そのコミットが触った関数だけ(既定 HEAD。hook が使う)
 #   --all         リポジトリ全体の関数。hook を置いた最初に一度回して、全関数を地図に載せる。既知の場所は飛ばす
 #   --root DIR    記録の場所(既定 $HIDANE_ROOT か ~/.claude/hidane)。<root>/<repo名>/functions.md に追記
 #   --repo DIR    git リポジトリ(既定: カレント)
 #   --dry-run     LLM を呼ばず、渡すはずのプロンプトを stdout に出す
+#   --bg          候補の数だけ表示してすぐ戻り、LLM 呼び出しは背景で回して <root>/hook.log に集計を残す(/hidane --tag 用。数分かかっても待たせない)
 # 環境変数: HIDANE_CLAUDE(claude コマンドの差し替え。検査用) HIDANE_MODEL
 #           HIDANE_MAX_FUNCS(1 回の呼び出しに載せる関数の数。既定 8。候補が尽きるまで繰り返す)
 #
 # 既に functions.md か log.md にある場所は付け直さない(同じ場所には一度だけ)。
 set -eu
 HERE=$(cd "$(dirname "$0")" && pwd -P)
-ROOT="${HIDANE_ROOT:-$HOME/.claude/hidane}"; REV=HEAD; ALL=""; REPO=.; DRY=""
+ROOT="${HIDANE_ROOT:-$HOME/.claude/hidane}"; REV=HEAD; ALL=""; REPO=.; DRY=""; BG=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --commit) REV="$2"; shift 2 ;;
@@ -25,6 +26,7 @@ while [ $# -gt 0 ]; do
     --root) ROOT="$2"; shift 2 ;;
     --repo) REPO="$2"; shift 2 ;;
     --dry-run) DRY=1; shift ;;
+    --bg) BG=1; shift ;;
     --help|-h) sed -n '2,16p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "tag.sh: unknown arg: $1" >&2; exit 2 ;;
   esac
@@ -49,6 +51,13 @@ if [ -n "$ALL" ]; then sh "$HERE/scope.sh" --all 2>/dev/null; else sh "$HERE/sco
 grep -vxF -f "$tmp/known" "$tmp/cands" 2>/dev/null > "$tmp/todo" || true
 total=$(wc -l < "$tmp/todo" | tr -d ' ')
 [ "$total" -gt 0 ] || { echo "tag.sh: $repo@$short: $(L t_none)"; exit 0; }
+if [ -n "$BG" ]; then
+  batches=$(( (total + MAXF - 1) / MAXF ))
+  printf "tag.sh: $(L t_bg)\n" "$total" "$batches" "$ROOT/hook.log"
+  if [ -n "$ALL" ]; then mode="--all"; else mode="--commit $REV"; fi
+  ( nohup sh "$HERE/tag.sh" $mode --root "$ROOT" --repo "$top" >> "$ROOT/hook.log" 2>&1 & ) >/dev/null 2>&1
+  exit 0
+fi
 
 # 2. 既存の概念一覧(全 repo)。呼び出しごとに更新する(前の束で新設した名前を次の束が使えるように)
 existing() { sh "$HERE/map.sh" --root "$ROOT" --tsv 2>/dev/null | cut -f1 | LC_ALL=C sort -u; }

@@ -125,6 +125,8 @@ L() {
     ja:r_norepo) echo "git リポジトリの中で実行するか --repo を付けてください" ;;
     en:r_norepo) echo "run inside a git repository or pass --repo" ;;
     ja:t_none) echo "付ける関数なし" ;;          en:t_none) echo "nothing to tag" ;;
+    ja:t_bg) echo "候補 %d 件。背景で概念を付けている(%d 束、1 束 1 分前後)。終わると %s に集計 1 行。地図は次の /hidane から" ;;
+    en:t_bg) echo "%d candidates. Tagging in the background (%d batches, about a minute each). A summary line lands in %s when done; the map picks it up on the next /hidane" ;;
     ja:t_done) echo "候補 %d、呼び出し %d 回、追記 %d 行、捨てた %d 行" ;; en:t_done) echo "candidates %d, calls %d, appended %d, dropped %d" ;;
     ja:t_drop) echo "捨てた" ;;                  en:t_drop) echo "dropped" ;;
     ja:t_new) echo "新" ;;                       en:t_new) echo "new" ;;

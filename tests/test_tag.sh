@@ -121,6 +121,23 @@ R5="$TMP/proj5"; mkdir -p "$R5"; (cd "$R5" && git init -q && git config user.ema
   printf 'from .models import (\n    A,\n    B,\n    C,\n    D,\n)\n\n\ndef main() -> None:\n    """Dispatch."""\n    fire.Fire(Cli)\n' > cli.py; git add -A && git commit -qm init)
 o=$(cd "$R5" && sh "$OLDPWD/scripts/scope.sh" --all 2>/dev/null); { echo "$o" | grep -q 'cli.py:9-11 *main' && ! echo "$o" | grep -q 'import'; } && ok "G16 複数行 import は候補にしない。3 行の関数は候補にする" || ng "G16 import" "$o"
 
+# G17 C: 「struct timeval x;」の宣言で関数を割らない。ヘッダの複数行プロトタイプと Makefile は候補にしない
+R6="$TMP/proj6"; mkdir -p "$R6/src" "$R6/incl"; (cd "$R6" && git init -q && git config user.email t@t && git config user.name t
+  printf 'long\tdeadline_of(t_dongle *d)\n{\n\tstruct timespec\tdeadline;\n\n\tif (d->state != 1)\n\t\treturn (0);\n\treturn (d->t);\n}\n' > src/cool.c
+  printf 'int\t\terror_arg(const char *name, const char *value,\n\t\t\tconst char *why);\nvoid\tenqueue_both(t_coder *coder, t_dongle *f,\n\t\t\tlong key);\n' > incl/header.h
+  printf 'all: $(NAME)\n\n$(NAME): $(OBJ)\n\t$(CC) $(OBJ) -o $(NAME)\n' > Makefile
+  git add -A && git commit -qm init)
+o=$(cd "$R6" && sh "$OLDPWD/scripts/scope.sh" --all 2>/dev/null); { echo "$o" | grep -q 'src/cool.c:1-8 *deadline_of' && ! echo "$o" | grep -q 'src/cool.c:3' && ! echo "$o" | grep -q 'header.h' && ! echo "$o" | grep -q 'Makefile'; } \
+  && ok "G17 struct の局所宣言で割らない。プロトタイプ・Makefile は候補にしない" || ng "G17 C 誤検出" "$o"
+# G18 --bg: 候補の数を 1 行出してすぐ戻り、追記は背景で hook.log に集計が残る
+R7="$TMP/proj7"; mkdir -p "$R7"; (cd "$R7" && git init -q && git config user.email t@t && git config user.name t
+  for i in 1 2 3 4 5; do printf 'int k%s(int x)\n{\n\treturn x * %s;\n}\n' $i $i > "k$i.c"; done; git add -A && git commit -qm init)
+: > "$FAKE_COUNT"; rm -f "$ROOT/hook.log"
+o=$(HIDANE_CLAUDE="$FAKE" sh scripts/tag.sh --repo "$R7" --root "$ROOT" --all --bg 2>&1); rc=$?
+i=0; while [ $i -lt 40 ] && ! grep -q '候補' "$ROOT/hook.log" 2>/dev/null; do sleep 0.25; i=$((i+1)); done
+{ [ $rc = 0 ] && echo "$o" | grep -q '^tag.sh: 候補 5 件。背景で' && grep -q '候補 5、呼び出し 1 回、追記 5 行' "$ROOT/hook.log" && [ "$(grep -c '^| 20' "$ROOT/proj7/functions.md")" = 5 ]; } \
+  && ok "G18 --bg は候補数の 1 行で戻り、背景で付けて hook.log に集計" || ng "G18 bg" "rc=$rc $o $(cat "$ROOT/hook.log" 2>&1)"
+
 # H01 hook: 置く → commit → 背景で functions.md が増える
 (cd "$R" && sh "$H/install.sh" --hook >/dev/null) && grep -q "$H" "$R/.git/hooks/post-commit" && ok "H01 install.sh --hook が hidane の場所を埋めて置く" || ng "H01 install"
 cat > "$FAKE" <<'F'

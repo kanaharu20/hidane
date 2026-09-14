@@ -53,7 +53,7 @@ cd "$(git rev-parse --show-toplevel)"
 # 除外: 文書・ロック・生成物。判断が要るものは残す。
 # パス頭の目印に空白を含めるのは、一覧側では numstat を整形した後の行に対して
 # grep をかけるため(`   1 +/   0 -  package-lock.json`)。^ も / も直前に来ない。
-excl='\.(md|txt|lock|min\.js|map|svg|png|jpg|gif|pdf)$|(^|/|[[:space:]])(package-lock\.json|yarn\.lock|pnpm-lock\.yaml|Cargo\.lock|go\.sum|poetry\.lock|uv\.lock)$|(^|/|[[:space:]])(LICENSE|COPYING|NOTICE)[^/]*$|(^|/|[[:space:]])\.[^/]+$'
+excl='\.(md|txt|lock|min\.js|map|svg|png|jpg|gif|pdf|mk|cmake)$|(^|/)(Makefile|makefile|GNUmakefile|CMakeLists\.txt)$|(^|/|[[:space:]])(package-lock\.json|yarn\.lock|pnpm-lock\.yaml|Cargo\.lock|go\.sum|poetry\.lock|uv\.lock)$|(^|/|[[:space:]])(LICENSE|COPYING|NOTICE)[^/]*$|(^|/|[[:space:]])\.[^/]+$'
 
 # --- 日付に関係なく、配下の全ファイルから関数単位の候補を出す ---
 # diff が無いので「Claude が決めた変更」は判定できない。代わりに
@@ -80,12 +80,13 @@ if [ -n "$all" ]; then
   | while IFS= read -r f; do
       [ -f "$f" ] || continue
       awk -v F="$f" '
+        function has_brace(a, b,   i) { for (i = a; i <= b; i++) if (buf[i] ~ /\{/) return 1; return 0 }
         function flush(   n, i, k, name, key) {
           if (!start) return
           e = NR - 1
           while (e > start && buf[e] ~ /^[[:space:]]*$/) e--
           n = e - start + 1
-          if (n >= 3) {
+          if (n >= 3 && (!brace_needed || has_brace(start, e))) {
             k = 0
             for (i = start; i <= e; i++)
               if (buf[i] ~ /(^|[^A-Za-z0-9_])(if|else|elif|for|while|switch|case|return|raise|throw|try|catch|except|break|continue)([^A-Za-z0-9_]|$)/) k++
@@ -94,13 +95,14 @@ if [ -n "$all" ]; then
         }
         { buf[NR] = $0 }
         # 言語のキーワードで始まる定義(字下げも可)
-        /^[[:space:]]*(async[[:space:]]+)?(def|class|fn|func|function|sub|impl|struct|enum|interface|trait|proc)[[:space:]]+[A-Za-z_]/ ||
+        (/^[[:space:]]*(async[[:space:]]+)?(def|class|fn|func|function|sub|impl|struct|enum|interface|trait|proc)[[:space:]]+[A-Za-z_]/ && $0 !~ /;[[:space:]]*$/) ||
         # C 風: 列 0 から始まり ( を含み ; で終わらず、制御構文で始まらない
         (/^[A-Za-z_][^;=]*\(/ && $0 !~ /;[[:space:]]*$/ && $0 !~ /^(if|for|while|switch|return|else|do|case|from|import)[^A-Za-z0-9_]/ && $0 !~ /^#/) ||
         # Java/C#/TS のメソッド: 字下げ + 修飾子 + 名前(
         /^[[:space:]]+(public|private|protected|static|export|override|final)[^;=]*[A-Za-z_][A-Za-z0-9_]*[[:space:]]*\([^;]*$/ {
           flush()
           start = NR
+          brace_needed = ($0 !~ /^[[:space:]]*(async[[:space:]]+)?(def|class|fn|func|function|sub|impl|struct|enum|interface|trait|proc)[[:space:]]/)
           head = $0; sub(/^[[:space:]]+/, "", head)
           gsub(/[[:space:]]+/, " ", head)
         }

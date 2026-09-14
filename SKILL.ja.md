@@ -14,7 +14,7 @@ description: 自分のコードのまだ問うていない関数から 1 つ選�
 - `--vault` … `sh <HIDANE>/scripts/open.sh` を実行して Obsidian で地図を開き、その出力 1 行だけを見せて終わる。問いは出さない。
 - `--map` … `sh <HIDANE>/scripts/map.sh` を実行し、表をそのまま見せて終わる。問いは出さない。
 - `--lint` … `sh <HIDANE>/scripts/lint.sh` を実行して似た概念名を統合し、その出力をそのまま見せて終わる。問いは出さない。
-- `--tag` … `sh <HIDANE>/scripts/tag.sh --all` を実行して、今いる repo でまだ地図に無い関数に概念を付け(commit 前の関数も拾う)、その出力の集計行をそのまま見せて終わる。問いは出さない。
+- `--tag` … `sh <HIDANE>/scripts/tag.sh --all --bg` を実行する。今いる repo でまだ地図に無い関数に概念が付く(commit 前の関数も拾う。LLM 呼び出しは背景で回るので数秒で戻る)。出力の 1 行をそのまま見せて終わる。待たない、確かめに行かない。問いは出さない。
 - `--update` … `sh "$(cat <HIDANE>/HOME)/install.sh" --update` を実行して最新版にし、その出力をそのまま見せて終わる。問いは出さない。
 - `--weak` … 下の「弱い所」の手順。問いは出さない。
 - 旗で始まらない文(`/hidane _us って何？`、`/hidane さっきの問いで触れていなかった所`)… 下の「解説」の手順。問いは出さない。

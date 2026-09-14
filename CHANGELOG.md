@@ -8,7 +8,11 @@
   included. Commit time is no longer the only entry for new concepts.
 - `scope.sh` no longer mistakes a multi-line Python `from x import (` for a function, and a 3-line function
   (def, docstring, one statement) is now a candidate; the floor was 4 lines.
-- 156 L0 tests.
+- `scope.sh` no longer splits a C function at a local `struct timeval x;` declaration, and no longer takes multi-line
+  prototypes in headers or Makefile rules for functions (C-style blocks must contain a `{`; Makefiles are skipped).
+- `tag.sh --bg`: `/hidane --tag` returns in seconds with the candidate count; the LLM calls run in the background
+  and the summary lands in `hook.log`, like the commit hook.
+- 158 L0 tests.
 
 ## 0.3.0 — 2026-09-13
 
