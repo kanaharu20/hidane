@@ -14,6 +14,7 @@ One function, one question per invocation. Answer, record, stop. Call again for 
 - `--vault` … run `sh <HIDANE>/scripts/open.sh`, show its single output line, stop. No question.
 - `--map` … run `sh <HIDANE>/scripts/map.sh`, show the table as is, stop. No question.
 - `--lint` … run `sh <HIDANE>/scripts/lint.sh`, show its output as is, stop. No question.
+- `--tag` … run `sh <HIDANE>/scripts/tag.sh --all` to tag the functions of the current repository that are not on the map yet (uncommitted ones included), show its summary line as is, stop. No question.
 - `--update` … run `sh "$(cat <HIDANE>/HOME)/install.sh" --update` to get the latest version, show its output as is, stop. No question.
 - `--weak` … the "Weak spots" steps below. No question.
 - text that does not start with a flag (`/hidane what is _us?`, `/hidane the part I missed in the last question`) … the "Explain" steps below. No question.

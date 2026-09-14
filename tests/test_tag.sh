@@ -109,6 +109,18 @@ chmod +x "$TMP/flaky"; : > "$FAKE_COUNT"
 HIDANE_CLAUDE="$TMP/flaky" HIDANE_MAX_FUNCS=1 sh scripts/tag.sh --repo "$R3" --root "$ROOT" >/dev/null 2>"$TMP/e4"; rc=$?
 { [ $rc = 4 ] && [ "$(grep -c '^| 20' "$ROOT/proj3/functions.md")" = 1 ] && grep -q '束 2' "$TMP/e4"; } && ok "G14 2 束目で失敗: 1 束目の追記は残り exit 4" || ng "G14 途中失敗" "rc=$rc $(cat "$TMP/e4")"
 
+# G15 上限なし: 関数 25 個の repo を --all で回すと候補 25(以前は上位 20 で切れていた)
+R4="$TMP/proj4"; mkdir -p "$R4"; (cd "$R4" && git init -q && git config user.email t@t && git config user.name t
+  for i in $(seq 1 25); do printf 'int h%s(int x)\n{\n\treturn x + %s;\n}\n' $i $i > "h$i.c"; done; git add -A && git commit -qm init)
+: > "$FAKE_COUNT"
+HIDANE_CLAUDE="$FAKE" sh scripts/tag.sh --repo "$R4" --root "$ROOT" --all > "$TMP/o5" 2>/dev/null
+{ grep -q '候補 25、呼び出し 4 回、追記 25 行' "$TMP/o5" && [ "$(grep -c '^| 20' "$ROOT/proj4/functions.md")" = 25 ]; } && ok "G15 --all は 20 件で切れずに全関数を候補にする" || ng "G15 上限" "$(cat "$TMP/o5")"
+
+# G16 Python の複数行 import は関数ではない。3 行の関数(def + docstring + 1 行)は候補になる
+R5="$TMP/proj5"; mkdir -p "$R5"; (cd "$R5" && git init -q && git config user.email t@t && git config user.name t
+  printf 'from .models import (\n    A,\n    B,\n    C,\n    D,\n)\n\n\ndef main() -> None:\n    """Dispatch."""\n    fire.Fire(Cli)\n' > cli.py; git add -A && git commit -qm init)
+o=$(cd "$R5" && sh "$OLDPWD/scripts/scope.sh" --all 2>/dev/null); { echo "$o" | grep -q 'cli.py:9-11 *main' && ! echo "$o" | grep -q 'import'; } && ok "G16 複数行 import は候補にしない。3 行の関数は候補にする" || ng "G16 import" "$o"
+
 # H01 hook: 置く → commit → 背景で functions.md が増える
 (cd "$R" && sh "$H/install.sh" --hook >/dev/null) && grep -q "$H" "$R/.git/hooks/post-commit" && ok "H01 install.sh --hook が hidane の場所を埋めて置く" || ng "H01 install"
 cat > "$FAKE" <<'F'

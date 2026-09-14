@@ -2,7 +2,7 @@
 # reflect の対象範囲を出す。
 #   scope.sh [--since DATE | --days N] [--author PAT]          変更ファイル一覧(基準コミットつき)
 #   scope.sh [--since DATE | --days N] [--author PAT] <file>   そのファイルのハンク(-U0、新規行番号は @@ +c,d @@)
-#   scope.sh --all [dir]      日付に関係なく、配下の全ファイルから関数単位の候補を出す(上ほど優先)
+#   scope.sh --all [dir]      日付に関係なく、配下の全ファイルから関数単位の候補を全部出す(上ほど優先。上限なし)
 #   scope.sh --commit <rev>   そのコミットが触ったファイルだけから、同じ形で候補を出す(フック用)
 # 基準 = 範囲開始日時より前の最後のコミット。無ければ空ツリー。
 # 未追跡の新規ファイルも一覧に出す(git diff は追跡ファイルしか見ないため)。
@@ -85,7 +85,7 @@ if [ -n "$all" ]; then
           e = NR - 1
           while (e > start && buf[e] ~ /^[[:space:]]*$/) e--
           n = e - start + 1
-          if (n >= 4) {
+          if (n >= 3) {
             k = 0
             for (i = start; i <= e; i++)
               if (buf[i] ~ /(^|[^A-Za-z0-9_])(if|else|elif|for|while|switch|case|return|raise|throw|try|catch|except|break|continue)([^A-Za-z0-9_]|$)/) k++
@@ -96,7 +96,7 @@ if [ -n "$all" ]; then
         # 言語のキーワードで始まる定義(字下げも可)
         /^[[:space:]]*(async[[:space:]]+)?(def|class|fn|func|function|sub|impl|struct|enum|interface|trait|proc)[[:space:]]+[A-Za-z_]/ ||
         # C 風: 列 0 から始まり ( を含み ; で終わらず、制御構文で始まらない
-        (/^[A-Za-z_][^;=]*\(/ && $0 !~ /;[[:space:]]*$/ && $0 !~ /^(if|for|while|switch|return|else|do|case)[^A-Za-z0-9_]/ && $0 !~ /^#/) ||
+        (/^[A-Za-z_][^;=]*\(/ && $0 !~ /;[[:space:]]*$/ && $0 !~ /^(if|for|while|switch|return|else|do|case|from|import)[^A-Za-z0-9_]/ && $0 !~ /^#/) ||
         # Java/C#/TS のメソッド: 字下げ + 修飾子 + 名前(
         /^[[:space:]]+(public|private|protected|static|export|override|final)[^;=]*[A-Za-z_][A-Za-z0-9_]*[[:space:]]*\([^;]*$/ {
           flush()
@@ -116,7 +116,7 @@ if [ -n "$all" ]; then
         if ((f ":" m) in seen || ($1 in seen)) next
         print $4 "\t" $3 "\t" $1 "\t" m "\t" $2
       }' \
-  | sort -t"$(printf '\t')" -k1,1nr -k2,2n | head -20 \
+  | sort -t"$(printf '\t')" -k1,1nr -k2,2n \
   | awk -F'\t' 'BEGIN { print "# 候補(上ほど優先)。分岐 = if/for/while/return などの行数。聞いた関数は除いてある" }
                 { printf "%-32s %-20s %3d行 分岐%-3d %s\n", $3, $4, $2, $1, $5 }'
   exit 0

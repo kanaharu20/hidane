@@ -66,7 +66,9 @@ and `record.sh` refuses any record that does not match it (exit 7). Claude decid
 
 After every commit, the hook sends the source of the touched functions to `claude -p` and asks for 1-3 concepts each.
 The existing concept list is shown with "reuse an existing name whenever one fits", but new names are allowed.
-The script validates the format and drops bad lines. `tag.sh --all` tags a whole repository at once.
+The script validates the format and drops bad lines.
+Two entry points: the hook at commit time (touched functions only) and `/hidane --tag` (`tag.sh --all`: every function of the current repository not on the map yet, no cap; it reads the working tree, so uncommitted functions count). Setup uses the latter once.
+Concepts name what a function does, never a library.
 
 ## Merging names (lint)
 

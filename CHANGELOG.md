@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.1 — 2026-09-14
+
+- `tag.sh --all` no longer stops at the 20 functions with the most branches (a reflect leftover in `scope.sh`).
+  A 47-function repository had 20 on the map; setup now tags every function as the README says.
+- `/hidane --tag`: tag the functions of the current repository that are not on the map yet, uncommitted ones
+  included. Commit time is no longer the only entry for new concepts.
+- `scope.sh` no longer mistakes a multi-line Python `from x import (` for a function, and a 3-line function
+  (def, docstring, one statement) is now a candidate; the floor was 4 lines.
+- 156 L0 tests.
+
 ## 0.3.0 — 2026-09-13
 
 - `/hidane --weak`: weak spots on one page. `weak.sh` picks the not-understood / fuzzy concepts that have recorded
