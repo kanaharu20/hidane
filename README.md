@@ -2,12 +2,13 @@
 
 [日本語](README.ja.md)
 
-A map of which parts of your own code you understand and which you have never checked.
-Two readers: you, and Claude.
+A tool for telling Claude which parts of your code you understand and which you do not.
 
-When an AI writes your code, the amount that works grows; the amount you can explain does not.
-I wanted that gap visible as colors rather than a score. And if Claude reads the same map, its explanations
-land at your level: it skips what you know and starts from what you got wrong last time.
+When an AI writes your code, the amount that works grows; the amount you can explain does not. And Claude explains
+things without knowing what you are missing.
+hidane builds a "map of understanding", not from self-report but from the record of questions you answered one at a time.
+Claude reads that map before explaining: it skips what you know and starts from what you got wrong last time.
+You look at the same map. Not a score, but which concepts are lit.
 
 <p align="center">
   <img src="docs/graph.svg" alt="A map drawn from fictional data: 2 repositories, 42 concepts. green=understood, amber=fuzzy, red=not understood, dark gray=unasked" width="820">
@@ -34,8 +35,17 @@ The elements of the correct answer were fixed as 2-5 "keys" before you answered,
 Fall short and you get "partial (keys 3 / 4), not mentioned: L28-29", line numbers only. It does not tell you what is there. You go and read. If reading is not enough, ask `/hidane the part I missed in the last question` and it explains from there.
 No explanation, no summary. That is how the asking side behaves.
 
-As answers accumulate, concepts light up in Obsidian's graph view. Understood is green, fuzzy amber, not understood red, never asked stays unlit.
-A traffic light. At first almost everything is dark, and it lights up one answer at a time.
+As answers accumulate, concepts light up in Obsidian's graph view. The color comes from one "value" per concept: hits raise it, misses and "I don't know" lower it.
+
+| Color | State | When |
+|---|---|---|
+| unlit | unasked | no function with this concept has been asked yet |
+| amber | fuzzy | answered but not settled: hits and misses mixed, only 1-2 answers, or no answer in 30 days |
+| green | understood | hits piled up (value +4 or more) |
+| red | not understood | misses piled up (value -4 or less) |
+
+How far one answer moves it depends on the question type: tracing 1, boundary 2, summary 3. Partial does not move it. Reading an explanation does not move it.
+After 30 days without an answer, understood and not understood both fall back to amber; one answer brings them back. At first almost everything is dark, and it lights up one answer at a time.
 
 When you want an explanation, just ask after `/hidane`: `/hidane what is printf?`. Claude reads the map first.
 Concepts you understand are not even named; concepts you do not understand are explained carefully, starting from what you got wrong, using your own functions as examples.
