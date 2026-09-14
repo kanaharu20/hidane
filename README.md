@@ -67,7 +67,7 @@ git clone git@github.com:kanaharu20/hidane.git ~/hidane
 cd your-repo && sh ~/hidane/install.sh
 ```
 
-It asks en or ja, registers `/hidane`, adds a hook to this repository, tags every function (about a minute), and writes the map to `~/Documents/hidane`.
+It asks en or ja, registers `/hidane`, adds a hook to this repository, tags every function (about a minute per 8 functions; a 50-function repository takes 6-7 minutes), and writes the map to `~/Documents/hidane`.
 Open that folder in Obsidian with "Open folder as vault". Then `/hidane`.
 
 | | |
@@ -105,7 +105,7 @@ The mechanics in detail: [docs/DESIGN.md](docs/DESIGN.md).
 
 ## Limits, and what is not done
 
-- One author, two repositories, 25 answers so far. Weights (1 / 2 / 3), threshold (±4) and forgetting (30 days) are all provisional
+- One author, two repositories, 32 answers so far. Weights (1 / 2 / 3), threshold (±4) and forgetting (30 days) are all provisional
 - The "what does this function do" question type (summary) is still judged by Claude reading the answer; grading by generating code from the explanation (CGBG) is not in
 - Zero dependencies beyond git and POSIX sh came at the price of dense sh and awk. 158 tests are what make it safe to change
 - Linux should work but is untested; `/hidane --vault` uses macOS `open`
@@ -129,7 +129,11 @@ A new test is trusted only after breaking the implementation and watching it fai
 | `HIDANE_FRESH_DAYS` | 30 | forgetting |
 | `HIDANE_MAX_FUNCS` | 8 | functions per LLM call |
 | `HIDANE_LINT_DAYS` | 3 | lint interval |
+| `HIDANE_WEAK_N` | 3 | concepts on the `--weak` page |
+| `HIDANE_MODEL` | | `--model` passed to `claude -p` |
 | `HIDANE_HOOK_OFF` | | 1 disables the hook |
+| `HIDANE_SKILL_DIR` | `~/.claude/skills/hidane` | where the skill is installed |
+| `HIDANE_CLAUDE` / `HIDANE_OPEN` | claude / open | substitutes for tests |
 
 Records from reflect (the predecessor) have a different shape and are not imported automatically: [docs/MIGRATING-from-reflect.ja.md](docs/MIGRATING-from-reflect.ja.md).
 Versions: [CHANGELOG.md](CHANGELOG.md).

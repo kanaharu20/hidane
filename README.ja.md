@@ -67,7 +67,7 @@ git clone git@github.com:kanaharu20/hidane.git ~/hidane
 cd 使いたいリポジトリ && sh ~/hidane/install.sh
 ```
 
-言語(en / ja)を聞かれ、`/hidane` が登録され、このリポジトリに hook が置かれ、全関数に概念が付き(1 分前後)、
+言語(en / ja)を聞かれ、`/hidane` が登録され、このリポジトリに hook が置かれ、全関数に概念が付き(8 関数ごとに 1 分前後。50 関数なら 6〜7 分待つ)、
 地図が `~/Documents/hidane` にできる。Obsidian でそのフォルダを「Open folder as vault」で開く。あとは `/hidane`。
 
 | | |
@@ -105,7 +105,7 @@ LLM に判断させるのは 3 か所だけ。関数にどの概念を付ける�
 
 ## できないこと、まだのこと
 
-- 作者 1 人が 2 リポジトリで 25 問答えた段階。重み(1 / 2 / 3)、閾値(±4)、忘却(30 日)は全部仮置き
+- 作者 1 人が 2 リポジトリで 32 問答えた段階。重み(1 / 2 / 3)、閾値(±4)、忘却(30 日)は全部仮置き
 - 「何をするか」型の問い(summary)の判定は、まだ Claude の読みに頼っている。説明からコードを生成して照合する方式(CGBG)は入れていない
 - 依存を git と POSIX sh だけにした代わりに、sh と awk が密で読みにくい。158 件の検査がそれを支えている
 - Linux は動くはずだが未検証。`/hidane --vault` は macOS の `open` を使う
@@ -129,7 +129,11 @@ sh tests/run_all.sh     # 158 件。LLM は呼ばない。数秒
 | `HIDANE_FRESH_DAYS` | 30 | 忘却 |
 | `HIDANE_MAX_FUNCS` | 8 | 1 回の LLM 呼び出しに載せる関数 |
 | `HIDANE_LINT_DAYS` | 3 | lint の間隔 |
+| `HIDANE_WEAK_N` | 3 | `--weak` に載せる概念の数 |
+| `HIDANE_MODEL` | | `claude -p` に渡す `--model` |
 | `HIDANE_HOOK_OFF` | | 1 で hook を止める |
+| `HIDANE_SKILL_DIR` | `~/.claude/skills/hidane` | skill の置き場 |
+| `HIDANE_CLAUDE` / `HIDANE_OPEN` | claude / open | 検査用の差し替え |
 
 reflect(前身)の記録は形が違うので自動では移らない。[docs/MIGRATING-from-reflect.ja.md](docs/MIGRATING-from-reflect.ja.md)。
 版は [CHANGELOG.md](CHANGELOG.md)。
