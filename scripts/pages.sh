@@ -10,8 +10,7 @@
 #   concepts/<概念>.md   frontmatter(state, value, evidence, last, repos)+ 関連・典型的なズレ・記録・未出題
 #   repos/<repo>.md      その repo に出た概念と状態
 #   index.md             map.sh の表そのまま
-#   .obsidian/graph.json Graph view の色(理解 青緑 / 曖昧 黄 / 非理解 赤 / 未出題 灰)。無いときだけ書く。理解の条件は
-#                        "[state:known] -[state:unknown]"(Obsidian の property 検索は部分一致で、known が unknown にも当たるため)
+#   .obsidian/graph.json Graph view の色。値 -6..+6 の 13 段(赤 → 黄 → 青緑)、未出題は灰。無いときだけ書く
 # 前回あって今回無い概念ページは消す(概念の統合で名前が消えたとき)。
 set -eu
 HERE=$(cd "$(dirname "$0")" && pwd -P)
@@ -47,7 +46,7 @@ sh "$HERE/map.sh" --root "$ROOT" --today "$TODAY" --tsv > "$tsv"
 
 # 行を集めて awk に渡す(map.sh と同じ流し方)
 # 作業ツリーに今も無い関数は gone(<repo>/path か log.md の先頭行から repo の場所を知る。分からなければ確かめない)
-alive() { [ "$TREE" != "-" ] || return 1; [ -n "$TREE" ] || return 0; file=${1%%:*}; range=${1##*:}; a=${range%-*}; b=${range#*-}; [ -f "$TREE/$file" ] && sed -n "${a},${b}p" "$TREE/$file" | grep -qF "$2"; }
+alive() { [ "$TREE" != "-" ] || return 1; [ -n "$TREE" ] || return 0; file=${1%%:*}; range=${1##*:}; a=${range%-*}; b=${range#*-}; [ -f "$TREE/$file" ] && sed -n "${a},${b}p" "$TREE/$file" | grep -Eq "(^|[^A-Za-z0-9_])$(printf '%s' "$2" | sed 's/[][\\.*^$]/\\\\&/g')([^A-Za-z0-9_]|$)"; }
 for d in "$ROOT"/*/; do
   repo=$(basename "$d")
   TREE=$(cat "$d/path" 2>/dev/null || sed -n '1s/^# hidane — //p' "$d/log.md" 2>/dev/null || true)
@@ -107,7 +106,8 @@ END {
   for (i = 1; i <= nc; i++) {
     c = order[i]; f = vault "/concepts/" fname(c) ".md"
     r = repos[c]; gsub(",", ", ", r)
-    printf("---\nstate: %s\nvalue: %s\nevidence: %s\nlast: %s\nrepos: [%s]\n", state[c], value[c], evid[c], last[c], r) > f
+    v = value[c] + 0; tone = (evid[c] + 0 == 0 ? "off" : v < 0 ? "v_m" (-v) : v > 0 ? "v_p" v : "v_z0")
+    printf("---\nstate: %s\nvalue: %s\ntone: %s\nevidence: %s\nlast: %s\nrepos: [%s]\n", state[c], value[c], tone, evid[c], last[c], r) > f
     if (al[c] != "") printf("aliases: [%s]\n", al[c]) > f
     printf("updated: %s\n---\n# %s\n\n", today, c) > f
     printf("%s **%s**(%s %s, %s %s, %s %s)\n\n", p_state, label(state[c]), h_value, value[c], h_evidence, evid[c], h_last, last[c]) > f
@@ -145,28 +145,30 @@ for d in concepts repos; do
 done
 rm -f "$tsv.keep"
 
-# Graph view の色。無いときだけ書く(利用者が Obsidian 側で変えた設定を上書きしない)
+# Graph view の色。値 -6..+6 の 13 段(赤 → 黄 → 青緑)。frontmatter の tone: v_m6..v_z0..v_p6 で塗る(未出題は off = 灰)。
+# tone の記号は互いに部分文字列にならない(Obsidian の property 検索は部分一致のため)。
+# 無いときだけ書く。旧方式(state ごとの 4 色)の graph.json は丸ごと作り直す(.bak を残す)
 g="$VAULT/.obsidian/graph.json"
-# 旧名「霧」や旧配色で作った色設定が残っていれば新しくする(利用者が自分で変えた色は触らない)。
-# Obsidian が整形し直した JSON(数字の後が改行)にも効くよう、行末と非数字の両方を見る
-if [ -f "$g" ]; then
-  sed 's/\[state:霧\]/[state:unasked]/; s/\[state:未出題\]/[state:unasked]/; s/\[state:理解\]/[state:known]/; s/\[state:曖昧\]/[state:fuzzy]/; s/\[state:非理解\]/[state:unknown]/' "$g" > "$g.tmp" && mv "$g.tmp" "$g"
-  # Obsidian の [state:known] は部分一致で unknown にも当たり、非理解が理解の色になる。known の条件に -[state:unknown] を足す
-  sed 's/"\[state:known\]"/"[state:known] -[state:unknown]"/' "$g" > "$g.tmp" && mv "$g.tmp" "$g"
-  for pair in 9159498:1566369 16771899:16765503 16007990:16729943 10395294:7041144 6323595:13620186; do
-    o=${pair%%:*}; n=${pair##*:}
-    sed "s/\(\"rgb\": *\)$o\([^0-9]\)/\1$n\2/; s/\(\"rgb\": *\)$o\$/\1$n/" "$g" > "$g.tmp" && mv "$g.tmp" "$g"
-  done
-fi
+if [ -f "$g" ] && grep -q '\[state:\(known\|fuzzy\|unknown\|理解\|曖昧\|非理解\|霧\|未出題\)' "$g"; then cp "$g" "$g.bak"; rm -f "$g"; fi
 [ -f "$g" ] || cat > "$g" <<'JSON'
 {
   "collapse-color-groups": false,
   "colorGroups": [
-    { "query": "[state:known] -[state:unknown]", "color": { "a": 1, "rgb": 1566369 } },
-    { "query": "[state:fuzzy]",   "color": { "a": 1, "rgb": 16765503 } },
-    { "query": "[state:unknown]", "color": { "a": 1, "rgb": 16729943 } },
-    { "query": "[state:unasked]", "color": { "a": 1, "rgb": 7041144 } },
-    { "query": "path:repos",     "color": { "a": 1, "rgb": 13620186 } }
+    { "query": "[tone:v_m6]", "color": { "a": 1, "rgb": 16729943 } },
+    { "query": "[tone:v_m5]", "color": { "a": 1, "rgb": 16735827 } },
+    { "query": "[tone:v_m4]", "color": { "a": 1, "rgb": 16741711 } },
+    { "query": "[tone:v_m3]", "color": { "a": 1, "rgb": 16747595 } },
+    { "query": "[tone:v_m2]", "color": { "a": 1, "rgb": 16753735 } },
+    { "query": "[tone:v_m1]", "color": { "a": 1, "rgb": 16759619 } },
+    { "query": "[tone:v_z0]", "color": { "a": 1, "rgb": 16765503 } },
+    { "query": "[tone:v_p1]", "color": { "a": 1, "rgb": 14210383 } },
+    { "query": "[tone:v_p2]", "color": { "a": 1, "rgb": 11721056 } },
+    { "query": "[tone:v_p3]", "color": { "a": 1, "rgb": 9165936 } },
+    { "query": "[tone:v_p4]", "color": { "a": 1, "rgb": 6610816 } },
+    { "query": "[tone:v_p5]", "color": { "a": 1, "rgb": 4121489 } },
+    { "query": "[tone:v_p6]", "color": { "a": 1, "rgb": 1566369 } },
+    { "query": "[tone:off]",  "color": { "a": 1, "rgb": 7041144 } },
+    { "query": "path:repos",  "color": { "a": 1, "rgb": 13620186 } }
   ],
   "showTags": false, "showAttachments": false, "hideUnresolved": true, "showOrphans": true,
   "textFadeMultiplier": 0, "nodeSizeMultiplier": 1.2, "lineSizeMultiplier": 1

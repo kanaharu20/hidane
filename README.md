@@ -36,14 +36,15 @@ The elements of the correct answer were fixed as 2-5 "keys" before you answered,
 Fall short and you get "partial (keys 3 / 4), not mentioned: order L28-29", kind and line numbers only. It does not tell you what is there. You go and read. If reading is not enough, ask `/hidane the part I missed in the last question` and it explains from there.
 No explanation, no summary. That is how the asking side behaves.
 
-As answers accumulate, concepts light up in Obsidian's graph view. The color comes from one "value" per concept: hits raise it, misses and "I don't know" lower it.
+As answers accumulate, concepts light up in Obsidian's graph view. The color comes from one "value" per concept (-6 to +6): hits raise it, misses and "I don't know" lower it.
+Thirteen steps from red (-6) through amber (0) to green (+6); one answer moves a concept one or two steps. Never-asked concepts stay unlit.
 
-| Color | State | When |
+| Value | State | When |
 |---|---|---|
-| unlit | unasked | no function with this concept has been asked yet |
-| amber | fuzzy | answered but not settled: hits and misses mixed, only 1-2 answers, or no answer in 30 days |
-| green | understood | hits piled up (value +4 or more) |
-| red | not understood | misses piled up (value -4 or less) |
+| none (unlit) | unasked | no function with this concept has been asked yet |
+| around -3 to +3 (amber) | fuzzy | answered but not settled: hits and misses mixed, only 1-2 answers, or no answer in 30 days |
+| +4 and up (toward green) | understood | hits piled up |
+| -4 and down (toward red) | not understood | misses piled up |
 
 How far one answer moves it depends on the question type: tracing 1, boundary 2, summary 3. Partial does not move it. Reading an explanation does not move it.
 After 30 days without an answer, understood and not understood both fall back to amber; one answer brings them back. At first almost everything is dark, and it lights up one answer at a time.
@@ -86,6 +87,7 @@ Open that folder in Obsidian with "Open folder as vault". Then `/hidane`.
 | `/hidane` | one question |
 | `/hidane <anything>` | an explanation at your level: a function, a concept, printf, "where am I weak" |
 | `/hidane --weak` | weak spots on one page: misses folded into a pattern, the flow, the step you stumble on, in your own lines |
+| `/hidane --focus [concept]` | focus: 3 questions in a row on one concept to settle it |
 | `/hidane --map` | the table of concepts, values and states |
 | `/hidane --vault` | rebuild the map and open it in Obsidian |
 | `/hidane --lint` | merge concept names that mean the same (also automatic every 3 days) |
@@ -118,14 +120,14 @@ The mechanics in detail: [docs/DESIGN.md](docs/DESIGN.md).
 
 - One author, two repositories, 32 answers so far. Weights (1 / 2 / 3), threshold (±4) and forgetting (30 days) are all provisional
 - The "what does this function do" question type (summary) is still judged by Claude reading the answer; grading by generating code from the explanation (CGBG) is not in
-- Zero dependencies beyond git and POSIX sh came at the price of dense sh and awk. 181 tests are what make it safe to change
+- Zero dependencies beyond git and POSIX sh came at the price of dense sh and awk. 190 tests are what make it safe to change
 - Linux should work but is untested; `/hidane --vault` uses macOS `open`
 - How closely Claude follows the SKILL steps is checked by reading real session transcripts. Prose instructions sometimes do not take
 
 ## Development
 
 ```sh
-sh tests/run_all.sh     # 181 tests, no LLM, seconds
+sh tests/run_all.sh     # 190 tests, no LLM, seconds
 ```
 
 A new test is trusted only after breaking the implementation and watching it fail. `run_all.sh` also fails if the test count in this README drifts from reality.
@@ -141,6 +143,7 @@ A new test is trusted only after breaking the implementation and watching it fai
 | `HIDANE_MAX_FUNCS` | 8 | functions per LLM call |
 | `HIDANE_LINT_DAYS` | 3 | lint interval |
 | `HIDANE_WEAK_N` | 3 | concepts on the `--weak` page |
+| `HIDANE_FOCUS_N` | 3 | questions in a row under `--focus` |
 | `HIDANE_MODEL` | | `--model` passed to `claude -p` |
 | `HIDANE_HOOK_OFF` | | 1 disables the hook |
 | `HIDANE_SKILL_DIR` | `~/.claude/skills/hidane` | where the skill is installed |

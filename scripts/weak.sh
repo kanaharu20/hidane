@@ -25,7 +25,7 @@ top=$(git rev-parse --show-toplevel 2>/dev/null) || top=""
 [ -n "$REPO" ] || { if [ -n "$top" ]; then REPO=$(hidane_repo_key "$top"); else REPO="-"; fi; }
 [ -n "$TREE" ] || TREE="$top"
 # 作業ツリーに今も無い関数は挙げない(next.sh と同じ確かめ方)
-alive() { [ -n "$TREE" ] || return 0; file=${1%%:*}; range=${1##*:}; a=${range%-*}; b=${range#*-}; [ -f "$TREE/$file" ] && sed -n "${a},${b}p" "$TREE/$file" | grep -qF "$2"; }
+alive() { [ -n "$TREE" ] || return 0; file=${1%%:*}; range=${1##*:}; a=${range%-*}; b=${range#*-}; [ -f "$TREE/$file" ] && sed -n "${a},${b}p" "$TREE/$file" | grep -Eq "(^|[^A-Za-z0-9_])$(printf '%s' "$2" | sed 's/[][\\.*^$]/\\\\&/g')([^A-Za-z0-9_]|$)"; }
 tsv=$(mktemp); trap 'rm -f "$tsv"' EXIT
 sh "$HERE/map.sh" --root "$ROOT" --today "$TODAY" --tsv > "$tsv" 2>/dev/null || true
 for d in "$ROOT"/*/; do

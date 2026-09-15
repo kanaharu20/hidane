@@ -178,6 +178,16 @@ HIDANE_CLAUDE="$FAKE" sh scripts/tag.sh --repo "$TMP/one/api" --root "$ROOT" --a
 one=$(cd "$TMP/one/api" && pwd -P); two=$(cd "$TMP/two/api" && pwd -P)
 n=$(ls -d "$ROOT"/api* | wc -l | tr -d ' '); { [ "$n" = 2 ] && [ "$(cat "$ROOT/api/path")" = "$one" ] && [ "$(grep -c '^| 20' "$ROOT/api/functions.md")" = 1 ] && grep -qF "$two" "$ROOT"/api-*/path; } && ok "G25 同名の別 repo は api-<数字> に分かれ、同じ repo は同じ置き場" || ng "G25 repo key" "$(ls "$ROOT"; cat "$ROOT"/api*/path)"
 
+# G26 ファイル名に使えない概念名(先頭 .、..、/ を含む)は捨てる
+R12="$TMP/proj12"; mkdir -p "$R12"; (cd "$R12" && git init -q && git config user.email t@t && git config user.name t && printf 'int nm(int x)\n{\n\treturn x;\n}\n' > nm.c && git add -A && git commit -qm i)
+cat > "$TMP/badname" <<'F'
+#!/bin/sh
+grep '^### ' | sed 's/^### //' | awk -F'\t' '{ printf("%s\t%s\t.hidden, a/b, x..y, 正常な名前\n", $1, $2) }'
+F
+chmod +x "$TMP/badname"
+HIDANE_CLAUDE="$TMP/badname" sh scripts/tag.sh --repo "$R12" --root "$ROOT" --all >/dev/null 2>"$TMP/e12"
+{ grep -q '| nm.c:1-4 | nm | 正常な名前 |' "$ROOT/proj12/functions.md" && [ "$(grep -c '名前に使えない' "$TMP/e12")" = 3 ]; } && ok "G26 ファイル名に使えない概念名は捨て、残りで付ける" || ng "G26 names" "$(cat "$ROOT/proj12/functions.md" "$TMP/e12")"
+
 # H01 hook: 置く → commit → 背景で functions.md が増える
 (cd "$R" && sh "$H/install.sh" --hook >/dev/null) && grep -q "$H" "$R/.git/hooks/post-commit" && ok "H01 install.sh --hook が hidane の場所を埋めて置く" || ng "H01 install"
 cat > "$FAKE" <<'F'

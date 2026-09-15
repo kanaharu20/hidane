@@ -145,6 +145,7 @@ for chunk in "$tmp"/chunk.*; do
     n = split(cs, arr, ","); out = ""; note = ""
     for (i = 1; i <= n; i++) {
       c = trim(arr[i]); if (c == "" || length(c) > 40) continue
+      if (c ~ /^\./ || c ~ /\.\./ || c ~ /[\/\\]/ || c ~ /[\x01-\x1f]/) { printf("tag.sh: %s(名前に使えない): %s\n", t_drop, c) > "/dev/stderr"; continue }
       out = (out == "" ? c : out ", " c)
       if (!(c in known)) { note = (note == "" ? t_new ": " c : note ", " c); known[c] = 1 }
     }

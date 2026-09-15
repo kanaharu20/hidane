@@ -74,4 +74,21 @@ o=$($N --repo tree --tree "$TMP/wt" 2>&1); echo "$o" | grep -q '^場所: src/a.c
 o=$($N --repo tree 2>&1); echo "$o" | grep -q '^場所: src/gone.c:1-4$' && ok "N14 --tree も git も無ければ確かめず、そのまま出す" || ng "N14 no tree" "$o"
 rm "$TMP/wt/src/a.c"; $N --repo tree --tree "$TMP/wt" >/dev/null 2>"$TMP/e"; rc=$?; [ $rc = 1 ] && grep -q '作業ツリーに無い関数 3 件は除いた' "$TMP/e" && ok "N15 全部消えていれば 候補なし に除いた件数が付く" || ng "N15" "rc=$rc $(cat "$TMP/e")"
 
+# N17 一度でも答えた概念(分からないでも)は edge、初めての概念は trace
+mkdir -p "$ROOT/dn"; printf '%s\n| 2026-09-08 | src/x.c:1-4 | x | 例外処理 | trace | q | dunno |  |  |\n' "$H" > "$ROOT/dn/log.md"
+printf '%s\n| 2026-09-08 | src/y.c:1-4 | y | 例外処理 | abc |  |\n| 2026-09-08 | src/z.c:1-4 | z | 新顔 | abc |  |\n' "$F" > "$ROOT/dn/functions.md"
+o=$($N --repo dn); echo "$o" | grep -q '^型: edge' && ok "N17 分からないだけの概念でも 2 問目は edge" || ng "N17 dunno edge" "$o"
+printf '%s\n| 2026-09-08 | src/z.c:1-4 | z | 新顔 | abc |  |\n' "$F" > "$ROOT/dn/functions.md"; rm "$ROOT/dn/log.md"
+o=$($N --repo dn); echo "$o" | grep -q '^型: trace' && ok "N17b 初めての概念は trace" || ng "N17b" "$o"
+# N18-N20 集中モード: --focus で概念を固定、次の呼び出しも同じ概念、record.sh で残りが減って終わる
+o=$($N --repo worker --focus 境界条件); { echo "$o" | sed -n 1p | grep -q '^集中: 境界条件(この概念であと 3 問)$' && echo "$o" | grep -q '^代表: 境界条件' && [ "$(cat "$ROOT/worker/focus")" = "$(printf '境界条件\t3')" ]; } && ok "N18 --focus <概念> でその概念の関数が出て focus に残る" || ng "N18 focus" "$o $(cat "$ROOT/worker/focus")"
+o=$($N --repo worker); echo "$o" | sed -n 1p | grep -q '^集中: 境界条件' && ok "N19 次の呼び出しも同じ概念から" || ng "N19 focus continues" "$o"
+$N --repo worker --focus 存在しない概念 >/dev/null 2>"$TMP/e"; rc=$?; [ $rc = 2 ] && grep -q '地図に無い' "$TMP/e" && ok "N19b 地図に無い概念は exit 2" || ng "N19b" "rc=$rc"
+o=$($N --repo worker --focus); echo "$o" | sed -n 1p | grep -q '^集中: 境界条件' && ok "N19c 概念を省くと、候補が残る中で順位最上位の概念(停止フラグの伝搬の関数は問い済み)に集中" || ng "N19c" "$o"
+printf '境界条件\t1\n' > "$ROOT/worker/focus"; $N --repo worker >/dev/null
+o=$(cd "$TMP" && sh "$OLDPWD/scripts/record.sh" --root "$ROOT" --repo worker "src/b.c:1-5" b "境界条件" edge "q" dunno); { echo "$o" | grep -q '^集中: 境界条件 は終わり' && [ ! -f "$ROOT/worker/focus" ]; } && ok "N20 残り 1 で答えると集中が終わる" || ng "N20 focus done" "$o"
+# N21 alive は識別子の完全一致(run は running に当たらない)
+mkdir -p "$ROOT/al" "$TMP/wt2/src"; printf 'int running(void)\n{\n\treturn 1;\n}\n' > "$TMP/wt2/src/r.c"
+printf '%s\n| 2026-09-08 | src/r.c:1-4 | run | 境界条件 | abc |  |\n| 2026-09-08 | src/r.c:1-4 | running | 境界条件 | abc |  |\n' "$F" > "$ROOT/al/functions.md"
+o=$($N --repo al --tree "$TMP/wt2" 2>&1); echo "$o" | grep -q '^関数: running$' && ok "N21 alive は完全一致(run は消えた扱い、running は生きている)" || ng "N21 alive" "$o"
 echo; echo "PASS $pass / FAIL $fail"; [ $fail -eq 0 ]

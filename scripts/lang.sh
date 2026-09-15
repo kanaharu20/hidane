@@ -44,6 +44,11 @@ L() {
     ja:n_func) echo "関数" ;;                   en:n_func) echo "Function" ;;
     ja:n_concepts) echo "概念" ;;               en:n_concepts) echo "Concepts" ;;
     ja:n_lead) echo "代表" ;;                   en:n_lead) echo "Lead concept" ;;
+    ja:n_focus) echo "集中" ;;                  en:n_focus) echo "Focus" ;;
+    ja:n_focus_left) echo "集中: %s(この概念であと %d 問)" ;;  en:n_focus_left) echo "Focus: %s (%d more questions on this concept)" ;;
+    ja:n_focus_none) echo "集中していた %s に問える関数が無くなったので、集中を解いた" ;;  en:n_focus_none) echo "no function left to ask for %s; focus released" ;;
+    ja:n_focus_unknown) echo "その概念は地図に無い: %s" ;;  en:n_focus_unknown) echo "no such concept on the map: %s" ;;
+    ja:r_focus_done) echo "集中: %s は終わり(%d 問答えた)" ;;  en:r_focus_done) echo "Focus: %s done (%d questions answered)" ;;
     ja:n_why) echo "理由" ;;                    en:n_why) echo "Why" ;;
     ja:n_zure) echo "過去のズレ" ;;             en:n_zure) echo "Past misses" ;;
     ja:n_type) echo "型" ;;                     en:n_type) echo "Type" ;;
@@ -61,7 +66,7 @@ L() {
     en:n_inputs_trace) echo "one ordinary value" ;;
     ja:n_form_text) echo "「<場所> <関数>。<入力> のとき、何を返す / 次に何が呼ばれる / どこで抜けるか」の 1 問だけ。観測できるものを名指しする(「ループはどうなるか」のような曖昧な対象は不可)。「なぜ」「何が必要か」は問わない" ;;
     en:n_form_text) echo "exactly one question: \"<place> <function>. Given <input>, what does it return / what is called next / where does it exit?\" Name something observable (not \"what happens to the loop\"). Never ask \"why\" or \"what is needed\"" ;;
-    ja:n_edge_hint) echo "過去のズレを突く入力を選ぶ" ;;  en:n_edge_hint) echo "pick an input that hits a past miss" ;;
+    ja:n_edge_hint) echo "境界か、過去のズレを突く入力を選ぶ" ;;  en:n_edge_hint) echo "pick a boundary input, or one that hits a past miss" ;;
     ja:n_none_repo) echo "には記録が無い。commit するか tag.sh --commit HEAD を回して、関数に概念を付けてください" ;;
     en:n_none_repo) echo "has no records yet. Commit, or run tag.sh --commit HEAD, to tag functions with concepts" ;;
     ja:n_none_cand) echo "候補なし: この repo の関数は全部問うた(または理解のみ)。commit するか tag.sh --commit HEAD を回して関数に概念を付ける" ;;

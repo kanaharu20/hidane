@@ -106,4 +106,10 @@ fi
 echo "$line"
 case "$result" in partial|miss) [ -n "$usermsg" ] && echo "$(L r_hint)" ;; esac
 if [ -z "$FREE" ]; then rm -f "$pending" "$keys" "$keys.pending"; fi
+# 集中モードの残りを 1 つ減らす。0 になれば終わりを告げて消す
+ff="$ROOT/$REPO/focus"
+if [ -z "$FREE" ] && [ -f "$ff" ]; then
+  fc=$(cut -f1 "$ff"); fleft=$(( $(cut -f2 "$ff") - 1 ))
+  if [ "$fleft" -le 0 ]; then rm -f "$ff"; printf "$(L r_focus_done)\n" "$fc" "${HIDANE_FOCUS_N:-3}"; else printf '%s\t%s\n' "$fc" "$fleft" > "$ff"; fi
+fi
 sh "$HERE/pages.sh" --root "$ROOT" >/dev/null 2>&1 || true

@@ -56,7 +56,7 @@ You will see `concepts/`, `repos/`, `index.md`. Click the **Graph view** icon.
 
 At first **almost everything is dark gray**. That is normal; nodes light up one answer at a time.
 
-No colors? Open the gear in Graph view → Groups and check the four `[state:...]` entries exist. If not, delete `~/Documents/hidane/.obsidian/graph.json` and run `/hidane --vault`.
+No colors? Open the gear in Graph view → Groups and check the `[tone:v_m6]` … `[tone:v_p6]` and `[tone:off]` entries exist. A vault from before 0.5.0 is rebuilt automatically (the old settings go to graph.json.bak). Close and reopen the Graph view tab, or Obsidian keeps the old settings in memory. If not, delete `~/Documents/hidane/.obsidian/graph.json` and run `/hidane --vault`.
 
 ## 3. Answer one question
 
@@ -93,6 +93,7 @@ Other commands:
 | | |
 |---|---|
 | `/hidane --weak` | weak spots on one page: misses folded into a pattern, the flow, the step you stumble on, in your own lines |
+| `/hidane --focus [concept]` | focus: 3 questions in a row on one concept, so one sitting lights one concept instead of spreading over many |
 | `/hidane --map` | table of concepts: value, state, repos |
 | `/hidane --vault` | rebuild the map and open it in Obsidian |
 | `/hidane --lint` | merge concept names that mean the same (also automatic every 3 days) |

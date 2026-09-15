@@ -48,8 +48,8 @@ sh scripts/pages.sh --root $FX --vault "$V" --today 2026-09-08 >/dev/null 2>&1
 
 # P09 初回の graph.json に 4 状態の色がある
 rm -rf "$TMP/v2"; sh scripts/pages.sh --root $FX --vault "$TMP/v2" --today 2026-09-08 >/dev/null 2>&1
-n=$(grep -c '\[state:' "$TMP/v2/.obsidian/graph.json"); [ "$n" = 4 ] && ok "P09 graph.json に 4 状態の色" || ng "P09 graph.json" "state queries=$n"
-grep -q '"\[state:known\] -\[state:unknown\]"' "$TMP/v2/.obsidian/graph.json" && ok "P09b 理解の条件は -[state:unknown] 付き(部分一致で非理解が青緑にならない)" || ng "P09b known query" "$(grep known "$TMP/v2/.obsidian/graph.json")"
+n=$(grep -c '\[tone:v_' "$TMP/v2/.obsidian/graph.json"); { [ "$n" = 13 ] && grep -q '"\[tone:off\]"' "$TMP/v2/.obsidian/graph.json"; } && ok "P09 graph.json に値 13 段の色と未出題の灰" || ng "P09 graph.json" "tone queries=$n"
+{ grep -q '^tone: v_m3$' "$TMP/v2/concepts/境界条件.md" && grep -q '^tone: off$' "$TMP/v2/concepts/起動と引数処理.md"; } && ok "P09b frontmatter の tone は値から(-3 → v_m3、未出題 → off)" || ng "P09b tone" "$(grep tone "$TMP/v2/concepts/境界条件.md" "$TMP/v2/concepts/起動と引数処理.md")"
 
 # P10 repo ページに概念と状態が重複なしで並ぶ
 r="$V/repos/worker.md"
@@ -64,16 +64,16 @@ mkdir -p "$TMP/sl/x"; { head -2 $FX/api/log.md | tail -1; echo '|---|---|---|---
 sh scripts/pages.sh --root "$TMP/sl" --vault "$TMP/slv" --today 2026-09-08 >/dev/null 2>&1
 { [ -f "$TMP/slv/concepts/入出力／バッファ.md" ] && grep -q '\[\[入出力／バッファ\]\]' "$TMP/slv/concepts/境界条件.md"; } && ok "P12 概念名の / は ／ に" || ng "P12 スラッシュ" "$(ls "$TMP/slv/concepts")"
 
-# P13 旧名・旧配色の graph.json は新しくなる。利用者が変えた色(未知の値)は触らない
+# P13 旧方式(state ごとの色)の graph.json は丸ごと作り直す(.bak を残す)。新方式のものは触らない
 rm -rf "$TMP/v4"; sh scripts/pages.sh --root $FX --vault "$TMP/v4" --today 2026-09-08 >/dev/null 2>&1
-printf '{"colorGroups":[{"query":"[state:霧]","color":{"a":1,"rgb": 10395294 }},{"query":"[state:理解]","color":{"a":1,"rgb": 123 }}]}\n' > "$TMP/v4/.obsidian/graph.json"
+printf '{"colorGroups":[{"query":"[state:霧]","color":{"a":1,"rgb": 10395294 }},{"query":"[state:known] -[state:unknown]","color":{"a":1,"rgb": 123 }}]}\n' > "$TMP/v4/.obsidian/graph.json"
 sh scripts/pages.sh --root $FX --vault "$TMP/v4" --today 2026-09-08 >/dev/null 2>&1
-{ grep -q '\[state:unasked\]' "$TMP/v4/.obsidian/graph.json" && grep -q '"rgb": 7041144 ' "$TMP/v4/.obsidian/graph.json" && grep -q '"rgb": 123 ' "$TMP/v4/.obsidian/graph.json" && grep -q '"\[state:known\] -\[state:unknown\]"' "$TMP/v4/.obsidian/graph.json"; } \
-  && ok "P13 旧名と旧配色は移行し、利用者の色は残る" || ng "P13 移行" "$(cat "$TMP/v4/.obsidian/graph.json")"
-# P14 Obsidian が整形した形(数字の後が改行)でも移行する
-printf '{\n  "colorGroups": [\n    {\n      "query": "[state:曖昧]",\n      "color": {\n        "a": 1,\n        "rgb": 16771899\n      }\n    }\n  ]\n}\n' > "$TMP/v4/.obsidian/graph.json"
+{ grep -q '\[tone:v_p6\]' "$TMP/v4/.obsidian/graph.json" && ! grep -q 'state:' "$TMP/v4/.obsidian/graph.json" && grep -q 'state:霧' "$TMP/v4/.obsidian/graph.json.bak"; } \
+  && ok "P13 旧方式の graph.json は作り直され、.bak が残る" || ng "P13 移行" "$(cat "$TMP/v4/.obsidian/graph.json")"
+# P14 新方式で利用者が色を変えたものは触らない
+sed 's/"rgb": 1566369/"rgb": 123/' "$TMP/v4/.obsidian/graph.json" > "$TMP/v4/g.tmp" && mv "$TMP/v4/g.tmp" "$TMP/v4/.obsidian/graph.json"
 sh scripts/pages.sh --root $FX --vault "$TMP/v4" --today 2026-09-08 >/dev/null 2>&1
-grep -q '"rgb": 16765503$' "$TMP/v4/.obsidian/graph.json" && ok "P14 整形済み JSON(改行区切り)でも旧配色を移行" || ng "P14 整形済み" "$(cat "$TMP/v4/.obsidian/graph.json")"
+grep -q '"rgb": 123' "$TMP/v4/.obsidian/graph.json" && ok "P14 新方式の graph.json は上書きしない(利用者の色が残る)" || ng "P14 keep" "$(grep 123 "$TMP/v4/.obsidian/graph.json")"
 
 # O01 open.sh: vault を作り直し、URL を出す。O02 open コマンドの差し替えで開く
 rm -rf "$TMP/v3"; u=$(sh scripts/open.sh --root $FX --vault "$TMP/v3" --print)

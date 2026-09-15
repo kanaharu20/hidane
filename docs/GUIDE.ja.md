@@ -56,7 +56,7 @@ Obsidian を起動 → 左下の vault 切替 → **Open folder as vault** → `
 
 最初は**ほぼ全部が暗い灰**です。これは正常で、問いに答えるたびに 1 つずつ灯っていく。
 
-色が付かないときは Graph view 右上の歯車 → Groups に `[state:known] -[state:unknown]` などの 4 行があるか確認する。無ければ `~/Documents/hidane/.obsidian/graph.json` を消して `/hidane --vault` を打つと作り直される。
+色が付かないときは Graph view 右上の歯車 → Groups に `[tone:v_m6]` … `[tone:v_p6]` と `[tone:off]` の行があるか確認する。0.5.0 より前の vault は自動で作り直される(古い設定は graph.json.bak)。Graph view を開いたままだと反映されないので、タブを閉じて開き直す。無ければ `~/Documents/hidane/.obsidian/graph.json` を消して `/hidane --vault` を打つと作り直される。
 
 ## 3. 一問答える
 
@@ -93,6 +93,7 @@ Claude Code が `sh .../scripts/next.sh` などの実行許可を毎回聞いて
 | | |
 |---|---|
 | `/hidane --weak` | 弱い所を 1 枚に。ズレを型にまとめ、流れのどの段で躓いているかを自分のコードの行で示す |
+| `/hidane --focus [概念]` | 集中。1 つの概念の関数を続けて 3 問。72 概念に薄く散らず、1 回の座りで 1 概念を灯す |
 | `/hidane --map` | 概念ごとの値・状態・repo の表をその場に出す |
 | `/hidane --vault` | 地図を作り直して Obsidian で開く |
 | `/hidane --lint` | 似た概念名を統合する(3 日に一度は自動) |

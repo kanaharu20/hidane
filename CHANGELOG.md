@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.5.0 — 2026-09-15
+
+Color and pace, after a week of use: a concept took 4-5 answers to change color, and nothing moved in between.
+
+- Graph colors are a 13-step gradient over the value (-6 red → 0 amber → +6 green); every answer moves the node one
+  or two steps. Never-asked stays gray. Old `graph.json` files are rebuilt (the old one is kept as `.bak`); close and
+  reopen the Graph view once.
+- `/hidane --focus [concept]`: three questions in a row on one concept, so one sitting settles one concept.
+- A concept answered once (including "I don't know") gets the boundary question type from then on (weight 2); the
+  weight-2 type used to require a recorded miss, so "I don't know" never led to it.
+- `alive()` matches the function name as a whole identifier (`run` no longer matches `running`).
+- `tag.sh` rejects concept names that cannot be file names (leading `.`, `..`, `/`).
+- 190 L0 tests.
+
 ## 0.4.0 — 2026-09-15
 
 Fixes from a full self-review of the scripts.

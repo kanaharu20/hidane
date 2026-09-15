@@ -17,6 +17,7 @@ One function, one question per invocation. Answer, record, stop. Call again for 
 - `--tag` … run `sh <HIDANE>/scripts/tag.sh --all --bg`. The functions of the current repository not on the map yet get tagged (uncommitted ones included; the LLM calls run in the background, so it returns in seconds). Show its one output line as is, stop. Do not wait or check on it. No question.
 - `--update` … run `sh "$(cat <HIDANE>/HOME)/install.sh" --update` to get the latest version, show its output as is, stop. No question.
 - `--weak` … the "Weak spots" steps below. No question.
+- `--focus [concept]` … focus mode. Same one question as with no argument, except step 1 runs `sh <HIDANE>/scripts/next.sh --focus [concept]`. Later plain `/hidane` calls keep asking about that concept on their own (put next.sh's first line "Focus: …" verbatim before the question).
 - text that does not start with a flag (`/hidane what is _us?`, `/hidane the part I missed in the last question`) … the "Explain" steps below. No question.
 - none … follow the steps below.
 
