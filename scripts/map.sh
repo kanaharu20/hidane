@@ -9,12 +9,12 @@
 #   --tsv         見出し・脚注なしのタブ区切り(概念 値 証拠 最終 状態 repo)。状態は記号。pages.sh 用
 #
 # 記録の中の語彙は言語に依らない記号(lang.sh 参照):
-#   型   trace 1 / edge 2(summary は旧記録だけ。重み 3 のまま読む)   結果  hit +1 / partial 0(証拠にはなる) / miss -1 / dunno -1 / skip 0(証拠にしない)
+#   型   trace 1 / edge 2(summary は旧記録だけ。重み 3 のまま読む)   結果  hit +1 / partial 0(証拠にはなる) / miss -1 / dunno 0(証拠にはなる。値は動かさない) / skip 0(証拠にしない)
 #   代表 概念列で先頭に * が付いた概念(next.sh が狙った概念)は満額、同じ行の他の概念は半分(切り捨て)。* が無い旧行は全部満額
 #   状態 known / fuzzy / unknown / unasked  表示だけ言語表を通す
 # 規則(定数は環境変数で上書きできる。全部仮置き):
 #   値   = Σ(型の重み × 符号)。1 行ごとに足し、±CAP で止める(歩きながら止める)
-#   鮮度 = known は最後の当たりの日、unknown は最後のズレ(miss / dunno)の日から FRESH_DAYS 日以内(ズレでは理解に戻らず、当たりでは非理解に戻らない)
+#   鮮度 = known は最後の当たりの日、unknown は最後のズレ(miss)の日から FRESH_DAYS 日以内(ズレでは理解に戻らず、当たりでは非理解に戻らない)
 #   状態 = 証拠なし → unasked / 値 >= +THRESHOLD かつ当たりが新鮮 → known / 値 <= -THRESHOLD かつズレが新鮮 → unknown / それ以外 → fuzzy
 # 出力は値の昇順(=出題の優先順)。末尾に「読んだ行数 / 使えた行数」を出す。
 set -eu
@@ -59,7 +59,7 @@ function jdn(d,   y, m, dd, a, yy, mm) {
   return dd + int((153*mm+2)/5) + 365*yy + int(yy/4) - int(yy/100) + int(yy/400) - 32045
 }
 function weight(t) { if (t == "trace") return wt; if (t == "edge") return we; if (t == "summary") return ws; return -1 }
-function sign(r) { if (r == "hit") return 1; if (r == "miss" || r == "dunno") return -1; if (r == "partial" || r == "skip") return 0; return -99 }
+function sign(r) { if (r == "hit") return 1; if (r == "miss") return -1; if (r == "partial" || r == "dunno" || r == "skip") return 0; return -99 }
 function label(st) { return (st == "known" ? l_known : st == "fuzzy" ? l_fuzzy : st == "unknown" ? l_unknown : l_unasked) }
 $2 == "fn" {
   repo = $1; line = $3; split(line, col, "|")

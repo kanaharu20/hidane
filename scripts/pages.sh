@@ -59,7 +59,7 @@ for d in "$ROOT"/*/; do
     if alive "$pl" "$fn"; then printf '%s\tfn\t%s\n' "$repo" "$row"; else printf '%s\tgone\t%s\n' "$repo" "$row"; fi; done
   true
 done | sh "$HERE/resolve.sh" --root "$ROOT" | LC_ALL=C sort -t'	' -k3,3 | awk -F'\t' -v tsv="$tsv" -v vault="$VAULT" -v today="$TODAY" -v aliases="$ROOT/aliases.md" \
-  -v l_known="$(L st_known)" -v l_fuzzy="$(L st_fuzzy)" -v l_unknown="$(L st_unknown)" -v l_unasked="$(L st_unasked)" \
+  -v l_known="$(L st_known)" -v l_fuzzy="$(L st_fuzzy)" -v l_unknown="$(L st_unknown)" -v l_unasked="$(L st_unasked)" -v l_tent="$(L st_tent)" \
   -v ty_trace="$(L ty_trace)" -v ty_edge="$(L ty_edge)" -v ty_summary="$(L ty_summary)" \
   -v rs_hit="$(L rs_hit)" -v rs_miss="$(L rs_miss)" -v rs_dunno="$(L rs_dunno)" -v rs_skip="$(L rs_skip)" -v rs_partial="$(L rs_partial)" \
   -v p_state="$(L p_state)" -v p_related="$(L p_related)" -v p_zure="$(L p_zure)" -v p_records="$(L p_records)" -v p_unasked="$(L p_unasked)" -v p_gone="$(L p_gone)" -v p_gone_n="$(L p_gone_n)" -v p_lost="$(L p_lost)" \
@@ -67,6 +67,7 @@ done | sh "$HERE/resolve.sh" --root "$ROOT" | LC_ALL=C sort -t'	' -k3,3 | awk -F
 function trim(s) { gsub(/^[ \t]+|[ \t]+$/, "", s); return s }
 function fname(c) { gsub("/", "／", c); return c }
 function label(st) { return (st == "known" ? l_known : st == "fuzzy" ? l_fuzzy : st == "unknown" ? l_unknown : l_unasked) }
+function slabel(c) { return label(state[c]) ((evid[c] + 0 == 0 && nfn[c] + 0 <= 1) ? "(" l_tent ")" : "") }   # 仮: 関数が 1 つしか付いていない未出題の概念
 function tlabel(t) { return (t == "trace" ? ty_trace : t == "edge" ? ty_edge : t == "summary" ? ty_summary : t) }
 function rlabel(r) { return (r == "hit" ? rs_hit : r == "miss" ? rs_miss : r == "partial" ? rs_partial : r == "dunno" ? rs_dunno : r == "skip" ? rs_skip : r) }
 function link(a, b) { if (a == b) return; if (!((a SUBSEP b) in rel)) { rel[a SUBSEP b] = 1; related[a] = related[a] "- [[" fname(b) "]]\n" } }
@@ -96,6 +97,7 @@ BEGIN {
       rc[repo] = rc[repo] c "\n"
     } else {
       fog[c] = fog[c] sprintf("- %s [[%s]] `%s` %s%s\n", date, repo, place, fnm, (kind == "gone" ? " " p_gone : ""))
+      if (kind == "fn") nfn[c]++
       if (kind == "gone" && !((repo SUBSEP place) in gseen)) { gseen[repo SUBSEP place] = 1; gone[repo]++ }
       rc[repo] = rc[repo] c "\n"
     }
@@ -106,11 +108,11 @@ END {
   for (i = 1; i <= nc; i++) {
     c = order[i]; f = vault "/concepts/" fname(c) ".md"
     r = repos[c]; gsub(",", ", ", r)
-    v = value[c] + 0; tone = (evid[c] + 0 == 0 ? "off" : v < 0 ? "v_m" (-v) : v > 0 ? "v_p" v : "v_z0")
+    v = value[c] + 0; tone = (evid[c] + 0 == 0 ? (nfn[c] + 0 <= 1 ? "tent" : "off") : v < 0 ? "v_m" (-v) : v > 0 ? "v_p" v : "v_z0")
     printf("---\nstate: %s\nvalue: %s\ntone: %s\nevidence: %s\nlast: %s\nrepos: [%s]\n", state[c], value[c], tone, evid[c], last[c], r) > f
     if (al[c] != "") printf("aliases: [%s]\n", al[c]) > f
     printf("updated: %s\n---\n# %s\n\n", today, c) > f
-    printf("%s **%s**(%s %s, %s %s, %s %s)\n\n", p_state, label(state[c]), h_value, value[c], h_evidence, evid[c], h_last, last[c]) > f
+    printf("%s **%s**(%s %s, %s %s, %s %s)\n\n", p_state, slabel(c), h_value, value[c], h_evidence, evid[c], h_last, last[c]) > f
     if (related[c] != "") printf("## %s\n%s\n", p_related, related[c]) > f
     if (zl[c] != "")      printf("## %s\n%s\n", p_zure, zl[c]) > f
     if (rec[c] != "")     printf("## %s\n%s\n", p_records, rec[c]) > f
@@ -127,7 +129,7 @@ END {
     printf("| %s | %s | %s |\n|---|---|---|\n", h_concept, h_state, h_value) > f
     n = split(rc[repo], cs, "\n"); delete done
     for (i = 1; i <= n; i++) { c = cs[i]; if (c == "" || (c in done)) continue; done[c] = 1
-      printf("| [[%s]] | %s | %s |\n", fname(c), label(state[c]), value[c]) > f }
+      printf("| [[%s]] | %s | %s |\n", fname(c), slabel(c), value[c]) > f }
     close(f)
     keepr[repo ".md"] = 1
   }
@@ -150,6 +152,9 @@ rm -f "$tsv.keep"
 # 無いときだけ書く。旧方式(state ごとの 4 色)の graph.json は丸ごと作り直す(.bak を残す)
 g="$VAULT/.obsidian/graph.json"
 if [ -f "$g" ] && grep -q '\[state:\(known\|fuzzy\|unknown\|理解\|曖昧\|非理解\|霧\|未出題\)' "$g"; then cp "$g" "$g.bak"; rm -f "$g"; fi
+# 0.5.5 より前の graph.json に仮(tent)の色を足す
+if [ -f "$g" ] && ! grep -q '\[tone:tent\]' "$g"; then sed -i.bak 's/^\( *\){ "query": "\[tone:off\]",/\1{ "query": "[tone:tent]", "color": { "a": 1, "rgb": 5592405 } },\
+\1{ "query": "[tone:off]",/' "$g"; fi
 [ -f "$g" ] || cat > "$g" <<'JSON'
 {
   "collapse-color-groups": false,
@@ -168,6 +173,7 @@ if [ -f "$g" ] && grep -q '\[state:\(known\|fuzzy\|unknown\|理解\|曖昧\|非�
     { "query": "[tone:v_p5]", "color": { "a": 1, "rgb": 4121489 } },
     { "query": "[tone:v_p6]", "color": { "a": 1, "rgb": 1566369 } },
     { "query": "[tone:off]",  "color": { "a": 1, "rgb": 7041144 } },
+    { "query": "[tone:tent]", "color": { "a": 1, "rgb": 5592405 } },
     { "query": "path:repos",  "color": { "a": 1, "rgb": 13620186 } }
   ],
   "showTags": false, "showAttachments": false, "hideUnresolved": true, "showOrphans": true,

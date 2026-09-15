@@ -32,6 +32,7 @@ Records live outside the repo: `~/.claude/hidane/<repo>/{log.md,functions.md,pat
 | `scripts/tag.sh` | tags functions with concepts and appends to functions.md (LLM call 1 of 2) |
 | `scripts/map.sh` | computes each concept's value and state from log.md, every time |
 | `scripts/next.sh` | picks the one function to ask next and writes pending |
+| `scripts/next.awk` | ranking, focus and question-type logic, run by next.sh via awk -f |
 | `scripts/keys.sh` | fixes the elements of the correct answer before asking, prints the "Include in your answer" line |
 | `scripts/record.sh` | derives the result from the per-key verdicts and appends one row to log.md (the only writer of the primary record) |
 | `scripts/resolve.sh` | read-side filter that maps concept names through aliases.md |

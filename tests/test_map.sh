@@ -81,5 +81,8 @@ r=$($MAP --root "$TMP/fr2" --today 2026-09-01 | row /dev/stdin 沈む); echo "$r
 # T12 代表印: * 付きは満額、他は半分。印の無い旧行は全部満額
 mkdir -p "$TMP/ld/x"; printf '| 日時 | 場所 | 関数 | 概念 | 型 | 問い | 結果 | miss | 備考 |\n|---|---|---|---|---|---|---|---|---|\n| 2026-09-08 | a.c:1-2 | f | *主, 副 | edge | q | hit |  |  |\n| 2026-09-08 | a.c:1-2 | f | 旧甲, 旧乙 | edge | q | hit |  |  |\n| 2026-09-08 | a.c:1-2 | f | *主, 副 | trace | q | hit |  |  |\n' > "$TMP/ld/x/log.md"
 m=$($MAP --root "$TMP/ld" --today 2026-09-08); { echo "$m" | grep -q '| 主 | +3 |' && echo "$m" | grep -q '| 副 | +1 |' && echo "$m" | grep -q '| 旧甲 | +2 |' && echo "$m" | grep -q '| 旧乙 | +2 |'; } && ok "T12 代表 * は満額(2+1)、他は半分(1+0)、印の無い旧行は満額" || ng "T12 lead" "$(echo "$m" | grep '主\|副\|旧')"
+# T14 「分からない」は証拠に数えるが値は動かさない。ズレの鮮度にも数えない(dunno だけでは非理解にならない)
+mkdir -p "$TMP/dn/x"; printf '| 日時 | 場所 | 関数 | 概念 | 型 | 問い | 結果 | ズレ | 備考 |\n|---|---|---|---|---|---|---|---|---|\n| 2026-09-08 | a.c:1-2 | f | 甲 | edge | q | dunno |  |  |\n| 2026-09-08 | a.c:1-2 | f | 甲 | edge | q | dunno |  |  |\n| 2026-09-08 | a.c:3-4 | g | 乙 | edge | q | miss |  |  |\n| 2026-09-08 | a.c:3-4 | g | 乙 | edge | q | dunno |  |  |\n' > "$TMP/dn/x/log.md"
+m=$($MAP --root "$TMP/dn" --today 2026-09-08); { echo "$m" | grep -q '| 甲 | +0 | 2 | 2026-09-08 | 曖昧 |' && echo "$m" | grep -q '| 乙 | -2 | 2 |'; } && ok "T14 dunno は値 0・証拠 1(甲 0/2、乙 -2/2)" || ng "T14 dunno" "$m"
 echo; echo "PASS $pass / FAIL $fail"
 [ $fail -eq 0 ]

@@ -107,7 +107,12 @@ if [ "$after" -ne $((before + 1)) ] || [ "$cols" -ne 10 ]; then
 fi
 [ -n "$usermsg" ] && echo "$usermsg"
 echo "$line"
-case "$result" in partial|miss) [ -n "$usermsg" ] && echo "$(L r_hint)" ;; esac
+case "$result" in partial|miss) if [ -n "$usermsg" ]; then
+  # 答えの後にだけ鍵を全部見せる(どれが当たり・触れていない・逆か)
+  echo "$(L r_keys_show)"
+  printf '%s\n' "$verdict" | tr ',' '\n' | paste "$keys" - | awk -F'\t' -v y="$(L rs_hit)" -v n="$(L r_missing)" -v c="$(L r_contra)" '{ v = $3; gsub(/^ +| +$/, "", v); printf("  %s. %s [%s]\n", $1, $2, (v == "yes" ? y : v == "no" ? n : c)) }'
+  echo "$(L r_hint)"
+fi ;; esac
 if [ -z "$FREE" ]; then rm -f "$pending" "$keys" "$keys.pending"; fi
 # 集中モードの残りを 1 つ減らす。0 になれば終わりを告げて消す
 ff="$ROOT/$REPO/focus"

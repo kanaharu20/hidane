@@ -19,7 +19,7 @@ $H
 L
 cat > "$ROOT/api/log.md" <<L
 $H
-| 2026-09-07 | c.py:1-5 | c | 末尾要素の扱い | trace | q | dunno |  |  |
+| 2026-09-07 | c.py:1-5 | c | 末尾要素の扱い | trace | q | miss |  |  |
 L
 cat > "$ROOT/api/functions.md" <<L
 $F

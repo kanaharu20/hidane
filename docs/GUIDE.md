@@ -50,10 +50,11 @@ You will see `concepts/`, `repos/`, `index.md`. Click the **Graph view** icon.
 |---|---|
 | toward green | understood (value +4 or more, with a hit within 30 days) |
 | around amber | fuzzy (mixed results, or not checked for 30 days) |
-| toward red | not understood (value -4 or less, with a miss or "don't know" within 30 days) |
+| toward red | not understood (value -4 or less, with a miss within 30 days; "don't know" does not move the value) |
 
 Colors are 13 steps over the value (-6 to +6), red → amber → green; one answer moves a concept one or two steps.
 | dark gray | unasked (tagged, never asked) |
+| darker gray | tentative (an unasked concept attached to only one function; its name is not settled yet. Shown as unasked(tentative) in tables) |
 | light gray | repository |
 
 At first **almost everything is dark gray**. That is normal; nodes light up one answer at a time.

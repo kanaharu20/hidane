@@ -39,7 +39,8 @@ $R --free "src/d.c:1-2" dd "x" "edge" "q" "hit" >/dev/null 2>&1; rc=$?
 
 # R13 代表概念に * が付き、map.sh は代表を満額、他を半分で数える(edge 当たり: 代表 +2、他 +1)
 printf 'src/e.c:1-9\tee\t甲, 乙\tedge\t乙\n' > "$ROOT/proj/pending"
-o=$($R "src/e.c:1-9" ee "甲, 乙" "edge" "q" "dunno"); echo "$o" | grep -q '| 甲, \*乙 | edge |' && ok "R13 代表概念に * が付く" || ng "R13 mark" "$o"
+sh scripts/keys.sh --root "$ROOT" --repo proj "返り値: x @2" "分岐: y @3" >/dev/null
+o=$($R "src/e.c:1-9" ee "甲, 乙" "edge" "q" --verdict "contra,no"); echo "$o" | grep -q '| 甲, \*乙 | edge |' && ok "R13 代表概念に * が付く" || ng "R13 mark" "$o"
 m=$(sh scripts/map.sh --root "$ROOT" --today 2026-09-08); { echo "$m" | grep -q '| 乙 | -2 |' && echo "$m" | grep -q '| 甲 | -1 |'; } && ok "R13b 代表は満額(-2)、他は半分(-1)" || ng "R13b half" "$(echo "$m" | grep '甲\|乙')"
 $R "src/e.c:1-9" ee "甲" "edge" "q" "dunno" >/dev/null 2>&1; rc=$?; [ $rc = 7 ] && ok "R13c pending の概念(4 列)と違えば exit 7 は変わらず" || ng "R13c" "rc=$rc"
 echo; echo "PASS $pass / FAIL $fail"; [ $fail -eq 0 ]

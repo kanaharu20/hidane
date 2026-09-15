@@ -229,5 +229,10 @@ ROOT2="$TMP/root2"; export HIDANE_VAULT="$TMP/vault2"
   && ok "I01 install.sh 一発で skill・hook・タグ付け・地図まで揃う" || ng "I01 setup" "rc=$rc $(cat "$TMP/setup.out")"
 (cd "$TMP" && HIDANE_ROOT="$ROOT2" HIDANE_SKILL_DIR="$TMP/skill2" sh "$H/install.sh" --lang ja < /dev/null > "$TMP/setup2.out" 2>&1); grep -q 'git リポジトリの外' "$TMP/setup2.out" && ok "I02 リポジトリの外では skill だけ置いて案内する" || ng "I02" "$(cat "$TMP/setup2.out")"
 
+# G27 JS/TS: アロー関数(const f = (…) =>、async)とクラス内メソッド(name(…) {)を拾う。1 行のアローと if (…) { は拾わない
+RJ="$TMP/proj_js"; mkdir -p "$RJ"; (cd "$RJ" && git init -q && git config user.email t@t && git config user.name t
+  printf 'export const add = (a, b) => {\n  const s = a + b;\n  return s;\n};\nconst load = async (path) => {\n  const d = await read(path);\n  if (!d) return null;\n  return d;\n};\nclass Store {\n  constructor(n) {\n    this.n = n;\n    this.items = [];\n  }\n  async put(item) {\n    if (!item) return false;\n    this.items.push(item);\n    return true;\n  }\n}\nconst cb = () => 1;\nfunction main() {\n  if (x) {\n    y();\n  }\n  return 0;\n}\n' > app.js; git add -A && git commit -qm init)
+o=$(cd "$RJ" && sh "$OLDPWD/scripts/scope.sh" --all 2>/dev/null)
+{ echo "$o" | grep -q 'app.js:1-4 *add ' && echo "$o" | grep -q 'app.js:5-9 *load ' && echo "$o" | grep -q 'app.js:15-20 *put ' && echo "$o" | grep -q 'app.js:11-14 *constructor ' && echo "$o" | grep -q 'app.js:22-27 *main ' && ! echo "$o" | grep -q ' cb ' && ! echo "$o" | grep -q ' if ' && [ "$(echo "$o" | grep -c '^app')" = 5 ]; } && ok "G27 JS のアロー関数とクラス内メソッドを名前つきで拾う(5 件)、1 行アローと if は拾わない" || ng "G27 js" "$o"
 echo; echo "PASS $pass / FAIL $fail"
 [ $fail -eq 0 ]

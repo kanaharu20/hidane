@@ -32,13 +32,14 @@ Lead concept: a question targets the one concept next.sh chose (the lead). recor
 |---|---|
 | hit | +1 |
 | partial | 0 (counted as evidence) |
-| miss, dunno | −1 |
+| miss | −1 |
+| dunno | 0 (counted as evidence; "I don't know" does not move the value) |
 | skip | 0 (not evidence) |
 
 | State | Condition |
 |---|---|
 | understood | value ≥ +4, last **hit** within 30 days |
-| not understood | value ≤ −4, last **miss or "I don't know"** within 30 days |
+| not understood | value ≤ −4, last **miss** within 30 days |
 | fuzzy | −4 < value < +4, or older than 30 days (the value is kept; only certainty decays) |
 
 Freshness is tracked separately for hits and misses (0.5.1) so that a concept that decayed to fuzzy cannot be re-certified as understood by a miss whose date happens to be fresh. Only a hit brings it back to understood; only a miss brings it back to not understood.

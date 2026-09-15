@@ -22,5 +22,6 @@ sh "$HERE/pages.sh" --root "$ROOT" --vault "$VAULT" >/dev/null
 enc=$(printf '%s' "$VAULT" | od -An -tx1 -v | tr -d ' \n' | sed 's/../%&/g' | tr 'a-f' 'A-F')
 url="obsidian://open?path=$enc"
 if [ -n "$PRINT" ]; then echo "$url"; exit 0; fi
-"${HIDANE_OPEN:-open}" "$url"
+case "$(uname -s)" in Darwin) opener=open ;; *) opener=xdg-open ;; esac   # Linux は xdg-open
+"${HIDANE_OPEN:-$opener}" "$url"
 echo "open.sh: $(L o_opened): $VAULT"

@@ -32,6 +32,7 @@ docs/DESIGN*.md     決め事とその理由。docs/GUIDE*.md は使う人の手
 | `scripts/tag.sh` | 関数に概念を付けて functions.md に追記する(LLM を呼ぶ 1 か所目) |
 | `scripts/map.sh` | log.md から概念ごとの値と状態を毎回計算する |
 | `scripts/next.sh` | 次に問う関数を 1 つ選び、pending に書く |
+| `scripts/next.awk` | next.sh の順位付け・集中・型の決定(next.sh から awk -f で呼ぶ) |
 | `scripts/keys.sh` | 答えを聞く前に正解の要素(鍵)を固定し、「答えに含めるもの」の行を出す |
 | `scripts/record.sh` | 鍵の判定から結果を決めて log.md に 1 行追記する(一次記録の唯一の書き口) |
 | `scripts/resolve.sh` | 読むときに概念名を aliases.md で新名に置き換えるフィルタ |

@@ -33,7 +33,7 @@ install_skill() {
   dst="${HIDANE_SKILL_DIR:-$HOME/.claude/skills/hidane}"
   mkdir -p "$dst/scripts" "$dst/hooks"
   rm -f "$dst/scripts/"*   # 前の版の残骸を消してから置く
-  cp "$HERE/SKILL.$lang.md" "$dst/SKILL.md"; cp "$HERE/scripts/"*.sh "$dst/scripts/"
+  cp "$HERE/SKILL.$lang.md" "$dst/SKILL.md"; cp "$HERE/scripts/"*.sh "$HERE/scripts/"*.awk "$dst/scripts/"
   cp "$HERE/hooks/post-commit" "$dst/hooks/"; cp "$HERE/install.sh" "$HERE/SKILL.en.md" "$HERE/SKILL.ja.md" "$HERE/VERSION" "$dst/"
   printf '%s\n' "$HERE" > "$dst/HOME"
   say "  /hidane を登録した: $dst" "  /hidane registered: $dst"

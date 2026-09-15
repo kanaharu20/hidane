@@ -17,7 +17,7 @@ o=$(sh scripts/migrate.sh --root "$ROOT")
 { grep -q '| trace | q | hit |' "$ROOT/old/log.md" && grep -q '| edge | q | dunno |' "$ROOT/old/log.md" && grep -q '| summary | q | miss |' "$ROOT/old/log.md" && [ -f "$ROOT/old/log.md.bak-1" ] && [ "$(cat "$ROOT/.version")" = 1 ] && [ ! -f "$ROOT/old/pending" ]; } \
   && ok "U01 段 1: 日本語の型・結果を記号に、退避を残し、古い pending を消し、.version=1" || ng "U01 migrate" "$o $(cat "$ROOT/old/log.md")"
 cp "$ROOT/old/log.md" "$TMP/after1"; o=$(sh scripts/migrate.sh --root "$ROOT"); diff -q "$TMP/after1" "$ROOT/old/log.md" >/dev/null && echo "$o" | grep -q 'nothing to do' && ok "U02 2 回目は何もしない(冪等)" || ng "U02 idempotent" "$o"
-m=$(sh scripts/map.sh --root "$ROOT" --today 2026-09-08); echo "$m" | grep -q '| 境界条件 | -4 | 3 |' && ok "U03 移行後の記録を map.sh が読める(+1 -2 -3 = -4)" || ng "U03 map after" "$m"
+m=$(sh scripts/map.sh --root "$ROOT" --today 2026-09-08); echo "$m" | grep -q '| 境界条件 | -2 | 3 |' && ok "U03 移行後の記録を map.sh が読める(+1 +0(dunno) -3 = -2)" || ng "U03 map after" "$m"
 sh scripts/migrate.sh --root "$TMP/none" | grep -q 'no records' && ok "U04 記録が無ければ何もしない" || ng "U04"
 
 # --update: 疑似リモートから新版を取ってくる

@@ -35,7 +35,7 @@ One function, one question per invocation. Answer, record, stop. Call again for 
    **Keys are only the facts that decide the answer to this question.** If the question is "what does it return", the keys are the return value and the branches or comparisons that decide it. Do not make keys out of things the question did not ask for, such as how a lock is taken or an intermediate arithmetic value (if the answer is correct without it, it is not a key).
    **Keys are outcomes, never reasons.** "line 59 checks only is_done, so it does not end" is a reason (an answer to "why"), and the question did not ask why. Write only what happens: "the condition at line 59 stays true and the loop continues" (keys.sh rejects keys containing "because").
    **Keys are facts on this function's own lines.** "@ line" must fall inside the place next.sh printed (keys.sh rejects lines outside it or in another file). What happens inside a called function is another function's question, never a key here. **One thing asked** (return / call / order / state; call and order together are allowed as "in what order"). Branch keys only support it (keys.sh rejects other combinations and branch-only keys). For "what is called next" the keys are calls and order. For "what does it return", the return value and the branch; intermediate steps are not keys. Use "where does it exit" only for a function with 2 or more ways out. For a function without branches ask what it returns, or what it calls (and on what).
-   Never use a sentence that would be true of any function ("something happens and it ends"). **Never show the keys to the user.**
+   Never use a sentence that would be true of any function ("something happens and it ends"). **Never show the keys before the answer.** (On partial or miss, record.sh prints the full key list after the answer; show that as is.)
 4. **Ask**: fit exactly one question into the "Question form". Pick one concrete value from "Input candidates".
    - The form is always "Given <input>, what does it return / what is called next / where does it exit?". Name one observable thing. Vague targets such as "what happens to the loop" or "how does it behave" leave the answer's granularity open and never line up with the keys. The input is a concrete value or one situation ("stop is raised during the debug phase").
    - Never ask "why", "what is needed", "what should be done" (they reveal that an answer exists). Do not widen the question with "including the process" or "and why".
@@ -90,7 +90,7 @@ Fold the past misses into one page and show the reader where they stumble. The s
 
 ## Never
 
-- Explain the code before asking. Feedback stops at the line numbers record.sh prints. Never reveal what a missing key says.
+- Explain the code before asking. Feedback stops at what record.sh prints (the result line, the record, and on partial or miss the key list). Add no explanation to it.
 - Ask without keys in place, or rewrite keys after seeing the answer.
 - Output scores, percentages, or evaluative words ("you understand this well").
 - Record a second answer. The record is the first answer.

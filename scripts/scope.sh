@@ -63,7 +63,11 @@ if [ -n "$all" ]; then
         # C 風: 列 0 から始まり ( を含み ; で終わらず、制御構文で始まらない
         (/^[A-Za-z_][^;=]*\(/ && $0 !~ /;[[:space:]]*$/ && $0 !~ /^(if|for|while|switch|return|else|do|case|from|import)[^A-Za-z0-9_]/ && $0 !~ /^#/) ||
         # Java/C#/TS のメソッド: 字下げ + 修飾子 + 名前(
-        /^[[:space:]]+(public|private|protected|static|export|override|final)[^;=]*[A-Za-z_][A-Za-z0-9_]*[[:space:]]*\([^;]*$/ {
+        /^[[:space:]]+(public|private|protected|static|export|override|final)[^;=]*[A-Za-z_][A-Za-z0-9_]*[[:space:]]*\([^;]*$/ ||
+        # JS/TS: const f = (…) => / const f = async (…) => / const f = function (…)
+        /^[[:space:]]*(export[[:space:]]+)?(const|let|var)[[:space:]]+[A-Za-z_$][A-Za-z0-9_$]*[[:space:]]*=[[:space:]]*(async[[:space:]]*)?(function[[:space:]]*\(|\([^)]*\)[[:space:]]*=>|[A-Za-z_$][A-Za-z0-9_$]*[[:space:]]*=>)/ ||
+        # JS/TS のクラス内メソッド: 字下げ + 名前(…) { で終わる(if/for などと test の it/describe は除く)
+        (/^[[:space:]]+(async[[:space:]]+)?[A-Za-z_$][A-Za-z0-9_$]*[[:space:]]*\([^;]*\)[[:space:]]*\{[[:space:]]*$/ && $0 !~ /^[[:space:]]+(async[[:space:]]+)?(if|for|while|switch|catch|else|do|try|function|return|foreach|using|lock|synchronized|it|test|describe|expect)[[:space:]]*\(/) {
           flush()
           start = NR
           brace_needed = ($0 !~ /^[[:space:]]*(async[[:space:]]+)?(def|class|fn|func|function|sub|impl|struct|enum|interface|trait|proc)[[:space:]]/)
@@ -77,6 +81,8 @@ if [ -n "$all" ]; then
       {
         # 見出しから関数名だけを取る
         h = $2; sub(/[[:space:]]*\(.*$/, "", h); sub(/[[:space:]]*[{:;][[:space:]]*$/, "", h)
+        # JS の const f = async (…) => / const f = x => は「= 以降」を落として名前にする
+        sub(/[[:space:]]*=[[:space:]]*(async[[:space:]]+)?[A-Za-z_$][A-Za-z0-9_$]*[[:space:]]*=>.*$/, "", h); sub(/[[:space:]]*=[[:space:]]*(async|function)?[[:space:]]*$/, "", h)
         m = h; sub(/.*[^A-Za-z0-9_$]/, "", m)
         f = $1; sub(/:.*/, "", f)
         if ((f ":" m) in seen) next

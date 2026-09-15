@@ -41,7 +41,7 @@ o=$($R "a.c:1-99" f "境界条件" edge "q" --verdict "yes,yes,yes,yes"); rc=$?
 pend; fourkeys
 o=$($R "a.c:1-99" f "境界条件" edge "q" --verdict "yes,yes,no,yes")
 { echo "$o" | sed -n 1p | grep -q '^部分(鍵 3 / 4) — 触れていない: 順序 L28-29$' && echo "$o" | grep -q '| partial | 触れていない: 順序: 作った分だけ join する @28-29 |'; } && ok "V02 no が 1 つ → partial。ユーザーには種別と行番号、log には鍵の文" || ng "V02" "$o"
-echo "$o" | sed -n 3p | grep -q '^解説が要るなら「/hidane ' && ok "V02b partial のとき 3 行目に解説の案内" || ng "V02b hint" "$o"
+{ echo "$o" | sed -n 3p | grep -q '^鍵(' && echo "$o" | grep -q '^  1\. 呼び出し: stopped を立てる @ 26 \[当たり\]$' && echo "$o" | grep -q '^  3\. 順序: 作った分だけ join する @ 28-29 \[触れていない\]$' && echo "$o" | tail -1 | grep -q '^解説が要るなら「/hidane '; } && ok "V02b partial のとき鍵を全部見せ(当たり/触れていない)、最後に解説の案内" || ng "V02b hint" "$o"
 pend; fourkeys
 o=$($R "a.c:1-99" f "境界条件" edge "q" --verdict "yes,contra,no,no")
 { echo "$o" | sed -n 1p | grep -q '^ズレ(鍵 1 / 4) — 触れていない: 順序 L28-29, 順序 #4 — 逆: 呼び出し L27$' && echo "$o" | grep -q '| miss | 逆: 呼び出し: wake_all を呼ぶ @27; 触れていない: 順序: 作った分だけ join する @28-29; 触れていない: 順序: 1 を返す |'; } && ok "V03 contra があれば miss。行の無い鍵は #番号" || ng "V03" "$o"
@@ -66,5 +66,5 @@ $R "zzz.c:1-2" nope x summary "q" dunno >/dev/null 2>"$TMP/e"; rc=$?; [ $rc = 7 
 # V14 --path は問い合わせだけ。ディレクトリも path も作らない
 rm -rf "$TMP/rootq"; (cd "$TMP" && git init -q q >/dev/null 2>&1 && cd q && sh "$OLDPWD/scripts/record.sh" --root "$TMP/rootq" --path >/dev/null); [ ! -d "$TMP/rootq" ] && ok "V14 --path は何も作らない" || ng "V14 side effect" "$(ls -R "$TMP/rootq")"
 # map: partial は証拠だが値は動かない
-o=$(sh scripts/map.sh --root "$ROOT" --today "$(date +%Y-%m-%d)"); echo "$o" | grep -q '^| 境界条件 | -2 | 5 |' && ok "V10 map: partial は証拠に数えるが値は動かない(hit+2, partial 0, miss-2, dunno-2, partial 0 → -2 / 5)" || ng "V10 map" "$(echo "$o" | grep 境界条件)"
+o=$(sh scripts/map.sh --root "$ROOT" --today "$(date +%Y-%m-%d)"); echo "$o" | grep -q '^| 境界条件 | +0 | 5 |' && ok "V10 map: partial と dunno は証拠に数えるが値は動かない(hit+2, partial 0, miss-2, dunno 0, partial 0 → 0 / 5)" || ng "V10 map" "$(echo "$o" | grep 境界条件)"
 echo; echo "PASS $pass / FAIL $fail"; [ $fail -eq 0 ]

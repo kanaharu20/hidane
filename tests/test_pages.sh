@@ -49,7 +49,7 @@ sh scripts/pages.sh --root $FX --vault "$V" --today 2026-09-08 >/dev/null 2>&1
 # P09 初回の graph.json に 4 状態の色がある
 rm -rf "$TMP/v2"; sh scripts/pages.sh --root $FX --vault "$TMP/v2" --today 2026-09-08 >/dev/null 2>&1
 n=$(grep -c '\[tone:v_' "$TMP/v2/.obsidian/graph.json"); { [ "$n" = 13 ] && grep -q '"\[tone:off\]"' "$TMP/v2/.obsidian/graph.json"; } && ok "P09 graph.json に値 13 段の色と未出題の灰" || ng "P09 graph.json" "tone queries=$n"
-{ grep -q '^tone: v_m3$' "$TMP/v2/concepts/境界条件.md" && grep -q '^tone: off$' "$TMP/v2/concepts/起動と引数処理.md"; } && ok "P09b frontmatter の tone は値から(-3 → v_m3、未出題 → off)" || ng "P09b tone" "$(grep tone "$TMP/v2/concepts/境界条件.md" "$TMP/v2/concepts/起動と引数処理.md")"
+{ grep -q '^tone: v_m3$' "$TMP/v2/concepts/境界条件.md" && grep -q '^tone: off$' "$TMP/v2/concepts/入力検証.md" && grep -q '^tone: tent$' "$TMP/v2/concepts/起動と引数処理.md" && grep -q '| \[\[起動と引数処理\]\] | 未出題(仮) |' "$TMP/v2/repos/worker.md"; } && ok "P09b tone は値から(-3 → v_m3、未出題 → off、関数 1 つの未出題 → tent、表に 未出題(仮))" || ng "P09b tone" "$(grep tone "$TMP/v2/concepts/境界条件.md" "$TMP/v2/concepts/起動と引数処理.md")"
 
 # P10 repo ページに概念と状態が重複なしで並ぶ
 r="$V/repos/worker.md"
@@ -94,5 +94,8 @@ rm "$R5/w/path"; sh scripts/pages.sh --root "$R5" --vault "$TMP/v5" --today 2026
 printf '%s\n' "$TMP/no-such-dir" > "$R5/w/path"; sh scripts/pages.sh --root "$R5" --vault "$TMP/v5" --today 2026-09-08 >/dev/null 2>&1
 { grep -q '^リポジトリが .*no-such-dir に無い' "$TMP/v5/repos/w.md" && [ "$(grep -c '(消えた)' "$TMP/v5/concepts/境界条件.md")" = 2 ]; } && ok "P16 repo の場所が消えていれば全部 (消えた) と repo ページに案内" || ng "P16 lost" "$(cat "$TMP/v5/repos/w.md")"
 
+# P17 仮(tent)の色が無い graph.json には足す(.bak を残す)。graph.json は毎回作り直さない
+sed -i.orig '/tone:tent/d' "$TMP/v2/.obsidian/graph.json"; sh scripts/pages.sh --root $FX --vault "$TMP/v2" --today 2026-09-08 >/dev/null 2>&1
+{ grep -q '"\[tone:tent\]"' "$TMP/v2/.obsidian/graph.json" && [ -f "$TMP/v2/.obsidian/graph.json.bak" ] && [ "$(grep -c '\[tone:' "$TMP/v2/.obsidian/graph.json")" = 15 ]; } && ok "P17 仮の色が無い graph.json に足す(15 群)" || ng "P17 tent upgrade" "$(grep tone "$TMP/v2/.obsidian/graph.json")"
 echo; echo "PASS $pass / FAIL $fail"
 [ $fail -eq 0 ]

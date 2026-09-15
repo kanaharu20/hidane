@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.5.5 — 2026-09-15
+
+Decisions from the defect discussion.
+
+- "I don't know" (dunno) no longer moves the value: sign 0, still counted as evidence, not counted for miss freshness.
+  An honest "I don't know" no longer pushes a concept toward red; only a wrong answer does.
+- On partial or miss, record.sh prints the full key list after the record (each marked hit / not mentioned / contra),
+  then the explanation hint. Keys stay hidden before the answer.
+- Tentative concepts: an unasked concept attached to only one function gets tone `tent` (a darker gray) and
+  "unasked(tentative)" in tables. Existing graph.json files get the new color group added (.bak kept).
+- scope.sh detects JS/TS arrow functions (`const f = (…) =>`, `async`, `= function (`) and indented class methods
+  (`name(…) {`), excluding control keywords and test helpers (it / test / describe).
+- open.sh uses `xdg-open` outside macOS.
+- next.sh's awk program moved to `scripts/next.awk` (run via `awk -f`); install.sh copies `*.awk`.
+- 207 tests.
+
 ## 0.5.4 — 2026-09-15
 
 The last line of a question no longer names key kinds or counts ("何を呼ぶか(2 つ)" read as a hint, and "呼ぶ"
