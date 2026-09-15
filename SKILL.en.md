@@ -18,6 +18,7 @@ One function, one question per invocation. Answer, record, stop. Call again for 
 - `--update` … run `sh "$(cat <HIDANE>/HOME)/install.sh" --update` to get the latest version, show its output as is, stop. No question.
 - `--weak` … the "Weak spots" steps below. No question.
 - `--focus [concept]` … focus mode. Step 1 runs `sh <HIDANE>/scripts/next.sh --focus [concept]`; then ask, wait, judge and record one question exactly as with no argument. **After showing record.sh's output, go back to step 1 for the next question** (from the second question on, run `next.sh` with no flag; it keeps the same concept). Put next.sh's first line "Focus: … (N left)" verbatim before each question. Stop when record.sh prints "Focus: … done" (3 questions; `HIDANE_FOCUS_N` changes it). If next.sh prints that focus was released, ask that one question and stop. Never ask the questions together: always one, and wait for the answer before the next.
+- `--dispute <key number> <reason>` … dispute a key of the last question. Run `sh <HIDANE>/scripts/record.sh --dispute <number> "<reason>"`, show its output verbatim and stop. Value and state do not change. No question. The number is the one record.sh showed in the key list after a partial or miss.
 - text that does not start with a flag (`/hidane what is _us?`, `/hidane the part I missed in the last question`) … the "Explain" steps below. No question.
 - none … follow the steps below.
 
@@ -42,6 +43,7 @@ One function, one question per invocation. Answer, record, stop. Call again for 
    - **The question's last sentence ends with the "Question ending" keys.sh printed.** No "include in your answer" line, no kind names, no counts ("2 of them"). No key contents, no line numbers.
    - At most 4 lines including it. Place and function first. No code quotes (no expressions such as `x == 0`, no line numbers, no names of the functions it calls; describe the input in words: "a dongle with an empty wait list"). No hints. Never two questions.
    - Ask in the language the user writes in.
+   - **Once the text is ready, pass it through `sh <HIDANE>/scripts/ask.sh "<full question>"`.** On exit 2, fix it as the reason says and run again (pending and keys stay). Show its output (the question) to the user verbatim. record.sh refuses a question that did not go through ask.sh (exit 2).
 5. **Wait** for the answer. "I don't know" is a valid answer. Do not prompt, do not ask to rephrase.
 6. **Judge per key**: compare the answer against each key and mark it `yes` (states that fact specifically) / `no` (does not mention it) / `contra` (says the opposite).
    - Paraphrases count as yes. A generic statement that would fit any function does not.

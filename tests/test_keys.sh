@@ -8,9 +8,10 @@ ROOT="$TMP/root"; mkdir -p "$ROOT/p"; export HIDANE_VAULT="$TMP/vault"
 pass=0; fail=0
 ok() { pass=$((pass+1)); echo "PASS $1"; }
 ng() { fail=$((fail+1)); echo "FAIL $1"; [ -n "${2:-}" ] && echo "     $2"; }
-K="sh scripts/keys.sh --root $ROOT --repo p"; R="sh scripts/record.sh --root $ROOT --repo p"
+K="sh scripts/keys.sh --root $ROOT --repo p"; R="sh scripts/record.sh --root $ROOT --repo p"; A="sh scripts/ask.sh --root $ROOT --repo p"
 pend() { printf 'a.c:1-99\tf\t境界条件\tedge\n' > "$ROOT/p/pending"; }
-fourkeys() { $K "呼び出し: stopped を立てる @ 26" "呼び出し: wake_all を呼ぶ @ 27" "順序: 作った分だけ join する @ 28-29" "順序: 1 を返す" >/dev/null; }
+fourkeys() { $K "呼び出し: stopped を立てる @ 26" "呼び出し: wake_all を呼ぶ @ 27" "順序: 作った分だけ join する @ 28-29" "順序: 1 を返す" >/dev/null; $A "a.c f。
+x のとき、どの関数がどの順で呼ばれますか" >/dev/null; }
 
 $K "x" "y" >/dev/null 2>"$TMP/e"; rc=$?; [ $rc = 5 ] && grep -q 'pending' "$TMP/e" && ok "K01 pending が無ければ鍵を置けない(exit 5)" || ng "K01" "rc=$rc"
 pend; $K "x" >/dev/null 2>&1; rc=$?; [ $rc = 2 ] && [ ! -f "$ROOT/p/keys" ] && ok "K02 鍵 1 個は exit 2" || ng "K02" "rc=$rc"
@@ -54,7 +55,8 @@ $R "a.c:1-99" f "境界条件" edge "q" hit >/dev/null 2>"$TMP/e"; rc=$?; [ $rc 
 o=$($R "a.c:1-99" f "境界条件" edge "q" dunno); echo "$o" | grep -q '| dunno |  |  |$' && ok "V08 dunno は鍵なしで書ける" || ng "V08" "$o"
 o=$($R --free "b.c:1-2" g "x" trace "q" partial "手で"); echo "$o" | grep -q '| partial | 手で |' && ok "V09 --free なら partial を直接書ける" || ng "V09" "$o"
 # V11 鍵の文にバッククォートや $( ) があっても実行されない(eval を使わない)
-pend; $K "返り値: \`touch $TMP/INJECTED\` を返す @ 5" "分岐: \$(touch $TMP/INJ2) @ 6" >/dev/null
+pend; $K "返り値: \`touch $TMP/INJECTED\` を返す @ 5" "分岐: \$(touch $TMP/INJ2) @ 6" >/dev/null; $A "a.c f。
+x のとき、何を返しますか。そうなる条件も添えてください" >/dev/null
 o=$($R "a.c:1-99" f "境界条件" edge "q" --verdict "no,no" "")
 { [ ! -e "$TMP/INJECTED" ] && [ ! -e "$TMP/INJ2" ] && echo "$o" | grep -q 'touch' ; } && ok "V11 鍵の文は実行されず、そのまま log に残る" || ng "V11 eval" "$o"
 # V12 鍵が別の問いのもの(鍵を置いた後に next.sh の決定が変わった)なら exit 7

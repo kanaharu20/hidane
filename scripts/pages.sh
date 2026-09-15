@@ -61,7 +61,7 @@ for d in "$ROOT"/*/; do
 done | sh "$HERE/resolve.sh" --root "$ROOT" | LC_ALL=C sort -t'	' -k3,3 | awk -F'\t' -v tsv="$tsv" -v vault="$VAULT" -v today="$TODAY" -v aliases="$ROOT/aliases.md" \
   -v l_known="$(L st_known)" -v l_fuzzy="$(L st_fuzzy)" -v l_unknown="$(L st_unknown)" -v l_unasked="$(L st_unasked)" -v l_tent="$(L st_tent)" \
   -v ty_trace="$(L ty_trace)" -v ty_edge="$(L ty_edge)" -v ty_summary="$(L ty_summary)" \
-  -v rs_hit="$(L rs_hit)" -v rs_miss="$(L rs_miss)" -v rs_dunno="$(L rs_dunno)" -v rs_skip="$(L rs_skip)" -v rs_partial="$(L rs_partial)" \
+  -v rs_hit="$(L rs_hit)" -v rs_miss="$(L rs_miss)" -v rs_dunno="$(L rs_dunno)" -v rs_skip="$(L rs_skip)" -v rs_partial="$(L rs_partial)" -v rs_dispute="$(L rs_dispute)" \
   -v p_state="$(L p_state)" -v p_related="$(L p_related)" -v p_zure="$(L p_zure)" -v p_records="$(L p_records)" -v p_unasked="$(L p_unasked)" -v p_gone="$(L p_gone)" -v p_gone_n="$(L p_gone_n)" -v p_lost="$(L p_lost)" \
   -v h_concept="$(L h_concept)" -v h_state="$(L h_state)" -v h_value="$(L h_value)" -v h_evidence="$(L h_evidence)" -v h_last="$(L h_last)" '
 function trim(s) { gsub(/^[ \t]+|[ \t]+$/, "", s); return s }
@@ -69,7 +69,7 @@ function fname(c) { gsub("/", "／", c); return c }
 function label(st) { return (st == "known" ? l_known : st == "fuzzy" ? l_fuzzy : st == "unknown" ? l_unknown : l_unasked) }
 function slabel(c) { return label(state[c]) ((evid[c] + 0 == 0 && nfn[c] + 0 <= 1) ? "(" l_tent ")" : "") }   # 仮: 関数が 1 つしか付いていない未出題の概念
 function tlabel(t) { return (t == "trace" ? ty_trace : t == "edge" ? ty_edge : t == "summary" ? ty_summary : t) }
-function rlabel(r) { return (r == "hit" ? rs_hit : r == "miss" ? rs_miss : r == "partial" ? rs_partial : r == "dunno" ? rs_dunno : r == "skip" ? rs_skip : r) }
+function rlabel(r) { return (r == "hit" ? rs_hit : r == "miss" ? rs_miss : r == "partial" ? rs_partial : r == "dunno" ? rs_dunno : r == "skip" ? rs_skip : r == "dispute" ? rs_dispute : r) }
 function link(a, b) { if (a == b) return; if (!((a SUBSEP b) in rel)) { rel[a SUBSEP b] = 1; related[a] = related[a] "- [[" fname(b) "]]\n" } }
 BEGIN {
   while ((getline l < aliases) > 0) { if (l ~ /^\| 20/) { split(l, a, "|"); o = trim(a[3]); nn = trim(a[4]); if (o != "" && nn != "" && o != nn) { to[o] = nn; olds[++no] = o } } }
@@ -93,7 +93,7 @@ BEGIN {
     if (kind == "log") {
       type = trim(col[6]); q = trim(col[7]); res = trim(col[8]); zure = trim(col[9])
       rec[c] = rec[c] sprintf("- %s [[%s]] `%s` %s — %s — %s%s\n", date, repo, place, fnm, tlabel(type), rlabel(res), (q != "" ? "(" q ")" : ""))
-      if (zure != "") zl[c] = zl[c] sprintf("- %s(%s, %s)\n", zure, repo, date)
+      if (zure != "") zl[c] = zl[c] sprintf("- %s%s(%s, %s)\n", (res == "dispute" ? rs_dispute ": " : ""), zure, repo, date)
       rc[repo] = rc[repo] c "\n"
     } else {
       fog[c] = fog[c] sprintf("- %s [[%s]] `%s` %s%s\n", date, repo, place, fnm, (kind == "gone" ? " " p_gone : ""))

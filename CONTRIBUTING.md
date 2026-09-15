@@ -34,6 +34,7 @@ Records live outside the repo: `~/.claude/hidane/<repo>/{log.md,functions.md,pat
 | `scripts/next.sh` | picks the one function to ask next and writes pending |
 | `scripts/next.awk` | ranking, focus and question-type logic, run by next.sh via awk -f |
 | `scripts/keys.sh` | fixes the elements of the correct answer before asking, prints the "Include in your answer" line |
+| `scripts/ask.sh` | validates and stores the full question text (line count, place and function, no expressions / line numbers / callee names, the ending) |
 | `scripts/record.sh` | derives the result from the per-key verdicts and appends one row to log.md (the only writer of the primary record) |
 | `scripts/resolve.sh` | read-side filter that maps concept names through aliases.md |
 | `scripts/pages.sh` | rebuilds the map (the Obsidian vault) from the records |

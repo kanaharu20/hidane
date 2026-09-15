@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.5.6 — 2026-09-15
+
+- `ask.sh`: the full question text goes through a mechanical check before the user sees it (at most 4 lines; file and
+  function on line 1; no code expressions, line numbers or callee names from the call keys on later lines; the last
+  line ends with the ending keys.sh gave). record.sh refuses to record a question that did not pass. This moves the
+  prose rules of SKILL.md step 4 into a script.
+- `record.sh --dispute <n> <reason>`: dispute a key of the most recent record. Appends one `dispute` row (place,
+  function, concepts and type copied from that record; the key text, the reason, the original timestamp). map.sh
+  ignores dispute rows, so value and state never change; concept pages and next.sh show them as 異議 so the next
+  keys for that function are made with the dispute in view. record.sh keeps `keys.last` for this.
+- 229 tests.
+
 ## 0.5.5 — 2026-09-15
 
 Decisions from the defect discussion.

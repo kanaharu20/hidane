@@ -15,6 +15,7 @@ hidane $v — 自分のコードのどこを理解していて、どこをまだ
                              例: /hidane printf って何？  /hidane 自分の弱い所は  /hidane さっきの問いで触れていなかった所
   /hidane --weak             弱い所を 1 枚に。ズレを型にまとめ、流れのどの段で躓いているかを自分のコードの行で示す
   /hidane --focus [概念]     集中。1 回の呼び出しで、1 つの概念の関数を 1 問ずつ 3 問出して決着をつける(省略なら順位最上位の概念)
+  /hidane --dispute <番号> <理由>  直前の問いの鍵に異議を残す(値は変わらない。次にその関数を問うとき鍵を作る側に見せる)
   /hidane --map              概念ごとの値と状態の表
   /hidane --vault            地図を作り直して Obsidian で開く
   /hidane --lint             似た概念名を統合する(3 日に一度は自動)
@@ -35,6 +36,7 @@ hidane $v — a map of which parts of your code you understand and which you hav
                              e.g. /hidane what is printf?   /hidane where am I weak   /hidane the part I missed in the last question
   /hidane --weak             weak spots on one page: misses folded into a pattern, the flow, the step you stumble on, in your own lines
   /hidane --focus [concept]  focus: 3 questions in one invocation, one at a time, on one concept to settle it (default: the top-ranked concept)
+  /hidane --dispute <n> <reason>  dispute a key of the last question (value unchanged; shown when keys are next made for that function)
   /hidane --map              the table of concepts, values and states
   /hidane --vault            rebuild the map and open it in Obsidian
   /hidane --lint             merge concept names that mean the same (also automatic every 3 days)

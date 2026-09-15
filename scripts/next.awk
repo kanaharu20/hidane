@@ -7,8 +7,8 @@ BEGIN {
   while ((getline l < alllog) > 0) {
     split(l, t, "\t"); repo = t[1]; split(t[2], col, "|"); z = trim(col[9]); res = trim(col[8]); k = split(trim(col[5]), cs, ",")
     for (i = 1; i <= k; i++) { c = trim(cs[i]); sub(/^\*/, "", c); if (c == "") continue
-      if (res != "skip") answered[c] = 1
-      if (z != "") zure[c] = zure[c] "- " z "(" repo ", " substr(trim(col[2]), 1, 10) ")\n" }
+      if (res != "skip" && res != "dispute") answered[c] = 1
+      if (z != "") zure[c] = zure[c] "- " (res == "dispute" ? l_dispute ": " : "") z "(" repo ", " substr(trim(col[2]), 1, 10) ")\n" }
   }
 }
 {

@@ -72,6 +72,7 @@ $2 == "fn" {
   read++
   repo = $1; line = $3; split(line, col, "|")
   date = substr(trim(col[2]), 1, 10); concepts = trim(col[5]); type = trim(col[6]); result = trim(col[8])
+  if (result == "dispute") next   # 異議は記録だが値には数えない
   w = weight(type); s = sign(result)
   if (w < 0 || s == -99 || date !~ /^20[0-9][0-9]-[0-9][0-9]-[0-9][0-9]$/) { printf("map.sh: %s (%s): %s\n", m_bad, repo, line) > "/dev/stderr"; next }
   used++

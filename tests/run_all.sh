@@ -5,7 +5,7 @@ cd "$(dirname "$0")" || exit 2
 rc=0; total=0
 # 本物の記録に検査が触れていないことを、前後の一覧で確かめる(fixture の repo が ~/.claude/hidane に漏れた事故があった)
 real="${HIDANE_ROOT:-$HOME/.claude/hidane}"; before=$(ls -A "$real" 2>/dev/null | sort)
-for t in test_map.sh test_pages.sh test_tag.sh test_record.sh test_next.sh test_lint.sh test_lang.sh test_keys.sh test_update.sh test_explain.sh test_weak.sh; do
+for t in test_map.sh test_pages.sh test_tag.sh test_record.sh test_next.sh test_ask.sh test_lint.sh test_lang.sh test_keys.sh test_update.sh test_explain.sh test_weak.sh; do
   echo "### $t"
   out=$(sh "$t" 2>&1); r=$?
   echo "$out" | grep -E '^FAIL|^PASS [0-9]+ / FAIL'

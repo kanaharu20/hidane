@@ -35,7 +35,7 @@ if [ -n "$SHOW" ]; then [ -f "$kf" ] && cat "$kf"; exit 0; fi
 [ $# -ge 2 ] && [ $# -le 5 ] || { echo "keys.sh: $(L k_count) ($#)" >&2; exit 2; }
 place=$(cut -f1 "$ROOT/$REPO/pending"); rng=${place##*:}; ra=${rng%-*}; rb=${rng#*-}
 case "$ra$rb" in *[!0-9]*|"") ra="" ;; esac   # 範囲が読めなければ行の検査はしない
-: > "$kf"
+: > "$kf"; rm -f "$kf.end" "$ROOT/$REPO/question"
 i=0; n_ret=0; n_branch=0; n_call=0; n_order=0; n_state=0
 for k in "$@"; do
   i=$((i+1))
@@ -70,4 +70,5 @@ cp "$ROOT/$REPO/pending" "$kf.pending"   # どの問いの鍵かを残す。reco
 printf "keys.sh: $(L k_saved)\n" "$i"
 case "$prim" in "call order") end=$(L k_e_callorder) ;; *) end=$(L k_e_$prim) ;; esac
 [ "$n_branch" -gt 0 ] && end="$end$(L k_e_branch)"
+printf '%s\n' "$end" > "$kf.end"   # ask.sh が最後の行と照らす
 printf "$(L k_end)\n%s\n" "$end" "$(L k_end_note)"

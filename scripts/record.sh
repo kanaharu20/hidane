@@ -13,13 +13,14 @@
 # 追記後、その行が読めることを確かめ(読めなければ exit 6 で取り消す)、pending と keys を消し、vault を作り直す。
 set -eu
 HERE=$(cd "$(dirname "$0")" && pwd -P)
-ROOT="${HIDANE_ROOT:-$HOME/.claude/hidane}"; REPO=""; PATHONLY=""; FREE=""
+ROOT="${HIDANE_ROOT:-$HOME/.claude/hidane}"; REPO=""; PATHONLY=""; FREE=""; DISPUTE=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --root) ROOT="$2"; shift 2 ;;
     --repo) REPO="$2"; shift 2 ;;
     --path) PATHONLY=1; shift ;;
     --free) FREE=1; shift ;;
+    --dispute) DISPUTE=1; shift ;;
     --help|-h) sed -n '2,13p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     --) shift; break ;;
     -*) echo "record.sh: unknown option: $1" >&2; exit 2 ;;
@@ -34,8 +35,28 @@ if [ -z "$REPO" ]; then
 fi
 log="$ROOT/$REPO/log.md"; pending="$ROOT/$REPO/pending"; keys="$ROOT/$REPO/keys"
 if [ -n "$PATHONLY" ]; then echo "$log"; exit 0; fi   # 問い合わせ。何も書かない
+# 異議: 直前の記録の鍵 N に「間違い」を 1 行追記する。値・状態は変えない(map.sh は dispute 行を読まない)
+if [ -n "$DISPUTE" ]; then
+  [ $# -ge 2 ] && [ -n "$2" ] || { echo "record.sh: $(L r_dispute_usage)" >&2; exit 2; }
+  kl="$ROOT/$REPO/keys.last"
+  [ -f "$kl" ] && [ -s "$kl" ] && [ -f "$log" ] || { echo "record.sh: $(L r_nolast)" >&2; exit 2; }
+  nk=$(wc -l < "$kl" | tr -d ' '); n=$(printf '%s' "$1" | tr -d ' ')
+  printf '%s' "$n" | grep -Eq '^[0-9]+$' && [ "$n" -ge 1 ] && [ "$n" -le "$nk" ] || { printf "record.sh: $(L r_nokeyn)\n" "$1" "$nk" >&2; exit 2; }
+  ktext=$(sed -n "${n}p" "$kl" | cut -f2)
+  last=$(grep '^| 20' "$log" | grep -v '| dispute |' | tail -1)
+  [ -n "$last" ] || { echo "record.sh: $(L r_nolast)" >&2; exit 2; }
+  lp=$(printf '%s' "$last" | awk -F'|' '{ gsub(/^ +| +$/, "", $3); print $3 }'); lf=$(printf '%s' "$last" | awk -F'|' '{ gsub(/^ +| +$/, "", $4); print $4 }')
+  lc=$(printf '%s' "$last" | awk -F'|' '{ gsub(/^ +| +$/, "", $5); print $5 }'); lt=$(printf '%s' "$last" | awk -F'|' '{ gsub(/^ +| +$/, "", $6); print $6 }')
+  ld=$(printf '%s' "$last" | awk -F'|' '{ gsub(/^ +| +$/, "", $2); print $2 }')
+  reason=$(printf '%s' "$2" | tr '\n\t' '  ' | sed 's/|/｜/g; s/^ *//; s/ *$//')
+  line=$(printf '| %s | %s | %s | %s | %s | %s %s: %s | dispute | %s | %s |' "$(date '+%Y-%m-%d %H:%M')" "$lp" "$lf" "$lc" "$lt" "$(L h_key)" "$n" "$ktext" "$reason" "$ld")
+  printf '%s\n' "$line" >> "$log"
+  echo "$(L r_disputed)"; echo "$line"
+  sh "$HERE/pages.sh" --root "$ROOT" >/dev/null 2>&1 || true
+  exit 0
+fi
 [ $# -ge 6 ] || { echo "record.sh: $(L r_usage) ($#)" >&2; exit 2; }
-if [ -z "$FREE" ]; then [ -f "$pending" ] || { echo "record.sh: $(L r_nopending)" >&2; exit 7; }; fi
+if [ -z "$FREE" ]; then [ -f "$pending" ] || { echo "record.sh: $(L r_nopending)" >&2; exit 7; }; [ -f "$ROOT/$REPO/question" ] || { echo "record.sh: $(L r_noquestion)" >&2; exit 2; }; fi
 
 clean() { printf '%s' "$1" | tr '\n\t' '  ' | sed 's/|/｜/g; s/^ *//; s/ *$//'; }
 rlabel() { case "$1" in hit) L rs_hit ;; partial) L rs_partial ;; miss) L rs_miss ;; dunno) L rs_dunno ;; skip) L rs_skip ;; *) echo "$1" ;; esac; }
@@ -113,7 +134,7 @@ case "$result" in partial|miss) if [ -n "$usermsg" ]; then
   printf '%s\n' "$verdict" | tr ',' '\n' | paste "$keys" - | awk -F'\t' -v y="$(L rs_hit)" -v n="$(L r_missing)" -v c="$(L r_contra)" '{ v = $3; gsub(/^ +| +$/, "", v); printf("  %s. %s [%s]\n", $1, $2, (v == "yes" ? y : v == "no" ? n : c)) }'
   echo "$(L r_hint)"
 fi ;; esac
-if [ -z "$FREE" ]; then rm -f "$pending" "$keys" "$keys.pending"; fi
+if [ -z "$FREE" ]; then [ ! -f "$keys" ] || cp "$keys" "$keys.last"; rm -f "$pending" "$keys" "$keys.pending" "$keys.end" "$ROOT/$REPO/question"; fi   # keys.last は --dispute 用
 # 集中モードの残りを 1 つ減らす。0 になれば終わりを告げて消す
 ff="$ROOT/$REPO/focus"
 if [ -z "$FREE" ] && [ -f "$ff" ]; then
