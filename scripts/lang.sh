@@ -64,8 +64,8 @@ L() {
     en:n_inputs_edge) echo "one of: empty / a single element / the last element / exactly the limit / a value that reproduces a past miss" ;;
     ja:n_inputs_trace) echo "普通の値を 1 つ" ;;
     en:n_inputs_trace) echo "one ordinary value" ;;
-    ja:n_form_text) echo "「<場所> <関数>。<入力> のとき、何を返す / 次に何が呼ばれる / どこで抜けるか」の 1 問だけ。観測できるものを名指しする(「ループはどうなるか」のような曖昧な対象は不可)。「なぜ」「何が必要か」は問わない" ;;
-    en:n_form_text) echo "exactly one question: \"<place> <function>. Given <input>, what does it return / what is called next / where does it exit?\" Name something observable (not \"what happens to the loop\"). Never ask \"why\" or \"what is needed\"" ;;
+    ja:n_form_text) echo "「<場所> <関数>。<入力> のとき、何を返す / 次に何が呼ばれる / どこで抜けるか」の 1 問だけ。観測できるものを 1 つ名指しする(「どこで抜けるか」は抜け方が 2 つ以上ある関数だけ。分岐の無い関数には何を返すか・何を呼ぶか)(「ループはどうなるか」のような曖昧な対象は不可)。「なぜ」「何が必要か」は問わない" ;;
+    en:n_form_text) echo "exactly one question: \"<place> <function>. Given <input>, what does it return / what is called next / where does it exit?\" Name one observable thing (not \"what happens to the loop\"; \"where does it exit\" only for a function with 2+ ways out, otherwise ask what it returns or what it calls). Never ask \"why\" or \"what is needed\"" ;;
     ja:n_edge_hint) echo "境界か、過去のズレを突く入力を選ぶ" ;;  en:n_edge_hint) echo "pick a boundary input, or one that hits a past miss" ;;
     ja:n_none_repo) echo "には記録が無い。commit するか tag.sh --commit HEAD を回して、関数に概念を付けてください" ;;
     en:n_none_repo) echo "has no records yet. Commit, or run tag.sh --commit HEAD, to tag functions with concepts" ;;
@@ -149,6 +149,10 @@ L() {
     ja:k_u_call) echo "%d つ" ;;      en:k_u_call) echo "%d calls" ;;
     ja:k_u_order) echo "%d 段" ;;     en:k_u_order) echo "%d steps" ;;
     ja:k_u_state) echo "%d つ" ;;     en:k_u_state) echo "%d changes" ;;
+    ja:k_kinds) echo "鍵の種別が %d つ(%s)。問いは観測できるもの 1 つを聞くので、種別は 2 つまで(聞くもの 1 つと、それを決める分岐)" ;;
+    en:k_kinds) echo "keys span %d kinds (%s). A question asks for one observable thing, so use at most 2 kinds (the thing asked, plus the branch that decides it)" ;;
+    ja:k_range) echo "鍵 %d の行(@%s)が、問う関数の範囲 %s の外。鍵はこの関数の行にある事実だけ(呼んだ関数の中身は別の問い)" ;;
+    en:k_range) echo "key %d points at @%s, outside the asked function's range %s. Keys are facts on this function's own lines (what a callee does inside is another question)" ;;
     ja:r_place) echo "場所は file:a-b の形" ;;   en:r_place) echo "place must look like file:a-b" ;;
     ja:r_concepts) echo "概念が空" ;;            en:r_concepts) echo "concepts are empty" ;;
     ja:r_pending) echo "next.sh が決めた内容と違うので書かない(exit 7)。" ;;

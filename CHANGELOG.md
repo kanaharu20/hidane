@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.5.3 — 2026-09-15
+
+Question quality, after a focus run produced "from line 20's mark_waiters_unblocked, which path leaves the function"
+with keys spanning branch / call / order and one key inside the callee.
+
+- `keys.sh` rejects keys whose `@ line` falls outside the asked function's range or names another file: keys are
+  facts on the function's own lines, and what a callee does inside is another question.
+- `keys.sh` rejects keys spanning 3 or more kinds. One question asks for one observable thing plus the branch that
+  decides it, so the last line names at most two things.
+- The guidance line lists the thing asked first and the branch last.
+- SKILL: "where does it exit" only for functions with 2+ ways out; no expressions, line numbers or callee names in
+  the question text; describe the input in words.
+- 201 tests.
+
 ## 0.5.2 — 2026-09-15
 
 - `--focus` now asks its 3 questions inside one invocation, still one at a time (ask, wait, record, then the

@@ -32,6 +32,8 @@ kf="$ROOT/$REPO/keys"
 if [ -n "$SHOW" ]; then [ -f "$kf" ] && cat "$kf"; exit 0; fi
 [ -f "$ROOT/$REPO/pending" ] || { echo "keys.sh: $(L k_nopending)" >&2; exit 5; }
 [ $# -ge 2 ] && [ $# -le 5 ] || { echo "keys.sh: $(L k_count) ($#)" >&2; exit 2; }
+place=$(cut -f1 "$ROOT/$REPO/pending"); rng=${place##*:}; ra=${rng%-*}; rb=${rng#*-}
+case "$ra$rb" in *[!0-9]*|"") ra="" ;; esac   # 範囲が読めなければ行の検査はしない
 : > "$kf"
 i=0; n_ret=0; n_branch=0; n_call=0; n_order=0; n_state=0
 for k in "$@"; do
@@ -49,12 +51,23 @@ for k in "$@"; do
     *) rm -f "$kf"; printf "keys.sh: $(L k_cat)\n" "$i" >&2; exit 2 ;;
   esac
   [ -n "$rest" ] || { rm -f "$kf"; echo "keys.sh: $(L k_empty) ($i)" >&2; exit 2; }
+  # 「@ 行」はこの関数の範囲内。別ファイルや呼んだ先の行は弾く
+  case "$rest" in *@*)
+    at=$(printf '%s' "${rest##*@}" | sed 's/^ *//; s/ *$//'); bad=""
+    case "$at" in *[!0-9,\ -]*) bad=1 ;; esac
+    if [ -z "$bad" ] && [ -n "$ra" ]; then for n in $(printf '%s' "$at" | tr ',-' '  '); do [ "$n" -ge "$ra" ] && [ "$n" -le "$rb" ] || bad=1; done; fi
+    [ -z "$bad" ] || { rm -f "$kf"; printf "keys.sh: $(L k_range)\n" "$i" "$at" "$place" >&2; exit 2; } ;;
+  esac
   printf '%d\t%s: %s\n' "$i" "$(L k_c_$c)" "$rest" >> "$kf"
 done
+# 種別は 2 つまで(聞くもの 1 つ + それを決める分岐)。3 つ以上は「全部説明して」になる
+kinds=0; kl=""
+for c in ret call order state branch; do eval n=\$n_$c; [ "$n" -gt 0 ] || continue; kinds=$((kinds+1)); kl="$kl${kl:+, }$(L k_p_$c)"; done
+[ "$kinds" -le 2 ] || { rm -f "$kf"; printf "keys.sh: $(L k_kinds)\n" "$kinds" "$kl" >&2; exit 2; }
 cp "$ROOT/$REPO/pending" "$kf.pending"   # どの問いの鍵かを残す。record.sh が pending と照合する
 printf "keys.sh: $(L k_saved)\n" "$i"
 scope=""
-for c in ret branch call order state; do
+for c in ret call order state branch; do
   eval n=\$n_$c; [ "$n" -gt 0 ] || continue
   u=""; [ "$n" -gt 1 ] && u="$([ "$LANGX" = ja ] || printf " ")($(printf "$(L k_u_$c)" "$n"))"
   scope="$scope${scope:+、}$(L k_p_$c)$u"
