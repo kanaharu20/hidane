@@ -22,7 +22,7 @@ while [ $# -gt 0 ]; do
 done
 . "$HERE/lang.sh"
 top=$(git rev-parse --show-toplevel 2>/dev/null) || top=""
-[ -n "$REPO" ] || REPO=$(basename "${top:--}")
+[ -n "$REPO" ] || { if [ -n "$top" ]; then REPO=$(hidane_repo_key "$top"); else REPO="-"; fi; }
 [ -n "$TREE" ] || TREE="$top"
 # 作業ツリーに今も無い関数は挙げない(next.sh と同じ確かめ方)
 alive() { [ -n "$TREE" ] || return 0; file=${1%%:*}; range=${1##*:}; a=${range%-*}; b=${range#*-}; [ -f "$TREE/$file" ] && sed -n "${a},${b}p" "$TREE/$file" | grep -qF "$2"; }

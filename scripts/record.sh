@@ -9,7 +9,7 @@
 #   record.sh [--root DIR] [--repo NAME] 場所 関数 概念 型 問い dunno|skip [備考]
 #   record.sh --free 場所 関数 概念 型 問い hit|partial|miss|dunno|skip [ズレ] [備考]   手で記録する(照合なし)
 #   record.sh --path                                                              log.md の場所
-#   型 trace | edge | summary。next.sh の pending と場所・関数・概念・型が一致しないと exit 7。
+#   型 trace | edge | summary。next.sh の pending が無い、pending と場所・関数・概念・型が違う、鍵が今の pending のものでない、のどれでも exit 7(--free 以外)。
 # 追記後、その行が読めることを確かめ(読めなければ exit 6 で取り消す)、pending と keys を消し、vault を作り直す。
 set -eu
 HERE=$(cd "$(dirname "$0")" && pwd -P)
@@ -27,13 +27,15 @@ while [ $# -gt 0 ]; do
   esac
 done
 . "$HERE/lang.sh"
+top=""
 if [ -z "$REPO" ]; then
   top=$(git rev-parse --show-toplevel 2>/dev/null) || { echo "record.sh: $(L r_norepo)" >&2; exit 3; }
-  REPO=$(basename "$top"); mkdir -p "$ROOT/$REPO"; printf '%s\n' "$top" > "$ROOT/$REPO/path"
+  REPO=$(hidane_repo_key "$top")
 fi
 log="$ROOT/$REPO/log.md"; pending="$ROOT/$REPO/pending"; keys="$ROOT/$REPO/keys"
-if [ -n "$PATHONLY" ]; then echo "$log"; exit 0; fi
+if [ -n "$PATHONLY" ]; then echo "$log"; exit 0; fi   # 問い合わせ。何も書かない
 [ $# -ge 6 ] || { echo "record.sh: $(L r_usage) ($#)" >&2; exit 2; }
+if [ -z "$FREE" ]; then [ -f "$pending" ] || { echo "record.sh: $(L r_nopending)" >&2; exit 7; }; fi
 
 clean() { printf '%s' "$1" | tr '\n\t' '  ' | sed 's/|/｜/g; s/^ *//; s/ *$//'; }
 rlabel() { case "$1" in hit) L rs_hit ;; partial) L rs_partial ;; miss) L rs_miss ;; dunno) L rs_dunno ;; skip) L rs_skip ;; *) echo "$1" ;; esac; }
@@ -50,7 +52,11 @@ if [ "$6" = "--verdict" ]; then
   nkeys=$(wc -l < "$keys" | tr -d ' ')
   nv=$(printf '%s\n' "$verdict" | tr ',' '\n' | wc -l | tr -d ' ')
   [ "$nv" -eq "$nkeys" ] || { echo "record.sh: $(L r_verdict) ($nv / $nkeys)" >&2; exit 2; }
-  eval "$(printf '%s\n' "$verdict" | tr ',' '\n' | paste "$keys" - | awk -F'\t' -v l_missing="$(L r_missing)" -v l_contra="$(L r_contra)" '
+  # 鍵が今の pending のものか(keys.sh が pending の写しを keys.pending に残す)
+  if [ -z "$FREE" ] && ! cmp -s "$keys.pending" "$pending" 2>/dev/null; then echo "record.sh: $(L r_keysstale)" >&2; exit 7; fi
+  # 判定は awk が一時ファイルに 1 行 1 項目で書く。eval は使わない(鍵の文にバッククォートや $( ) があっても実行されない)
+  pf=$(mktemp); trap 'rm -f "$pf"' EXIT
+  printf '%s\n' "$verdict" | tr ',' '\n' | paste "$keys" - | awk -F'\t' -v l_missing="$(L r_missing)" -v l_contra="$(L r_contra)" '
     function trim(s) { gsub(/^[ \t]+|[ \t]+$/, "", s); return s }
     { v = trim($3); t = $2; ref = ""; if (match(t, /@ *[0-9]+(-[0-9]+)?[ ]*$/)) { ref = substr(t, RSTART); sub(/^@ */, "", ref); t = trim(substr(t, 1, RSTART - 1)) }
       kind = ""; if (match(t, /^[^:]+: /)) { kind = substr(t, 1, RSTART + RLENGTH - 3) " " }
@@ -59,10 +65,12 @@ if [ "$6" = "--verdict" ]; then
       if (v == "no") { no++; z = z (z == "" ? "" : "; ") l_missing ": " t (ref != "" ? " @" ref : ""); u = u (u == "" ? "" : ", ") kind loc; next }
       if (v == "contra") { contra++; z = z (z == "" ? "" : "; ") l_contra ": " t (ref != "" ? " @" ref : ""); uc = uc (uc == "" ? "" : ", ") kind loc; next }
       bad = 1 }
-    END { if (bad) { print "BAD=1"; exit }
+    END { if (bad) { print "bad\t1"; exit }
       r = (contra > 0 ? "miss" : no > 0 ? "partial" : "hit")
-      printf("result=%s\nyes=%d\nzure=\"%s\"\nmissing=\"%s\"\ncontras=\"%s\"\n", r, yes, z, u, uc) }' )"
-  [ "${BAD:-}" = "" ] || { echo "record.sh: $(L r_verdict): $verdict" >&2; exit 2; }
+      printf("result\t%s\nyes\t%d\nzure\t%s\nmissing\t%s\ncontras\t%s\n", r, yes, z, u, uc) }' > "$pf"
+  pick() { awk -F'\t' -v k="$1" '$1 == k { print substr($0, length(k) + 2) }' "$pf"; }
+  [ -z "$(pick bad)" ] || { echo "record.sh: $(L r_verdict): $verdict" >&2; exit 2; }
+  result=$(pick result); yes=$(pick yes); zure=$(pick zure); missing=$(pick missing); contras=$(pick contras)
   usermsg=$(printf "%s($(L r_keys_of))" "$(rlabel "$result")" "$yes" "$nkeys")
   [ -n "$missing" ] && usermsg="$usermsg — $(L r_missing): $missing"
   [ -n "$contras" ] && usermsg="$usermsg — $(L r_contra): $contras"
@@ -83,7 +91,7 @@ if [ -z "$FREE" ] && [ -f "$pending" ]; then
   fi
 fi
 
-mkdir -p "$(dirname "$log")"
+mkdir -p "$(dirname "$log")"; [ -z "$top" ] || printf '%s\n' "$top" > "$ROOT/$REPO/path"
 [ -f "$log" ] || printf '# hidane — %s\n\n%s\n|---|---|---|---|---|---|---|---|---|\n' "$REPO" "$(L log_header)" > "$log"
 before=$(grep -c '^| 20' "$log" || true)
 line=$(printf '| %s | %s | %s | %s | %s | %s | %s | %s | %s |' "$(date '+%Y-%m-%d %H:%M')" "$place" "$func" "$concepts" "$type" "$q" "$result" "$zure" "$note")
@@ -97,5 +105,5 @@ fi
 [ -n "$usermsg" ] && echo "$usermsg"
 echo "$line"
 case "$result" in partial|miss) [ -n "$usermsg" ] && echo "$(L r_hint)" ;; esac
-if [ -z "$FREE" ]; then rm -f "$pending" "$keys"; fi
+if [ -z "$FREE" ]; then rm -f "$pending" "$keys" "$keys.pending"; fi
 sh "$HERE/pages.sh" --root "$ROOT" >/dev/null 2>&1 || true

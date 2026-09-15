@@ -50,7 +50,7 @@ description: 自分のコードのまだ問うていない関数から 1 つ選�
    sh <HIDANE>/scripts/record.sh "<場所>" "<関数>" "<概念>" "<型>" "<問いの要約 20 字>" --verdict "yes,no,contra,..." ""
    ```
    「分からない」「未回答」のときは `--verdict` の代わりに `dunno` / `skip` を渡す。
-   型は `trace` / `edge` / `summary`。場所・関数・概念・型は next.sh が出したものをそのまま。違うと record.sh が書かない(exit 7)。
+   型は `trace` / `edge` / `summary`。場所・関数・概念・型は next.sh が出したものをそのまま。違う、next.sh を回していない、鍵が古い(next.sh の後に置き直していない)、のどれでも record.sh は書かない(exit 7)。
    record.sh の出力の後に、解説・正解の文・励ましを足さない。
 8. **終わる**。総括、次の提案、励ましは書かない。
 

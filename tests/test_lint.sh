@@ -76,6 +76,8 @@ HIDANE_CLAUDE="$FAKE" sh scripts/lint.sh --root "$ROOT" --if-due >/dev/null 2>&1
 HIDANE_CLAUDE="$FAKE" HIDANE_LINT_DAYS=0 sh scripts/lint.sh --root "$ROOT" --if-due >/dev/null 2>&1
 [ "$(wc -l < "$TMP/count" | tr -d ' ')" = 1 ] && ok "L10 --if-due: 期限が来ていれば呼ぶ" || ng "L10 if-due days=0"
 
+# 英語のプロンプトに日本語の見出し(値・証拠・関数)が混ざらない
+de=$(HIDANE_LANG=en sh scripts/lint.sh --root "$ROOT" --dry-run); { ! echo "$de" | grep -q '値\|証拠\|関数:' && echo "$de" | grep -q 'Function: '; } && ok "L-en 英語プロンプトの見出しは英語" || ng "L-en labels" "$(echo "$de" | grep '^- ' | head -2)"
 # dry-run にはプロンプトに概念一覧(解いた名前)と関数名が入る
 d=$(sh scripts/lint.sh --root "$ROOT" --dry-run); echo "$d" | grep -q '^- 境界条件(' && echo "$d" | grep -q '関数: ' && ! echo "$d" | grep -q '^- 端の処理' && ok "L11 dry-run: 概念一覧は別名を解いた後の名前" || ng "L11 dry-run" "$(echo "$d" | tail -5)"
 

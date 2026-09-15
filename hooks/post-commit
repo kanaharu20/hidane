@@ -13,5 +13,6 @@ command -v "${HIDANE_CLAUDE:-claude}" >/dev/null 2>&1 || exit 0
 root="${HIDANE_ROOT:-$HOME/.claude/hidane}"; mkdir -p "$root" 2>/dev/null || exit 0
 n=$(git diff-tree --no-commit-id --name-only -r HEAD 2>/dev/null | wc -l | tr -d ' ')
 echo "hidane: sending the functions touched in this commit ($n files) to Claude in the background to tag concepts. log: $root/hook.log  off: HIDANE_HOOK_OFF=1" >&2
-( nohup sh "$H/scripts/tag.sh" --commit HEAD --repo "$(pwd)" >> "$root/hook.log" 2>&1 & ) >/dev/null 2>&1
+rev=$(git rev-parse HEAD 2>/dev/null) || exit 0   # 今の commit を固定して渡す(背景で動く間に次の commit や --amend が来ても取り違えない)
+( nohup sh "$H/scripts/tag.sh" --commit "$rev" --repo "$(pwd)" >> "$root/hook.log" 2>&1 & ) >/dev/null 2>&1
 exit 0

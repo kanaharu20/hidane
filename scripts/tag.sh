@@ -37,21 +37,24 @@ MAXF="${HIDANE_MAX_FUNCS:-8}"
 
 cd "$REPO"
 top=$(git rev-parse --show-toplevel 2>/dev/null) || { echo "tag.sh: git リポジトリではない: $REPO" >&2; exit 3; }
-cd "$top"; repo=$(basename "$top")
+cd "$top"; repo=$(hidane_repo_key "$top")
 short=$(git rev-parse --short "$REV" 2>/dev/null || echo "-")   # commit がまだ無い repo でも動く(記録の commit 欄は -)
 out="$ROOT/$repo"; fn="$out/functions.md"; log="$out/log.md"
 mkdir -p "$out"; [ -n "$DRY" ] || printf '%s\n' "$top" > "$out/path"
 tmp=$(mktemp -d); trap 'rm -rf "$tmp"' EXIT
 
 # 1. 候補(場所<TAB>関数名)。既知の場所は除く
-if [ -n "$ALL" ]; then sh "$HERE/scope.sh" --all 2>/dev/null; else sh "$HERE/scope.sh" --commit "$REV" 2>/dev/null; fi \
+if [ -n "$ALL" ]; then HIDANE_ROOT="$ROOT" sh "$HERE/scope.sh" --all 2>/dev/null; else HIDANE_ROOT="$ROOT" sh "$HERE/scope.sh" --commit "$REV" 2>/dev/null; fi \
   | sed 1d | awk '{ print $1 "\t" $2 }' > "$tmp/cands"
-{ [ -f "$fn" ] && grep '^| 20' "$fn"; [ -f "$log" ] && grep '^| 20' "$log"; true; } \
-  | awk -F'|' '{ p=$3; f=$4; gsub(/^ +| +$/, "", p); gsub(/^ +| +$/, "", f); print p "\t" f }' > "$tmp/known"
+{ cat "$fn" "$log" 2>/dev/null || true; } | grep '^| 20' \
+  | awk -F'|' '{ p=$3; f=$4; gsub(/^ +| +$/, "", p); gsub(/^ +| +$/, "", f); print p "\t" f }' > "$tmp/known" || true
 grep -vxF -f "$tmp/known" "$tmp/cands" 2>/dev/null > "$tmp/todo" || true
 total=$(wc -l < "$tmp/todo" | tr -d ' ')
 [ "$total" -gt 0 ] || { echo "tag.sh: $repo@$short: $(L t_none)"; exit 0; }
+lock="$out/.tag.lock"
+[ -d "$lock" ] && [ -n "$(find "$lock" -mmin +20 2>/dev/null)" ] && rm -rf "$lock"   # 20 分以上前の鍵は事故の残り
 if [ -n "$BG" ]; then
+  [ -d "$lock" ] && { echo "tag.sh: $repo: $(L t_locked)" >&2; exit 5; }
   batches=$(( (total + MAXF - 1) / MAXF ))
   printf "tag.sh: $(L t_bg)\n" "$total" "$batches" "$ROOT/hook.log"
   if [ -n "$ALL" ]; then mode="--all"; else mode="--commit $REV"; fi
@@ -59,12 +62,18 @@ if [ -n "$BG" ]; then
   exit 0
 fi
 
+# 同じ repo で 2 つ同時に走らせない(hook と --tag が重なると functions.md が二重になる)
+if [ -z "$DRY" ]; then
+  mkdir "$lock" 2>/dev/null || { echo "tag.sh: $repo: $(L t_locked)" >&2; exit 5; }
+  trap 'rm -rf "$tmp" "$lock"' EXIT
+fi
+
 # 2. 既存の概念一覧(全 repo)。呼び出しごとに更新する(前の束で新設した名前を次の束が使えるように)
 existing() { sh "$HERE/map.sh" --root "$ROOT" --tsv 2>/dev/null | cut -f1 | LC_ALL=C sort -u; }
 
-# 関数のコード。--all なら作業ツリー(行番号も作業ツリーで数えている。commit 前の関数を拾うため)、コミット指定ならその版
+# 関数のコード。--all なら作業ツリー、コミット指定ならその commit の版(scope.sh も同じ木で行番号を数えている)
 code() { # $1 file $2 a $3 b
-  if [ -n "$ALL" ]; then cat "$1" 2>/dev/null; else git show "$REV:$1" 2>/dev/null || cat "$1" 2>/dev/null; fi | sed -n "$2,$3p"
+  if [ -n "$ALL" ]; then cat "$1" 2>/dev/null; else git show "$REV:$1" 2>/dev/null; fi | sed -n "$2,$3p"
 }
 
 # 3. 束ごとに: プロンプト → 呼び出し → 検査 → 追記

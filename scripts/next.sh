@@ -26,7 +26,7 @@ done
 . "$HERE/lang.sh"
 if [ -z "$REPO" ]; then
   top=$(git rev-parse --show-toplevel 2>/dev/null) || { echo "next.sh: $(L r_norepo)" >&2; exit 3; }
-  REPO=$(basename "$top"); [ -n "$TREE" ] || TREE="$top"
+  REPO=$(hidane_repo_key "$top"); [ -n "$TREE" ] || TREE="$top"
 fi
 [ -n "$TODAY" ] || TODAY=$(date +%Y-%m-%d)
 d="$ROOT/$REPO"

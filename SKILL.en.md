@@ -50,7 +50,7 @@ One function, one question per invocation. Answer, record, stop. Call again for 
    sh <HIDANE>/scripts/record.sh "<place>" "<function>" "<concepts>" "<type>" "<question summary, ~20 chars>" --verdict "yes,no,contra,..." ""
    ```
    For "don't know" / no answer, pass `dunno` / `skip` instead of `--verdict`.
-   type is `trace` / `edge` / `summary`. Place, function, concepts and type must be exactly what next.sh printed, or record.sh refuses (exit 7).
+   type is `trace` / `edge` / `summary`. Place, function, concepts and type must be exactly what next.sh printed; if they differ, if next.sh was not run, or if the keys are stale (fixed before this next.sh run), record.sh refuses (exit 7).
    Add nothing after record.sh's output: no explanation, no correct answer, no encouragement.
 8. **Stop.** No summary, no next steps, no encouragement.
 

@@ -60,7 +60,7 @@ hit / miss を Claude が直接書くことはできない(`--free` は手動用
 候補の関数は今いるリポジトリの、まだ問うていないもの(同じファイル・同じ関数名なら、編集で行がずれても問うた扱い)。作業ツリーにその関数が今も無ければ飛ばす。
 
 型もここで決める(その概念に過去のズレがあれば edge、無ければ trace)。決定は `pending` に置かれ、
-`record.sh` はそれと一致しない記録を書かない(exit 7)。Claude が決められるのは問いの文と鍵だけ。
+`record.sh` は、pending が無い・pending と一致しない・鍵が別の問いのもの、のどれでも書かない(exit 7)。Claude が決められるのは問いの文と鍵だけ。
 
 ## タグ付け
 
@@ -133,7 +133,7 @@ commit のたび、hook が触った関数のソースを `claude -p` に送り�
 | `weak.sh` | 弱い所の材料(ズレのある概念、ズレ全件、関数) | |
 | `help.sh` | 使い方の固定文(en / ja) | |
 | `profile`(無し) | 解説の粒度は Claude が index と概念ページから決める | ● |
-| `scope.sh` | commit を関数に切る(15 言語、reflect から) | |
+| `scope.sh` | commit や作業ツリーを関数に切る(キーワード定義と C 風の定義。問うた関数は除く) | |
 | `migrate.sh` | 記録の形式の移行 | |
 | `hooks/post-commit` | commit 後に tag.sh を背景で | |
 

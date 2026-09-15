@@ -104,6 +104,12 @@ L() {
     ja:r_result) echo "結果は dunno / skip のどちらか。hit / partial / miss は --verdict から決まる(手動は --free)" ;;
     en:r_result) echo "result must be dunno or skip; hit / partial / miss are derived from --verdict (or use --free)" ;;
     ja:r_nokeys) echo "鍵が無い。keys.sh で先に鍵を置いてから --verdict で判定する" ;;
+    ja:r_nopending) echo "next.sh の決定(pending)が無いので書かない(exit 7)。先に next.sh を回す。手で書くなら --free" ;;
+    en:r_nopending) echo "no decision from next.sh (pending); not recorded (exit 7). Run next.sh first, or use --free" ;;
+    ja:r_keysstale) echo "鍵が別の問いのもの(next.sh を回した後に置いていない)。keys.sh で置き直す(exit 7)" ;;
+    en:r_keysstale) echo "the keys belong to another question (fixed before this next.sh run). Fix them again with keys.sh (exit 7)" ;;
+    ja:t_locked) echo "別の tag.sh がこの repo で動いている(hook か --tag)。終わってからもう一度" ;;
+    en:t_locked) echo "another tag.sh is running for this repository (the hook or --tag); retry when it is done" ;;
     en:r_nokeys) echo "no keys; run keys.sh first, then judge with --verdict" ;;
     ja:r_verdict) echo "--verdict は鍵の数と同じ個数の yes / no / contra をコンマ区切りで" ;;
     en:r_verdict) echo "--verdict needs one of yes / no / contra per key, comma-separated" ;;
@@ -151,6 +157,12 @@ L() {
     ja:o_opened) echo "Obsidian で開きました" ;; en:o_opened) echo "opened in Obsidian" ;;
     *) echo "$1" ;;
   esac
+}
+# 記録の置き場の名前。基本は repo の basename。同じ名前で別の場所の repo が先に居れば basename-<数字> に分ける(-ef で同じ場所かを見る。大文字小文字だけ違う名前は同じ場所)
+hidane_repo_key() {
+  b=$(basename "$1"); pf="$ROOT/$b/path"
+  if [ -f "$pf" ]; then p=$(cat "$pf"); if [ -d "$p" ] && ! [ "$p" -ef "$1" ]; then printf '%s-%s\n' "$b" "$(printf '%s' "$(cd "$1" && pwd -P)" | cksum | cut -d' ' -f1)"; return; fi; fi
+  printf '%s\n' "$b"
 }
 # 記号 → 表示。awk に渡す用
 label_state() { case "$1" in known) L st_known ;; fuzzy) L st_fuzzy ;; unknown) L st_unknown ;; unasked) L st_unasked ;; *) echo "$1" ;; esac; }

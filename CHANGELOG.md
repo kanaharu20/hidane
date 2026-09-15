@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.4.0 — 2026-09-15
+
+Fixes from a full self-review of the scripts.
+
+- `record.sh` no longer passes key text through `eval`; a key containing backticks or `$( )` was executed as shell.
+- The hook resolves the commit hash before going to the background, so a second commit or `--amend` during the
+  LLM call no longer swaps which commit gets tagged.
+- `scope.sh` read the miss column as the function name (a reflect leftover), so an asked function whose lines
+  shifted was sent to the LLM again. It now keys on file + function. Reflect-only modes were removed.
+- `tag.sh` takes a per-repository lock; the hook and `--tag` running together no longer duplicate rows.
+- `tag.sh --commit` reads line ranges and bodies from the commit's tree, not a mix of working tree and HEAD.
+- `record.sh --path` is a pure query (it created directories and rewrote `path`); scope.sh honors `HIDANE_ROOT`.
+- A header-only functions.md made tag.sh skip log.md when computing known functions (`set -e` + `&&`).
+- `install.sh` finds the hooks directory through git (worktrees, `core.hooksPath`) and reports a failed write.
+- Keys are bound to the pending question (`keys.pending`); `record.sh` refuses stale keys and, without `--free`,
+  any record with no pending decision (exit 7).
+- Records directories: two repositories with the same basename in different places get separate directories
+  (`api`, `api-<n>`); names differing only by case on macOS stay together.
+- `install.sh --skill` clears old scripts before copying; the English lint prompt no longer carries Japanese labels.
+- 181 L0 tests.
+
 ## 0.3.5 — 2026-09-15
 
 - `/hidane --tag` works in a repository with no commits yet, and picks up untracked files (not ignored ones).

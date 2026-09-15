@@ -46,6 +46,18 @@ rm -f "$ROOT/p/keys"; $R "a.c:1-9" f "境界条件" edge "q" --verdict "yes,yes,
 $R "a.c:1-9" f "境界条件" edge "q" hit >/dev/null 2>"$TMP/e"; rc=$?; [ $rc = 2 ] && ok "V07 hit を直接渡すのは exit 2(--free 以外)" || ng "V07" "rc=$rc"
 o=$($R "a.c:1-9" f "境界条件" edge "q" dunno); echo "$o" | grep -q '| dunno |  |  |$' && ok "V08 dunno は鍵なしで書ける" || ng "V08" "$o"
 o=$($R --free "b.c:1-2" g "x" trace "q" partial "手で"); echo "$o" | grep -q '| partial | 手で |' && ok "V09 --free なら partial を直接書ける" || ng "V09" "$o"
+# V11 鍵の文にバッククォートや $( ) があっても実行されない(eval を使わない)
+pend; $K "返り値: \`touch $TMP/INJECTED\` を返す @ 5" "分岐: \$(touch $TMP/INJ2) @ 6" >/dev/null
+o=$($R "a.c:1-9" f "境界条件" edge "q" --verdict "no,no" "")
+{ [ ! -e "$TMP/INJECTED" ] && [ ! -e "$TMP/INJ2" ] && echo "$o" | grep -q 'touch' ; } && ok "V11 鍵の文は実行されず、そのまま log に残る" || ng "V11 eval" "$o"
+# V12 鍵が別の問いのもの(鍵を置いた後に next.sh の決定が変わった)なら exit 7
+pend; fourkeys; printf 'b.c:1-9\tg\t境界条件\tedge\n' > "$ROOT/p/pending"
+$R "b.c:1-9" g "境界条件" edge "q" --verdict "yes,yes,yes,yes" >/dev/null 2>"$TMP/e"; rc=$?; { [ $rc = 7 ] && grep -q '別の問い' "$TMP/e"; } && ok "V12 鍵が今の pending のものでなければ exit 7" || ng "V12 stale keys" "rc=$rc $(cat "$TMP/e")"
+# V13 pending が無ければ dunno も書かない(--free は書ける)
+rm -f "$ROOT/p/pending" "$ROOT/p/keys" "$ROOT/p/keys.pending"
+$R "zzz.c:1-2" nope x summary "q" dunno >/dev/null 2>"$TMP/e"; rc=$?; [ $rc = 7 ] && grep -q 'pending' "$TMP/e" && ok "V13 pending 無しの dunno は exit 7" || ng "V13" "rc=$rc $(cat "$TMP/e")"
+# V14 --path は問い合わせだけ。ディレクトリも path も作らない
+rm -rf "$TMP/rootq"; (cd "$TMP" && git init -q q >/dev/null 2>&1 && cd q && sh "$OLDPWD/scripts/record.sh" --root "$TMP/rootq" --path >/dev/null); [ ! -d "$TMP/rootq" ] && ok "V14 --path は何も作らない" || ng "V14 side effect" "$(ls -R "$TMP/rootq")"
 # map: partial は証拠だが値は動かない
-o=$(sh scripts/map.sh --root "$ROOT" --today "$(date +%Y-%m-%d)"); echo "$o" | grep -q '^| 境界条件 | -2 | 4 |' && ok "V10 map: partial は証拠に数えるが値は動かない(hit+2, partial 0, miss-2, dunno-2 → -2 / 4)" || ng "V10 map" "$(echo "$o" | grep 境界条件)"
+o=$(sh scripts/map.sh --root "$ROOT" --today "$(date +%Y-%m-%d)"); echo "$o" | grep -q '^| 境界条件 | -2 | 5 |' && ok "V10 map: partial は証拠に数えるが値は動かない(hit+2, partial 0, miss-2, dunno-2, partial 0 → -2 / 5)" || ng "V10 map" "$(echo "$o" | grep 境界条件)"
 echo; echo "PASS $pass / FAIL $fail"; [ $fail -eq 0 ]

@@ -32,17 +32,26 @@ say() { if [ "$lang" = "ja" ]; then printf '%s\n' "$1"; else printf '%s\n' "$2";
 install_skill() {
   dst="${HIDANE_SKILL_DIR:-$HOME/.claude/skills/hidane}"
   mkdir -p "$dst/scripts" "$dst/hooks"
-  cp "$HERE/SKILL.$lang.md" "$dst/SKILL.md"; cp "$HERE/scripts/"*.sh "$HERE/scripts/gitattributes" "$dst/scripts/"
+  rm -f "$dst/scripts/"*   # 前の版の残骸を消してから置く
+  cp "$HERE/SKILL.$lang.md" "$dst/SKILL.md"; cp "$HERE/scripts/"*.sh "$dst/scripts/"
   cp "$HERE/hooks/post-commit" "$dst/hooks/"; cp "$HERE/install.sh" "$HERE/SKILL.en.md" "$HERE/SKILL.ja.md" "$HERE/VERSION" "$dst/"
   printf '%s\n' "$HERE" > "$dst/HOME"
   say "  /hidane を登録した: $dst" "  /hidane registered: $dst"
 }
+hook_path() {  # $1 = git root。worktree や core.hooksPath でも正しい場所
+  h=$(git -C "$1" rev-parse --git-path hooks 2>/dev/null) || h=".git/hooks"
+  case "$h" in /*) ;; *) h="$1/$h" ;; esac
+  printf '%s/post-commit\n' "$h"
+}
 install_hook() {  # $1 = git root
-  hook="$1/.git/hooks/post-commit"
+  hook=$(hook_path "$1")
   if [ -f "$hook" ] && ! grep -q '^# hidane-hook' "$hook"; then
     say "  別の post-commit hook があるので触らない: $hook" "  another post-commit hook exists; left alone: $hook"; return 1
   fi
-  sed "s|__HIDANE_HOME__|$HERE|" "$HERE/hooks/post-commit" > "$hook" && chmod +x "$hook"
+  mkdir -p "$(dirname "$hook")" 2>/dev/null
+  if ! { sed "s|__HIDANE_HOME__|$HERE|" "$HERE/hooks/post-commit" > "$hook" && chmod +x "$hook"; }; then
+    say "  hook を置けなかった: $hook" "  could not write the hook: $hook"; return 1
+  fi
   say "  hook を置いた: $hook" "  hook installed: $hook"
   say "    commit のたびに、触った関数のソースが背景で Claude(claude -p)に送られ、概念名が返る。commit は待たない。止めるには HIDANE_HOOK_OFF=1 か install.sh --unhook" \
       "    after every commit the touched functions' source is sent to Claude (claude -p) in the background and concept names come back. The commit never waits. Stop it with HIDANE_HOOK_OFF=1 or install.sh --unhook"
@@ -87,7 +96,7 @@ case "$cmd" in
     install_hook "$top" || exit 5 ;;
   --unhook)
     top=$(git rev-parse --show-toplevel 2>/dev/null) || { echo "install.sh: run inside a git repository" >&2; exit 3; }
-    hook="$top/.git/hooks/post-commit"
+    hook=$(hook_path "$top")
     if [ -f "$hook" ] && grep -q '^# hidane-hook' "$hook"; then rm -f "$hook"; echo "install.sh: hook removed"; else echo "install.sh: no hidane hook here"; fi ;;
   *) sed -n '2,10p' "$0" | sed 's/^# \{0,1\}//'; exit 2 ;;
 esac

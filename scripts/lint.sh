@@ -40,11 +40,11 @@ n=$(wc -l < "$tmp/map" | tr -d ' ')
 for d in "$ROOT"/*/; do
   repo=$(basename "$d")
   for f in log.md functions.md; do [ -f "$d/$f" ] && grep '^| 20' "$d/$f" | sed "s/^/$repo	/"; done; true
-done | sh "$HERE/resolve.sh" --root "$ROOT" | awk -F'\t' -v map="$tmp/map" '
+done | sh "$HERE/resolve.sh" --root "$ROOT" | awk -F'\t' -v map="$tmp/map" -v l_value="$(L h_value)" -v l_evid="$(L h_evidence)" -v l_fn="$(L n_func)" '
 function trim(s) { gsub(/^[ \t]+|[ \t]+$/, "", s); return s }
-BEGIN { while ((getline l < map) > 0) { split(l, t, "\t"); order[++nc] = t[1]; info[t[1]] = t[5] " 値 " t[2] " 証拠 " t[3] " repo " t[6] } }
+BEGIN { while ((getline l < map) > 0) { split(l, t, "\t"); order[++nc] = t[1]; info[t[1]] = t[5] " " l_value " " t[2] " " l_evid " " t[3] " repo " t[6] } }
 { split($2, col, "|"); fn = trim(col[4]); k = split(trim(col[5]), cs, ","); for (i = 1; i <= k; i++) { c = trim(cs[i]); if (c != "" && cnt[c] < 6 && !((c SUBSEP fn) in seen)) { seen[c SUBSEP fn] = 1; cnt[c]++; fns[c] = fns[c] (fns[c] == "" ? "" : ", ") fn } } }
-END { for (i = 1; i <= nc; i++) { c = order[i]; printf("- %s(%s)関数: %s\n", c, info[c], fns[c]) } }
+END { for (i = 1; i <= nc; i++) { c = order[i]; printf("- %s(%s) %s: %s\n", c, info[c], l_fn, fns[c]) } }
 ' > "$tmp/list"
 
 {

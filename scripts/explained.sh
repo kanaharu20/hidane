@@ -20,7 +20,7 @@ while [ $# -gt 0 ]; do
 done
 . "$HERE/lang.sh"
 [ $# -ge 1 ] || { echo "explained.sh: $(L x_usage)" >&2; exit 2; }
-if [ -z "$REPO" ]; then top=$(git rev-parse --show-toplevel 2>/dev/null) && REPO=$(basename "$top") || REPO="-"; fi
+if [ -z "$REPO" ]; then top=$(git rev-parse --show-toplevel 2>/dev/null) && REPO=$(hidane_repo_key "$top") || REPO="-"; fi
 clean() { printf '%s' "$1" | tr '\n\t' '  ' | sed 's/|/｜/g; s/^ *//; s/ *$//'; }
 topic=$(clean "$1"); [ -n "$topic" ] || { echo "explained.sh: $(L x_usage)" >&2; exit 2; }
 tmp=$(mktemp); trap 'rm -f "$tmp"' EXIT

@@ -26,7 +26,7 @@ done
 . "$HERE/lang.sh"
 if [ -z "$REPO" ]; then
   top=$(git rev-parse --show-toplevel 2>/dev/null) || { echo "keys.sh: $(L r_norepo)" >&2; exit 3; }
-  REPO=$(basename "$top")
+  REPO=$(hidane_repo_key "$top")
 fi
 kf="$ROOT/$REPO/keys"
 if [ -n "$SHOW" ]; then [ -f "$kf" ] && cat "$kf"; exit 0; fi
@@ -51,6 +51,7 @@ for k in "$@"; do
   [ -n "$rest" ] || { rm -f "$kf"; echo "keys.sh: $(L k_empty) ($i)" >&2; exit 2; }
   printf '%d\t%s: %s\n' "$i" "$(L k_c_$c)" "$rest" >> "$kf"
 done
+cp "$ROOT/$REPO/pending" "$kf.pending"   # どの問いの鍵かを残す。record.sh が pending と照合する
 printf "keys.sh: $(L k_saved)\n" "$i"
 scope=""
 for c in ret branch call order state; do

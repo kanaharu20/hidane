@@ -149,6 +149,35 @@ d=$(HIDANE_CLAUDE="$FAKE" sh scripts/tag.sh --repo "$R2" --root "$ROOT" --all --
 printf '%s\n| 2026-09-09 | x.c:1-2 | zz | c | abc |  |\n' "$(head -3 "$ROOT/proj2/functions.md")" > "$ROOT/proj2/functions.md"
 d=$(HIDANE_CLAUDE="$FAKE" sh scripts/tag.sh --repo "$R2" --root "$ROOT" --all --dry-run 2>/dev/null); echo "$d" | grep -q 'x + 100' && ok "G20 --all は作業ツリーの中身を送る(HEAD ではない)" || ng "G20 worktree" "$(echo "$d" | grep -n 'f1' | head -3)"
 
+# G21 同じ repo で 2 つ同時に走らせない(鍵ディレクトリ)。--bg の親も止まる
+mkdir -p "$ROOT/proj7/.tag.lock"; touch "$R7/k6.c"; printf 'int k6(int x)\n{\n\treturn x;\n}\n' > "$R7/k6.c"
+HIDANE_CLAUDE="$FAKE" sh scripts/tag.sh --repo "$R7" --root "$ROOT" --all >/dev/null 2>"$TMP/e9"; rc=$?
+HIDANE_CLAUDE="$FAKE" sh scripts/tag.sh --repo "$R7" --root "$ROOT" --all --bg >/dev/null 2>"$TMP/e10"; rc2=$?
+{ [ $rc = 5 ] && [ $rc2 = 5 ] && grep -q '別の tag.sh' "$TMP/e9" && [ "$(grep -c '^| 20' "$ROOT/proj7/functions.md")" = 5 ]; } && ok "G21 鍵があれば exit 5、何も付けない(--bg も)" || ng "G21 lock" "rc=$rc rc2=$rc2 $(cat "$TMP/e9")"
+rmdir "$ROOT/proj7/.tag.lock"
+# G22 --commit は行番号も中身もその commit の木から(作業ツリーが先にずれていても一致する)
+R9="$TMP/proj9"; mkdir -p "$R9/src"; (cd "$R9" && git init -q && git config user.email t@t && git config user.name t
+  printf 'int committed(int v)\n{\n\tif (v > 0)\n\t\treturn v;\n\treturn 0;\n}\n' > src/a.c && git add -A && git commit -qm one
+  printf '/* 1 */\n/* 2 */\n/* 3 */\n/* 4 */\n/* 5 */\n' | cat - src/a.c > src/a.c.new && mv src/a.c.new src/a.c)
+d=$(HIDANE_CLAUDE="$FAKE" sh scripts/tag.sh --repo "$R9" --root "$ROOT" --commit HEAD --dry-run 2>/dev/null)
+{ echo "$d" | grep -q '^### src/a.c:1-6	committed' && echo "$d" | grep -A2 '^### src/a.c:1-6' | grep -q '^int committed'; } && ok "G22 --commit は commit の木で範囲と中身を揃える" || ng "G22 commit tree" "$(echo "$d" | grep -n 'a.c\|committed' | head -5)"
+# G23 scope.sh の既出除外は 関数 列で(ズレ列ではない)。partial の行でも除ける
+R10="$TMP/proj10"; mkdir -p "$R10/src" "$ROOT/proj10"; (cd "$R10" && git init -q && git config user.email t@t && git config user.name t
+  printf 'int asked_fn(int v)\n{\n\treturn v;\n}\n' > src/a.c && printf 'int other_fn(int v)\n{\n\treturn v;\n}\n' > src/b.c && git add -A && git commit -qm one)
+printf '| 日時 | 場所 | 関数 | 概念 | 型 | 問い | 結果 | ズレ | 備考 |\n|---|---|---|---|---|---|---|---|---|\n| 2026-09-09 | src/a.c:7-10 | asked_fn | c | trace | q | partial | 触れていない: x @5 |  |\n' > "$ROOT/proj10/log.md"
+o=$(cd "$R10" && HIDANE_ROOT="$ROOT" sh "$OLDPWD/scripts/scope.sh" --all 2>/dev/null); { ! echo "$o" | grep -q 'asked_fn' && echo "$o" | grep -q 'other_fn'; } && ok "G23 問うた関数は行がずれても scope.sh の候補から外れる" || ng "G23 asked" "$o"
+# G24 functions.md が見出しだけでも log.md の既知は読む(set -e で落ちない)
+printf '| 日付 | 場所 | 関数 | 概念 | commit | 備考 |\n|---|---|---|---|---|---|\n' > "$ROOT/proj10/functions.md"
+printf '| 日時 | 場所 | 関数 | 概念 | 型 | 問い | 結果 | ズレ | 備考 |\n|---|---|---|---|---|---|---|---|---|\n| 2026-09-09 | src/b.c:1-4 | other_fn | c | trace | q | hit |  |  |\n' > "$ROOT/proj10/log.md"
+d=$(HIDANE_CLAUDE="$FAKE" sh scripts/tag.sh --repo "$R10" --root "$ROOT" --all --dry-run 2>/dev/null); { ! echo "$d" | grep -q '^### src/b.c' && echo "$d" | grep -q '^### src/a.c'; } && ok "G24 見出しだけの functions.md でも log.md の既知は除く" || ng "G24 set -e" "$(echo "$d" | grep '^###')"
+# G25 同じ basename の別 repo は別の置き場(basename-<数字>)。同じ repo は同じ置き場
+mkdir -p "$TMP/one/api" "$TMP/two/api"; for p in "$TMP/one/api" "$TMP/two/api"; do (cd "$p" && git init -q && git config user.email t@t && git config user.name t && printf 'int f(int x)\n{\n\treturn x;\n}\n' > f.c && git add -A && git commit -qm i); done
+HIDANE_CLAUDE="$FAKE" sh scripts/tag.sh --repo "$TMP/one/api" --root "$ROOT" --all >/dev/null 2>&1
+HIDANE_CLAUDE="$FAKE" sh scripts/tag.sh --repo "$TMP/two/api" --root "$ROOT" --all >/dev/null 2>&1
+HIDANE_CLAUDE="$FAKE" sh scripts/tag.sh --repo "$TMP/one/api" --root "$ROOT" --all >/dev/null 2>&1
+one=$(cd "$TMP/one/api" && pwd -P); two=$(cd "$TMP/two/api" && pwd -P)
+n=$(ls -d "$ROOT"/api* | wc -l | tr -d ' '); { [ "$n" = 2 ] && [ "$(cat "$ROOT/api/path")" = "$one" ] && [ "$(grep -c '^| 20' "$ROOT/api/functions.md")" = 1 ] && grep -qF "$two" "$ROOT"/api-*/path; } && ok "G25 同名の別 repo は api-<数字> に分かれ、同じ repo は同じ置き場" || ng "G25 repo key" "$(ls "$ROOT"; cat "$ROOT"/api*/path)"
+
 # H01 hook: 置く → commit → 背景で functions.md が増える
 (cd "$R" && sh "$H/install.sh" --hook >/dev/null) && grep -q "$H" "$R/.git/hooks/post-commit" && ok "H01 install.sh --hook が hidane の場所を埋めて置く" || ng "H01 install"
 cat > "$FAKE" <<'F'
@@ -170,6 +199,13 @@ sleep 0.5; [ $rc = 0 ] && [ "$(grep -c '^| 20' "$fn")" = $((n0 + 1)) ] && ok "H0
 # H06 他人の hook は上書きしない、--unhook は hidane のだけ消す
 (cd "$R" && sh "$H/install.sh" --unhook >/dev/null && printf '#!/bin/sh\necho mine\n' > .git/hooks/post-commit && sh "$H/install.sh" --hook >/dev/null 2>&1; rc=$?; [ $rc = 5 ] && grep -q mine .git/hooks/post-commit) \
   && ok "H06 他人の hook は触らず exit 5、--unhook は hidane のだけ消す" || ng "H06 上書き防止"
+
+# H07 hook は HEAD を文字で渡さず、その時の commit に解決して渡す
+grep -q 'git rev-parse HEAD' hooks/post-commit && grep -q -- '--commit "\$rev"' hooks/post-commit && ok "H07 hook は commit の hash を固定して背景に渡す" || ng "H07 hook rev"
+# H08 core.hooksPath があればそこに置く。置けなければ exit 5 で「置けなかった」
+R11="$TMP/proj11"; mkdir -p "$R11" "$TMP/hp"; (cd "$R11" && git init -q && git config core.hooksPath "$TMP/hp")
+(cd "$R11" && sh "$H/install.sh" --hook >/dev/null 2>&1); rc=$?; { [ $rc = 0 ] && grep -q hidane-hook "$TMP/hp/post-commit"; } && ok "H08 core.hooksPath の場所に置く" || ng "H08 hooksPath" "rc=$rc $(ls "$TMP/hp")"
+(cd "$R11" && git config core.hooksPath /nonexistent-dir/x && sh "$H/install.sh" --hook > "$TMP/h8" 2>&1); rc=$?; { [ $rc = 5 ] && grep -q '置けなかった' "$TMP/h8"; } && ok "H08b 置けなければ exit 5" || ng "H08b" "rc=$rc $(cat "$TMP/h8")"
 
 # I01 install.sh 引数なし: skill + hook + 全関数タグ + 地図、を非対話で一度に
 R2="$TMP/setup"; mkdir -p "$R2/src"; (cd "$R2" && git init -q && git config user.email t@t && git config user.name t && printf 'int one(void)\n{\n\treturn 1;\n}\n' > src/one.c && git add -A && git commit -qm init)

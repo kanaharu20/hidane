@@ -60,7 +60,7 @@ Concepts are ranked from all repositories: not understood > fuzzy > unasked, low
 Candidates come from the current repository, excluding functions already asked (same file and function name, so a shifted line range does not bring a function back) and functions no longer present in the working tree.
 
 The question type is decided here too (`edge` if the concept has past misses, else `trace`). The decision goes to `pending`,
-and `record.sh` refuses any record that does not match it (exit 7). Claude decides only the wording and the keys.
+and `record.sh` refuses a record with no pending decision, one that does not match it, or keys fixed for another question (exit 7). Claude decides only the wording and the keys.
 
 ## Tagging
 
@@ -133,7 +133,7 @@ Concepts with only "I don't know" answers are not selected: that is not weakness
 | `weak.sh` | material for the weak-spots page (concepts with misses, every miss, the functions) | |
 | `help.sh` | fixed usage text (en / ja) | |
 | (no script) | explanation level, decided by Claude from index and concept pages | ● |
-| `scope.sh` | cut a commit into functions (15 languages, from reflect) | |
+| `scope.sh` | cut a commit or a working tree into functions (keyword and C-style definitions; asked ones excluded) | |
 | `migrate.sh` | record-format migrations | |
 | `hooks/post-commit` | run tag.sh in the background after a commit | |
 
