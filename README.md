@@ -130,28 +130,6 @@ sh tests/run_all.sh     # 181 tests, no LLM, seconds
 
 A new test is trusted only after breaking the implementation and watching it fail. `run_all.sh` also fails if the test count in this README drifts from reality.
 
-| File | In one line |
-|---|---|
-| `hooks/post-commit` | after a commit, runs tag.sh in the background; never blocks the commit |
-| `scripts/scope.sh` | cuts a repository into functions and lists the candidates |
-| `scripts/tag.sh` | tags functions with concepts and appends to functions.md (LLM call 1 of 2) |
-| `scripts/map.sh` | computes each concept's value and state from log.md, every time |
-| `scripts/next.sh` | picks the one function to ask next and writes pending |
-| `scripts/keys.sh` | fixes the elements of the correct answer before asking, prints the "Include in your answer" line |
-| `scripts/record.sh` | derives the result from the per-key verdicts and appends one row to log.md (the only writer of the primary record) |
-| `scripts/resolve.sh` | read-side filter that maps concept names through aliases.md |
-| `scripts/pages.sh` | rebuilds the map (the Obsidian vault) from the records |
-| `scripts/open.sh` | rebuilds the map and opens it in Obsidian |
-| `scripts/lint.sh` | merges concept names that mean the same into aliases.md (LLM call 2 of 2) |
-| `scripts/weak.sh` | gathers the material for the weak-spots page (concepts with misses, every miss, the functions) |
-| `scripts/explained.sh` | logs one line per explanation requested to explained.md |
-| `scripts/lang.sh` | ja/en display strings, and how a repository's records directory is named |
-| `scripts/help.sh` | the fixed text behind `/hidane --help` |
-| `scripts/migrate.sh` | rewrites old log.md when the record format changes |
-| `scripts/stats.sh` | numbers-only summary with no names (for feedback) |
-| `install.sh` | setup, hook install and removal, update |
-| `tests/run_all.sh` | runs every test and checks the count against the README |
-
 | Variable | Default | |
 |---|---|---|
 | `HIDANE_LANG` | from config, else en | display and prompt language |
