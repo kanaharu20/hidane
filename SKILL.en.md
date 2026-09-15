@@ -5,7 +5,7 @@ description: Pick one function you have not been asked about yet, ask exactly on
 
 # hidane — one question from the unasked
 
-One function, one question per invocation. Answer, record, stop. Call again for another.
+One function, one question per invocation. Answer, record, stop. Call again for another (the exception is `--focus`: 3 questions in one invocation, still one at a time).
 **Use script output verbatim. Do not rebuild it.**
 
 ## Arguments (`$ARGUMENTS`)
@@ -17,7 +17,7 @@ One function, one question per invocation. Answer, record, stop. Call again for 
 - `--tag` … run `sh <HIDANE>/scripts/tag.sh --all --bg`. The functions of the current repository not on the map yet get tagged (uncommitted ones included; the LLM calls run in the background, so it returns in seconds). Show its one output line as is, stop. Do not wait or check on it. No question.
 - `--update` … run `sh "$(cat <HIDANE>/HOME)/install.sh" --update` to get the latest version, show its output as is, stop. No question.
 - `--weak` … the "Weak spots" steps below. No question.
-- `--focus [concept]` … focus mode. Same one question as with no argument, except step 1 runs `sh <HIDANE>/scripts/next.sh --focus [concept]`. Later plain `/hidane` calls keep asking about that concept on their own (put next.sh's first line "Focus: …" verbatim before the question).
+- `--focus [concept]` … focus mode. Step 1 runs `sh <HIDANE>/scripts/next.sh --focus [concept]`; then ask, wait, judge and record one question exactly as with no argument. **After showing record.sh's output, go back to step 1 for the next question** (from the second question on, run `next.sh` with no flag; it keeps the same concept). Put next.sh's first line "Focus: … (N left)" verbatim before each question. Stop when record.sh prints "Focus: … done" (3 questions; `HIDANE_FOCUS_N` changes it). If next.sh prints that focus was released, ask that one question and stop. Never ask the questions together: always one, and wait for the answer before the next.
 - text that does not start with a flag (`/hidane what is _us?`, `/hidane the part I missed in the last question`) … the "Explain" steps below. No question.
 - none … follow the steps below.
 
@@ -94,7 +94,7 @@ Fold the past misses into one page and show the reader where they stumble. The s
 - Ask without keys in place, or rewrite keys after seeing the answer.
 - Output scores, percentages, or evaluative words ("you understand this well").
 - Record a second answer. The record is the first answer.
-- Ask more than one question per invocation, even if asked to widen the scope.
+- Ask more than one question per invocation, even if asked to widen the scope. Under `--focus` the questions are still one at a time: record the answer, then ask the next.
 - Write to log.md by any means other than record.sh. Never pass --free. Never pass hit / miss directly.
 - Read record.sh's source before running it; the usage above is complete.
 

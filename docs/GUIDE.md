@@ -95,7 +95,7 @@ Other commands:
 | | |
 |---|---|
 | `/hidane --weak` | weak spots on one page: misses folded into a pattern, the flow, the step you stumble on, in your own lines |
-| `/hidane --focus [concept]` | focus: 3 questions in a row on one concept, so one sitting lights one concept instead of spreading over many |
+| `/hidane --focus [concept]` | focus: 3 questions in one invocation, one at a time, on one concept, so one sitting lights one concept instead of spreading over many |
 | `/hidane --map` | table of concepts: value, state, repos |
 | `/hidane --vault` | rebuild the map and open it in Obsidian |
 | `/hidane --lint` | merge concept names that mean the same (also automatic every 3 days) |

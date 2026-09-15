@@ -87,7 +87,7 @@ Open that folder in Obsidian with "Open folder as vault". Then `/hidane`.
 | `/hidane` | one question |
 | `/hidane <anything>` | an explanation at your level: a function, a concept, printf, "where am I weak" |
 | `/hidane --weak` | weak spots on one page: misses folded into a pattern, the flow, the step you stumble on, in your own lines |
-| `/hidane --focus [concept]` | focus: 3 questions in a row on one concept to settle it |
+| `/hidane --focus [concept]` | focus: 3 questions in one invocation, one at a time, on one concept to settle it |
 | `/hidane --map` | the table of concepts, values and states |
 | `/hidane --vault` | rebuild the map and open it in Obsidian |
 | `/hidane --lint` | merge concept names that mean the same (also automatic every 3 days) |
