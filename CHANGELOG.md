@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.5 — 2026-09-15
+
+- `/hidane --tag` works in a repository with no commits yet, and picks up untracked files (not ignored ones).
+  It failed with "Needed a single revision" and read function bodies from HEAD instead of the working tree.
+- 168 L0 tests.
+
 ## 0.3.4 — 2026-09-15
 
 - Functions no longer in the working tree are marked "(gone)" in the concept pages' unasked lists, and each

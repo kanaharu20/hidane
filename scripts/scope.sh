@@ -2,7 +2,7 @@
 # reflect の対象範囲を出す。
 #   scope.sh [--since DATE | --days N] [--author PAT]          変更ファイル一覧(基準コミットつき)
 #   scope.sh [--since DATE | --days N] [--author PAT] <file>   そのファイルのハンク(-U0、新規行番号は @@ +c,d @@)
-#   scope.sh --all [dir]      日付に関係なく、配下の全ファイルから関数単位の候補を全部出す(上ほど優先。上限なし)
+#   scope.sh --all [dir]      日付に関係なく、配下の全ファイル(未 commit の新規ファイルも)から関数単位の候補を全部出す(上ほど優先。上限なし)
 #   scope.sh --commit <rev>   そのコミットが触ったファイルだけから、同じ形で候補を出す(フック用)
 # 基準 = 範囲開始日時より前の最後のコミット。無ければ空ツリー。
 # 未追跡の新規ファイルも一覧に出す(git diff は追跡ファイルしか見ないため)。
@@ -74,7 +74,7 @@ if [ -n "$all" ]; then
   if [ -n "$rev" ]; then
     files=$(git diff-tree --root --no-commit-id --name-only -r "$rev" -- "$dir" 2>/dev/null) || { echo "no such commit: $rev" >&2; exit 4; }
   else
-    files=$(git ls-files -- "$dir")
+    files=$(git ls-files --cached --others --exclude-standard -- "$dir")   # 未追跡(未 commit)のファイルも。無視されるものは除く
   fi
   printf '%s\n' "$files" | grep -Ev "$excl" | grep -Ev '(^|/)(test|tests|spec|__tests__|node_modules|vendor|dist|build)/' \
   | while IFS= read -r f; do

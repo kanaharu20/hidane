@@ -38,7 +38,7 @@ MAXF="${HIDANE_MAX_FUNCS:-8}"
 cd "$REPO"
 top=$(git rev-parse --show-toplevel 2>/dev/null) || { echo "tag.sh: git リポジトリではない: $REPO" >&2; exit 3; }
 cd "$top"; repo=$(basename "$top")
-short=$(git rev-parse --short "$REV")
+short=$(git rev-parse --short "$REV" 2>/dev/null || echo "-")   # commit がまだ無い repo でも動く(記録の commit 欄は -)
 out="$ROOT/$repo"; fn="$out/functions.md"; log="$out/log.md"
 mkdir -p "$out"; [ -n "$DRY" ] || printf '%s\n' "$top" > "$out/path"
 tmp=$(mktemp -d); trap 'rm -rf "$tmp"' EXIT
@@ -62,9 +62,9 @@ fi
 # 2. 既存の概念一覧(全 repo)。呼び出しごとに更新する(前の束で新設した名前を次の束が使えるように)
 existing() { sh "$HERE/map.sh" --root "$ROOT" --tsv 2>/dev/null | cut -f1 | LC_ALL=C sort -u; }
 
-# 関数のコード。コミット指定ならその版、--all なら HEAD、無ければ作業ツリー
+# 関数のコード。--all なら作業ツリー(行番号も作業ツリーで数えている。commit 前の関数を拾うため)、コミット指定ならその版
 code() { # $1 file $2 a $3 b
-  { git show "$REV:$1" 2>/dev/null || cat "$1" 2>/dev/null; } | sed -n "$2,$3p"
+  if [ -n "$ALL" ]; then cat "$1" 2>/dev/null; else git show "$REV:$1" 2>/dev/null || cat "$1" 2>/dev/null; fi | sed -n "$2,$3p"
 }
 
 # 3. 束ごとに: プロンプト → 呼び出し → 検査 → 追記

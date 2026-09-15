@@ -138,6 +138,17 @@ i=0; while [ $i -lt 40 ] && ! grep -q '候補' "$ROOT/hook.log" 2>/dev/null; do 
 { [ $rc = 0 ] && echo "$o" | grep -q '^tag.sh: 候補 5 件。背景で' && grep -q '候補 5、呼び出し 1 回、追記 5 行' "$ROOT/hook.log" && [ "$(grep -c '^| 20' "$ROOT/proj7/functions.md")" = 5 ]; } \
   && ok "G18 --bg は候補数の 1 行で戻り、背景で付けて hook.log に集計" || ng "G18 bg" "rc=$rc $o $(cat "$ROOT/hook.log" 2>&1)"
 
+# G19 commit が 1 つも無い repo、未追跡のファイルでも --all は動く(記録の commit 欄は -)。作業ツリーの中身を送る
+R8="$TMP/proj8"; mkdir -p "$R8"; (cd "$R8" && git init -q && git config user.email t@t && git config user.name t
+  printf 'int fresh(int x)\n{\n\treturn x + 1;\n}\n' > fresh.c; printf 'obj/\n' > .gitignore; mkdir obj; printf 'int ignored(int x)\n{\n\treturn x;\n}\n' > obj/i.c)
+: > "$FAKE_COUNT"
+HIDANE_CLAUDE="$FAKE" sh scripts/tag.sh --repo "$R8" --root "$ROOT" --all > "$TMP/o8" 2>"$TMP/e8"; rc=$?
+{ [ $rc = 0 ] && grep -q '候補 1、呼び出し 1 回、追記 1 行' "$TMP/o8" && grep -q '^| 20[0-9-]* | fresh.c:1-4 | fresh | 算術 | - |' "$ROOT/proj8/functions.md" && ! grep -q ignored "$ROOT/proj8/functions.md"; } \
+  && ok "G19 commit 無し・未追跡でも --all は付く(commit 欄は -)。.gitignore のものは拾わない" || ng "G19 no commit" "rc=$rc $(cat "$TMP/o8" "$TMP/e8"; cat "$ROOT/proj8/functions.md" 2>&1)"
+d=$(HIDANE_CLAUDE="$FAKE" sh scripts/tag.sh --repo "$R2" --root "$ROOT" --all --dry-run 2>/dev/null | head -3); printf 'int f1(int x)\n{\n\treturn x + 100;\n}\n' > "$R2/f1.c"
+printf '%s\n| 2026-09-09 | x.c:1-2 | zz | c | abc |  |\n' "$(head -3 "$ROOT/proj2/functions.md")" > "$ROOT/proj2/functions.md"
+d=$(HIDANE_CLAUDE="$FAKE" sh scripts/tag.sh --repo "$R2" --root "$ROOT" --all --dry-run 2>/dev/null); echo "$d" | grep -q 'x + 100' && ok "G20 --all は作業ツリーの中身を送る(HEAD ではない)" || ng "G20 worktree" "$(echo "$d" | grep -n 'f1' | head -3)"
+
 # H01 hook: 置く → commit → 背景で functions.md が増える
 (cd "$R" && sh "$H/install.sh" --hook >/dev/null) && grep -q "$H" "$R/.git/hooks/post-commit" && ok "H01 install.sh --hook が hidane の場所を埋めて置く" || ng "H01 install"
 cat > "$FAKE" <<'F'
