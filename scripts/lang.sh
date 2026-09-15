@@ -92,6 +92,9 @@ L() {
     ja:p_zure) echo "典型的なズレ" ;;           en:p_zure) echo "Typical misses" ;;
     ja:p_records) echo "記録" ;;                en:p_records) echo "Records" ;;
     ja:p_unasked) echo "未出題の関数" ;;        en:p_unasked) echo "Unasked functions" ;;
+    ja:p_gone) echo "(消えた)" ;;               en:p_gone) echo "(gone)" ;;
+    ja:p_gone_n) echo "作業ツリーに無い関数 %d 件には (消えた) と印を付けた。出題からは外れている" ;;
+    en:p_gone_n) echo "%d functions no longer in the working tree are marked (gone) and are not asked" ;;
     ja:p_summary) echo "概念 %s / repo %s ページ。" ;;  en:p_summary) echo "%s concept / %s repo pages." ;;
     ja:r_usage) echo "引数は 場所 関数 概念 型 問い 結果 [ズレ] [備考] の 6〜8 個" ;;
     en:r_usage) echo "expected 6-8 args: place function concepts type question result [miss] [note]" ;;

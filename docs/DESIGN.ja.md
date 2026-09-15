@@ -107,6 +107,7 @@ commit のたび、hook が触った関数のソースを `claude -p` に送り�
   <repo>/log.md                問いと答え
   <repo>/functions.md          関数 → 概念
   <repo>/pending, keys         次の一問の決定と鍵(record.sh が消す)
+  <repo>/path                  そのリポジトリの場所(pages.sh が作業ツリーを確かめるため)
   aliases.md                   統合した名前
   explained.md                 求めた解説
   .version                     記録の形式の版(migrate.sh)

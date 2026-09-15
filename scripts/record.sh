@@ -29,7 +29,7 @@ done
 . "$HERE/lang.sh"
 if [ -z "$REPO" ]; then
   top=$(git rev-parse --show-toplevel 2>/dev/null) || { echo "record.sh: $(L r_norepo)" >&2; exit 3; }
-  REPO=$(basename "$top")
+  REPO=$(basename "$top"); mkdir -p "$ROOT/$REPO"; printf '%s\n' "$top" > "$ROOT/$REPO/path"
 fi
 log="$ROOT/$REPO/log.md"; pending="$ROOT/$REPO/pending"; keys="$ROOT/$REPO/keys"
 if [ -n "$PATHONLY" ]; then echo "$log"; exit 0; fi

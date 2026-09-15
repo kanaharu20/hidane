@@ -107,6 +107,7 @@ Concepts with only "I don't know" answers are not selected: that is not weakness
   <repo>/log.md                questions and answers
   <repo>/functions.md          function → concepts
   <repo>/pending, keys         the next question and its keys (deleted by record.sh)
+  <repo>/path                  where the repository lives (so pages.sh can check the working tree)
   aliases.md                   merged names
   explained.md                 explanations requested
   .version                     record-format version (migrate.sh)

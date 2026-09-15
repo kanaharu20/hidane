@@ -82,5 +82,15 @@ mkdir -p "$TMP/a b"; u=$(HIDANE_ROOT=$FX sh scripts/open.sh --vault "$TMP/a b/�
 [ "$u" = "obsidian://open?path=$(printf '%s' "$TMP" | od -An -tx1 -v | tr -d ' \n' | sed 's/../%&/g' | tr 'a-f' 'A-F')%2F%61%20%62%2F%E6%97%A5%E6%9C%AC" ] && ok "O03 空白と日本語のパスが %XX に符号化される(既知の答えと一致)" || ng "O03 encode" "$u"
 o=$(HIDANE_OPEN=echo sh scripts/open.sh --root $FX --vault "$TMP/v3"); echo "$o" | grep -q '^obsidian://open?path=' && echo "$o" | grep -q 'Obsidian で開きました' && ok "O02 open コマンドで URL を開く" || ng "O02" "$o"
 
+# P15 作業ツリーに無い関数は「未出題の関数」に (消えた) の印、repo ページに件数。path が無ければ確かめない
+R5="$TMP/r5"; mkdir -p "$R5/w" "$TMP/wt5/src"; printf 'int alive_fn(void)\n{\n\treturn 1;\n}\n' > "$TMP/wt5/src/a.c"
+printf '| 日付 | 場所 | 関数 | 概念 | commit | 備考 |\n|---|---|---|---|---|---|\n| 2026-09-08 | src/a.c:1-4 | alive_fn | 境界条件 | abc |  |\n| 2026-09-08 | src/b.c:1-4 | gone_fn | 境界条件 | abc |  |\n' > "$R5/w/functions.md"
+printf '%s\n' "$TMP/wt5" > "$R5/w/path"
+sh scripts/pages.sh --root "$R5" --vault "$TMP/v5" --today 2026-09-08 >/dev/null 2>&1
+{ grep -q '`src/b.c:1-4` gone_fn (消えた)$' "$TMP/v5/concepts/境界条件.md" && grep -q '`src/a.c:1-4` alive_fn$' "$TMP/v5/concepts/境界条件.md" && grep -q '^作業ツリーに無い関数 1 件には (消えた) と印を付けた' "$TMP/v5/repos/w.md"; } \
+  && ok "P15 消えた関数に印、repo ページに件数" || ng "P15 gone" "$(cat "$TMP/v5/concepts/境界条件.md" "$TMP/v5/repos/w.md")"
+rm "$R5/w/path"; sh scripts/pages.sh --root "$R5" --vault "$TMP/v5" --today 2026-09-08 >/dev/null 2>&1
+! grep -q '消えた' "$TMP/v5/concepts/境界条件.md" && ok "P15b repo の場所が分からなければ印を付けない" || ng "P15b" "$(cat "$TMP/v5/concepts/境界条件.md")"
+
 echo; echo "PASS $pass / FAIL $fail"
 [ $fail -eq 0 ]

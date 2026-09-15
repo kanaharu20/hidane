@@ -40,7 +40,7 @@ top=$(git rev-parse --show-toplevel 2>/dev/null) || { echo "tag.sh: git リポ�
 cd "$top"; repo=$(basename "$top")
 short=$(git rev-parse --short "$REV")
 out="$ROOT/$repo"; fn="$out/functions.md"; log="$out/log.md"
-mkdir -p "$out"
+mkdir -p "$out"; [ -n "$DRY" ] || printf '%s\n' "$top" > "$out/path"
 tmp=$(mktemp -d); trap 'rm -rf "$tmp"' EXIT
 
 # 1. 候補(場所<TAB>関数名)。既知の場所は除く
