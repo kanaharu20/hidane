@@ -79,7 +79,7 @@ Fold the past misses into one page and show the reader where they stumble. The s
 3. Read 3-5 of the listed functions that sit closest to the misses (`file:a-b`). The `@line` in a miss is from that day; find the spot in the current code.
 4. Write three sections, with exactly these headings.
    - **The pattern**: fold the misses into one shape ("the story stops where the flag is set"). Quote up to 3 miss texts, then say the common shape in 2-3 sentences. One pattern per concept if there are several.
-   - **The chain**: the flow to follow for that concept as a numbered chain of 3-5 steps, and which steps the misses land on ("the misses are at steps 2 and 4").
+   - **The flow**: the order to follow for that concept as a numbered flow of 3-5 steps, and which steps the misses land on ("the misses are at steps 2 and 4").
    - **Step by step**: explain each step by pointing at lines in the reader's own functions (`file:a-b`). Steps with misses get the careful treatment; steps that were hit get one sentence. Where it connects to another concept, point at the one line of the reader's code that makes the connection.
 5. No scores, ratios or judgement words ("understands well", "weak" as a verdict). Code quotes 3 lines at most. No question. In the user's language.
 6. Run `sh <HIDANE>/scripts/explained.sh "weak spots" "<concept, concept>"` (1-2 of the not-understood concepts from the first line). Show its one output line. State and colors do not change.

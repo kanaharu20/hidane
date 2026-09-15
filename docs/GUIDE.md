@@ -92,7 +92,7 @@ Other commands:
 
 | | |
 |---|---|
-| `/hidane --weak` | weak spots on one page: misses folded into a pattern, the chain, the step you stumble on, in your own lines |
+| `/hidane --weak` | weak spots on one page: misses folded into a pattern, the flow, the step you stumble on, in your own lines |
 | `/hidane --map` | table of concepts: value, state, repos |
 | `/hidane --vault` | rebuild the map and open it in Obsidian |
 | `/hidane --lint` | merge concept names that mean the same (also automatic every 3 days) |

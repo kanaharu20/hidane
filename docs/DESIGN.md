@@ -94,7 +94,7 @@ Explanations never change values, states or colors. Reading is not evidence of u
 The one explanation that worked best, "where am I weak", made into a fixed form. The map-reading side moved into a script.
 
 1. `weak.sh` assembles the material: among not-understood and fuzzy concepts, those with recorded misses (miss / partial), lowest value first, 3 of them (`HIDANE_WEAK_N`); every miss per concept (across repositories, newest first); the functions tagged with the concept in the current repository (only those still in the working tree). The two opening "From the map" lines are written by the script too
-2. Claude keeps those two lines verbatim, reads 3-5 of the functions, and writes three sections: the pattern, the chain, step by step. Misses folded into one shape, the flow as a 3-5 step chain, which steps the misses land on, each step pointed at in the reader's own lines
+2. Claude keeps those two lines verbatim, reads 3-5 of the functions, and writes three sections: the pattern, the flow, step by step. Misses folded into one shape, the flow as 3-5 steps, which steps the misses land on, each step pointed at in the reader's own lines
 3. `explained.sh "weak spots"` logs it
 
 Concepts with only "I don't know" answers are not selected: that is not weakness, it is missing material. With no misses at all, exit 1. Values, states and colors do not change.
