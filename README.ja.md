@@ -147,7 +147,7 @@ sh tests/run_all.sh     # 229 件。LLM は呼ばない。数秒
 | `HIDANE_SKILL_DIR` | `~/.claude/skills/hidane` | skill の置き場 |
 | `HIDANE_CLAUDE` / `HIDANE_OPEN` | claude / open | 検査用の差し替え |
 
-fork や PR、レビューの手引きは [CONTRIBUTING.ja.md](CONTRIBUTING.ja.md)。
+fork や PR、レビューの手引きは [CONTRIBUTING.ja.md](CONTRIBUTING.ja.md)。保留にしている設計項目は [docs/BACKLOG.ja.md](docs/BACKLOG.ja.md)。
 reflect(前身)の記録は形が違うので自動では移らない。[docs/MIGRATING-from-reflect.ja.md](docs/MIGRATING-from-reflect.ja.md)。
 版は [CHANGELOG.md](CHANGELOG.md)。
 
