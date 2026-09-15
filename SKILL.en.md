@@ -27,17 +27,19 @@ One function, one question per invocation. Answer, record, stop. Call again for 
 2. **Read**: read the range `file:a-b` with Read. **Do not show or explain it to the user.**
 3. **Fix the keys**: once the question is decided and before asking, fix 2-5 elements of the correct answer:
    ```
-   sh <HIDANE>/scripts/keys.sh "<fact 1> @ <line>" "<fact 2> @ <line>" ...
+   sh <HIDANE>/scripts/keys.sh "<kind>: <fact 1> @ <line>" "<kind>: <fact 2> @ <line>" ...
    ```
-   A key is one concrete, checkable fact (a return value, a function called, an order, a branch taken). "@ line" is where it lives (ranges allowed).
+   A key is one concrete, checkable fact, prefixed with its kind: `return:` `branch:` `call:` `order:` `state:` (keys.sh rejects a key without one). "@ line" is where it lives (ranges allowed).
+   keys.sh prints a second line, "Include in your answer: return value 1, branch 2": **kinds and counts only**. It becomes the last line of the question (step 4), so every fact you made a key is inside what the user is asked to answer. Keep the keys to what the question asks: for "what does it return", one return value and the 1-2 branches that decide it are enough.
    **Keys are only the facts that decide the answer to this question.** If the question is "what does it return", the keys are the return value and the branches or comparisons that decide it. Do not make keys out of things the question did not ask for, such as how a lock is taken or an intermediate arithmetic value (if the answer is correct without it, it is not a key).
    **Keys are outcomes, never reasons.** "line 59 checks only is_done, so it does not end" is a reason (an answer to "why"), and the question did not ask why. Write only what happens: "the condition at line 59 stays true and the loop continues" (keys.sh rejects keys containing "because").
-   If the question is "what happens", the keys run to the end of that flow: what the called function returns and where it exits (a key that stops halfway lets a half answer pass).
+   For "where does it exit" or "what is called next", the keys run to the end of that flow (what the called function returns, where it exits). For "what does it return", intermediate steps are not keys.
    Never use a sentence that would be true of any function ("something happens and it ends"). **Never show the keys to the user.**
 4. **Ask**: fit exactly one question into the "Question form". Pick one concrete value from "Input candidates".
    - The form is always "Given <input>, what does it return / what is called next / where does it exit?". Name one observable thing. Vague targets such as "what happens to the loop" or "how does it behave" leave the answer's granularity open and never line up with the keys. The input is a concrete value or one situation ("stop is raised during the debug phase").
    - Never ask "why", "what is needed", "what should be done" (they reveal that an answer exists). Do not widen the question with "including the process" or "and why".
-   - At most 3 lines. Place and function first. No code quotes. No hints. Never two questions.
+   - **The last line is the "Include in your answer: …" line keys.sh printed, verbatim.** No key contents, no line numbers: kinds and counts only.
+   - At most 4 lines including it. Place and function first. No code quotes. No hints. Never two questions.
    - Ask in the language the user writes in.
 5. **Wait** for the answer. "I don't know" is a valid answer. Do not prompt, do not ask to rephrase.
 6. **Judge per key**: compare the answer against each key and mark it `yes` (states that fact specifically) / `no` (does not mention it) / `contra` (says the opposite).

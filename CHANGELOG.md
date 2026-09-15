@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.3 — 2026-09-15
+
+- Keys carry a kind (return / branch / call / order / state) and `keys.sh` prints "Include in your answer: return
+  value 1, branch 2", which becomes the last line of the question. A question that asked only for a return value
+  while the keys demanded the steps in between was scored partial; now every key is inside what the user is asked.
+- The result line names the kind of each missing key: "not mentioned: branch L49-51".
+- 163 L0 tests.
+
 ## 0.3.2 — 2026-09-15
 
 - Not-understood concepts were drawn in the understood color: Obsidian's `[state:known]` group matches by substring,

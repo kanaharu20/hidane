@@ -73,12 +73,12 @@ Answer **in your own words, concretely**: not "it errors" but "it returns NULL a
 The reply looks like:
 
 ```
-partial (keys 3 / 4) — not mentioned: L64-65
+partial (keys 3 / 4) — not mentioned: branch L64-65
 | 2026-09-09 10:12 | src/pool.c:57-68 | take_slot | boundary conditions, lock ordering | edge | one worker | partial | ... |
 ```
 
 - **hit (keys n / n)**: every element of the correct answer was there.
-- **partial (keys k / n) — not mentioned: L64-65**: something is missing. It is not revealed; the line where it lives is pointed at. Go read it.
+- **partial (keys k / n) — not mentioned: branch L64-65**: something is missing. It is not revealed; only its kind (return value / branch / call / order / state) and the line where it lives are pointed at. Go read it.
 - **miss — contradicted: L63**: something was stated backwards.
 - No explanation, no model answer. That is by design. Want more? `/hidane` again.
 

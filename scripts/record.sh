@@ -53,9 +53,11 @@ if [ "$6" = "--verdict" ]; then
   eval "$(printf '%s\n' "$verdict" | tr ',' '\n' | paste "$keys" - | awk -F'\t' -v l_missing="$(L r_missing)" -v l_contra="$(L r_contra)" '
     function trim(s) { gsub(/^[ \t]+|[ \t]+$/, "", s); return s }
     { v = trim($3); t = $2; ref = ""; if (match(t, /@ *[0-9]+(-[0-9]+)?[ ]*$/)) { ref = substr(t, RSTART); sub(/^@ */, "", ref); t = trim(substr(t, 1, RSTART - 1)) }
+      kind = ""; if (match(t, /^[^:]+: /)) { kind = substr(t, 1, RSTART + RLENGTH - 3) " " }
+      loc = (ref != "" ? "L" ref : "#" $1)
       if (v == "yes") { yes++; next }
-      if (v == "no") { no++; z = z (z == "" ? "" : "; ") l_missing ": " t (ref != "" ? " @" ref : ""); u = u (u == "" ? "" : ", ") (ref != "" ? "L" ref : "#" $1); next }
-      if (v == "contra") { contra++; z = z (z == "" ? "" : "; ") l_contra ": " t (ref != "" ? " @" ref : ""); uc = uc (uc == "" ? "" : ", ") (ref != "" ? "L" ref : "#" $1); next }
+      if (v == "no") { no++; z = z (z == "" ? "" : "; ") l_missing ": " t (ref != "" ? " @" ref : ""); u = u (u == "" ? "" : ", ") kind loc; next }
+      if (v == "contra") { contra++; z = z (z == "" ? "" : "; ") l_contra ": " t (ref != "" ? " @" ref : ""); uc = uc (uc == "" ? "" : ", ") kind loc; next }
       bad = 1 }
     END { if (bad) { print "BAD=1"; exit }
       r = (contra > 0 ? "miss" : no > 0 ? "partial" : "hit")

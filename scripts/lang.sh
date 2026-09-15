@@ -114,6 +114,15 @@ L() {
     ja:k_reason) echo "鍵 %d は理由を含む(「ので」「because」)。鍵は起きる結果だけ(何を返す、何が呼ばれる、どこで抜ける)" ;;
     en:k_reason) echo "key %d carries a reason (\"because\"). A key is only an outcome (what is returned, what is called, where it exits)" ;;
     ja:k_saved) echo "鍵 %d 個を固定した(ユーザーには見せない)" ;; en:k_saved) echo "%d keys fixed (do not show them to the user)" ;;
+    ja:k_cat) echo "鍵 %d に種別が無い。「返り値: 」「分岐: 」「呼び出し: 」「順序: 」「状態: 」のどれかで始める" ;;
+    en:k_cat) echo "key %d has no kind. Start it with \"return: \", \"branch: \", \"call: \", \"order: \" or \"state: \"" ;;
+    ja:k_scope) echo "答えに含めるもの" ;;        en:k_scope) echo "Include in your answer" ;;
+    ja:k_scope_note) echo "(この 1 行を問いの最後の行にそのまま置く)" ;;  en:k_scope_note) echo "(put this line verbatim as the last line of the question)" ;;
+    ja:k_c_ret) echo "返り値" ;;     en:k_c_ret) echo "return value" ;;
+    ja:k_c_branch) echo "分岐" ;;    en:k_c_branch) echo "branch" ;;
+    ja:k_c_call) echo "呼び出し" ;;  en:k_c_call) echo "call" ;;
+    ja:k_c_order) echo "順序" ;;     en:k_c_order) echo "order" ;;
+    ja:k_c_state) echo "状態" ;;     en:k_c_state) echo "state" ;;
     ja:r_place) echo "場所は file:a-b の形" ;;   en:r_place) echo "place must look like file:a-b" ;;
     ja:r_concepts) echo "概念が空" ;;            en:r_concepts) echo "concepts are empty" ;;
     ja:r_pending) echo "next.sh が決めた内容と違うので書かない(exit 7)。" ;;

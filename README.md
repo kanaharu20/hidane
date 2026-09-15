@@ -22,6 +22,7 @@ Type `/hidane` in Claude Code and it picks one of those functions and asks exact
 ```
 src/main.c:19 is_valid_num
 Given the string "+5", what does this function return?
+Include in your answer: return value 1, branch 1
 ```
 
 Answer in your own words. "I don't know" is an answer.
@@ -31,8 +32,8 @@ hit (keys 2 / 2)
 | 2026-09-09 09:54 | src/main.c:19-33 | is_valid_num | input validation, boundary conditions | trace | "+5" → returns? | hit |  |  |
 ```
 
-The elements of the correct answer were fixed as 2-5 "keys" before you answered, and each key is judged present / missing / contradicted.
-Fall short and you get "partial (keys 3 / 4), not mentioned: L28-29", line numbers only. It does not tell you what is there. You go and read. If reading is not enough, ask `/hidane the part I missed in the last question` and it explains from there.
+The elements of the correct answer were fixed as 2-5 "keys" before you answered, and each key is judged present / missing / contradicted. The last line of the question lists the kinds and counts of the keys, never their contents, so every key is inside what you were asked.
+Fall short and you get "partial (keys 3 / 4), not mentioned: order L28-29", kind and line numbers only. It does not tell you what is there. You go and read. If reading is not enough, ask `/hidane the part I missed in the last question` and it explains from there.
 No explanation, no summary. That is how the asking side behaves.
 
 As answers accumulate, concepts light up in Obsidian's graph view. The color comes from one "value" per concept: hits raise it, misses and "I don't know" lower it.
@@ -117,14 +118,14 @@ The mechanics in detail: [docs/DESIGN.md](docs/DESIGN.md).
 
 - One author, two repositories, 32 answers so far. Weights (1 / 2 / 3), threshold (±4) and forgetting (30 days) are all provisional
 - The "what does this function do" question type (summary) is still judged by Claude reading the answer; grading by generating code from the explanation (CGBG) is not in
-- Zero dependencies beyond git and POSIX sh came at the price of dense sh and awk. 159 tests are what make it safe to change
+- Zero dependencies beyond git and POSIX sh came at the price of dense sh and awk. 163 tests are what make it safe to change
 - Linux should work but is untested; `/hidane --vault` uses macOS `open`
 - How closely Claude follows the SKILL steps is checked by reading real session transcripts. Prose instructions sometimes do not take
 
 ## Development
 
 ```sh
-sh tests/run_all.sh     # 159 tests, no LLM, seconds
+sh tests/run_all.sh     # 163 tests, no LLM, seconds
 ```
 
 A new test is trusted only after breaking the implementation and watching it fail. `run_all.sh` also fails if the test count in this README drifts from reality.
