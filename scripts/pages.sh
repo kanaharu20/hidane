@@ -47,10 +47,13 @@ sh "$HERE/map.sh" --root "$ROOT" --today "$TODAY" --tsv > "$tsv"
 
 # 行を集めて awk に渡す(map.sh と同じ流し方)
 # 作業ツリーに今も無い関数は gone(<repo>/path か log.md の先頭行から repo の場所を知る。分からなければ確かめない)
-alive() { [ -n "$TREE" ] || return 0; file=${1%%:*}; range=${1##*:}; a=${range%-*}; b=${range#*-}; [ -f "$TREE/$file" ] && sed -n "${a},${b}p" "$TREE/$file" | grep -qF "$2"; }
+alive() { [ "$TREE" != "-" ] || return 1; [ -n "$TREE" ] || return 0; file=${1%%:*}; range=${1##*:}; a=${range%-*}; b=${range#*-}; [ -f "$TREE/$file" ] && sed -n "${a},${b}p" "$TREE/$file" | grep -qF "$2"; }
 for d in "$ROOT"/*/; do
   repo=$(basename "$d")
-  TREE=$(cat "$d/path" 2>/dev/null || sed -n '1s/^# hidane — //p' "$d/log.md" 2>/dev/null || true); [ -d "$TREE" ] || TREE=""
+  TREE=$(cat "$d/path" 2>/dev/null || sed -n '1s/^# hidane — //p' "$d/log.md" 2>/dev/null || true)
+  # 場所を知っていてそこに無ければ、その repo は丸ごと消えた("-" = 全部 gone)。場所を知らなければ確かめない("")
+  case "$TREE" in /*) ;; *) TREE="" ;; esac
+  if [ -n "$TREE" ] && [ ! -d "$TREE" ]; then printf '%s\tlost\t%s\n' "$repo" "$TREE"; TREE="-"; fi
   [ -f "$d/log.md" ] && grep '^| 20' "$d/log.md" | sed "s/^/$repo	log	/"
   [ -f "$d/functions.md" ] && grep '^| 20' "$d/functions.md" | while IFS= read -r row; do
     pl=$(printf '%s' "$row" | awk -F'|' '{ gsub(/^ +| +$/, "", $3); print $3 }'); fn=$(printf '%s' "$row" | awk -F'|' '{ gsub(/^ +| +$/, "", $4); print $4 }')
@@ -60,7 +63,7 @@ done | sh "$HERE/resolve.sh" --root "$ROOT" | LC_ALL=C sort -t'	' -k3,3 | awk -F
   -v l_known="$(L st_known)" -v l_fuzzy="$(L st_fuzzy)" -v l_unknown="$(L st_unknown)" -v l_unasked="$(L st_unasked)" \
   -v ty_trace="$(L ty_trace)" -v ty_edge="$(L ty_edge)" -v ty_summary="$(L ty_summary)" \
   -v rs_hit="$(L rs_hit)" -v rs_miss="$(L rs_miss)" -v rs_dunno="$(L rs_dunno)" -v rs_skip="$(L rs_skip)" -v rs_partial="$(L rs_partial)" \
-  -v p_state="$(L p_state)" -v p_related="$(L p_related)" -v p_zure="$(L p_zure)" -v p_records="$(L p_records)" -v p_unasked="$(L p_unasked)" -v p_gone="$(L p_gone)" -v p_gone_n="$(L p_gone_n)" \
+  -v p_state="$(L p_state)" -v p_related="$(L p_related)" -v p_zure="$(L p_zure)" -v p_records="$(L p_records)" -v p_unasked="$(L p_unasked)" -v p_gone="$(L p_gone)" -v p_gone_n="$(L p_gone_n)" -v p_lost="$(L p_lost)" \
   -v h_concept="$(L h_concept)" -v h_state="$(L h_state)" -v h_value="$(L h_value)" -v h_evidence="$(L h_evidence)" -v h_last="$(L h_last)" '
 function trim(s) { gsub(/^[ \t]+|[ \t]+$/, "", s); return s }
 function fname(c) { gsub("/", "／", c); return c }
@@ -79,7 +82,8 @@ BEGIN {
   close(tsv)
 }
 {
-  repo = $1; kind = $2; split($3, col, "|")
+  repo = $1; kind = $2; if (kind == "lost") { lost[repo] = $3; next }
+  split($3, col, "|")
   date = substr(trim(col[2]), 1, 10); place = trim(col[3]); fnm = trim(col[4])
   k = split(trim(col[5]), cs, ",")
   for (i = 1; i <= k; i++) { cl[i] = trim(cs[i]) }
@@ -118,6 +122,7 @@ END {
   for (repo in rc) {
     f = vault "/repos/" repo ".md"
     printf("---\nkind: repo\nupdated: %s\n---\n# %s\n\n", today, repo) > f
+    if (repo in lost) { printf(p_lost "\n\n", lost[repo]) > f }
     if (gone[repo] > 0) { printf(p_gone_n "\n\n", gone[repo]) > f }
     printf("| %s | %s | %s |\n|---|---|---|\n", h_concept, h_state, h_value) > f
     n = split(rc[repo], cs, "\n"); delete done

@@ -91,6 +91,8 @@ sh scripts/pages.sh --root "$R5" --vault "$TMP/v5" --today 2026-09-08 >/dev/null
   && ok "P15 消えた関数に印、repo ページに件数" || ng "P15 gone" "$(cat "$TMP/v5/concepts/境界条件.md" "$TMP/v5/repos/w.md")"
 rm "$R5/w/path"; sh scripts/pages.sh --root "$R5" --vault "$TMP/v5" --today 2026-09-08 >/dev/null 2>&1
 ! grep -q '消えた' "$TMP/v5/concepts/境界条件.md" && ok "P15b repo の場所が分からなければ印を付けない" || ng "P15b" "$(cat "$TMP/v5/concepts/境界条件.md")"
+printf '%s\n' "$TMP/no-such-dir" > "$R5/w/path"; sh scripts/pages.sh --root "$R5" --vault "$TMP/v5" --today 2026-09-08 >/dev/null 2>&1
+{ grep -q '^リポジトリが .*no-such-dir に無い' "$TMP/v5/repos/w.md" && [ "$(grep -c '(消えた)' "$TMP/v5/concepts/境界条件.md")" = 2 ]; } && ok "P16 repo の場所が消えていれば全部 (消えた) と repo ページに案内" || ng "P16 lost" "$(cat "$TMP/v5/repos/w.md")"
 
 echo; echo "PASS $pass / FAIL $fail"
 [ $fail -eq 0 ]

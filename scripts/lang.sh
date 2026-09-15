@@ -93,6 +93,8 @@ L() {
     ja:p_records) echo "記録" ;;                en:p_records) echo "Records" ;;
     ja:p_unasked) echo "未出題の関数" ;;        en:p_unasked) echo "Unasked functions" ;;
     ja:p_gone) echo "(消えた)" ;;               en:p_gone) echo "(gone)" ;;
+    ja:p_lost) echo "リポジトリが %s に無い。記録は残る(答えは自分のもの)。やめるなら ~/.claude/hidane/<repo> を消して /hidane --vault" ;;
+    en:p_lost) echo "repository not found at %s. The records stay (answers are yours). To drop it, delete ~/.claude/hidane/<repo> and run /hidane --vault" ;;
     ja:p_gone_n) echo "作業ツリーに無い関数 %d 件には (消えた) と印を付けた。出題からは外れている" ;;
     en:p_gone_n) echo "%d functions no longer in the working tree are marked (gone) and are not asked" ;;
     ja:p_summary) echo "概念 %s / repo %s ページ。" ;;  en:p_summary) echo "%s concept / %s repo pages." ;;

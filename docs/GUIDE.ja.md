@@ -118,6 +118,7 @@ Claude Code が `sh .../scripts/next.sh` などの実行許可を毎回聞いて
 | Obsidian のノードに色が無い | 上の 2. の最後 |
 | 地図がおかしい | `~/Documents/hidane` を丸ごと消して `/hidane --vault`。記録から作り直される |
 | 記録を最初からやり直したい | `rm -rf ~/.claude/hidane`(**戻らない**) |
+| 1 つの repo をやめる | そのリポジトリで `sh ~/hidane/install.sh --unhook`、`rm -rf ~/.claude/hidane/<repo>`、`/hidane --vault`。その repo だけの概念と、そこで答えた記録は地図から消える。残したいなら消さない(repo が無くなっても記録は残り、地図には「消えた」と出る) |
 | 全部やめる | リポジトリで `sh ~/hidane/install.sh --unhook`、`rm -rf ~/.claude/skills/hidane ~/.claude/hidane ~/Documents/hidane` |
 
 ## 6. どこに何があるか

@@ -5,7 +5,9 @@
 - Functions no longer in the working tree are marked "(gone)" in the concept pages' unasked lists, and each
   repository page says how many. They were already excluded from questions and `--weak`; the vault now agrees.
   `tag.sh` and `record.sh` remember the repository path in `<root>/<repo>/path` so `pages.sh` can check from anywhere.
-- 165 L0 tests.
+- A repository whose directory is gone: every function is marked (gone) and the repository page says where it was
+  looked for and how to drop it. Records are never deleted by hidane itself.
+- 166 L0 tests.
 
 ## 0.3.3 — 2026-09-15
 
