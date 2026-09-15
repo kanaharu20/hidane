@@ -153,8 +153,9 @@ rm -f "$tsv.keep"
 g="$VAULT/.obsidian/graph.json"
 if [ -f "$g" ] && grep -q '\[state:\(known\|fuzzy\|unknown\|理解\|曖昧\|非理解\|霧\|未出題\)' "$g"; then cp "$g" "$g.bak"; rm -f "$g"; fi
 # 0.5.5 より前の graph.json に仮(tent)の色を足す
-if [ -f "$g" ] && ! grep -q '\[tone:tent\]' "$g"; then sed -i.bak 's/^\( *\){ "query": "\[tone:off\]",/\1{ "query": "[tone:tent]", "color": { "a": 1, "rgb": 5592405 } },\
-\1{ "query": "[tone:off]",/' "$g"; fi
+if [ -f "$g" ] && ! grep -q '\[tone:tent\]' "$g"; then   # 1 行形式でも Obsidian が整形した複数行形式でも、colorGroups の先頭に足す
+  cp "$g" "$g.bak"; awk '{ print } /"colorGroups": \[/ { match($0, /^ */); printf("%s  { \"query\": \"[tone:tent]\", \"color\": { \"a\": 1, \"rgb\": 5592405 } },\n", substr($0, 1, RLENGTH)) }' "$g.bak" > "$g"
+fi
 [ -f "$g" ] || cat > "$g" <<'JSON'
 {
   "collapse-color-groups": false,

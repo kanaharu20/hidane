@@ -97,5 +97,9 @@ printf '%s\n' "$TMP/no-such-dir" > "$R5/w/path"; sh scripts/pages.sh --root "$R5
 # P17 仮(tent)の色が無い graph.json には足す(.bak を残す)。graph.json は毎回作り直さない
 sed -i.orig '/tone:tent/d' "$TMP/v2/.obsidian/graph.json"; sh scripts/pages.sh --root $FX --vault "$TMP/v2" --today 2026-09-08 >/dev/null 2>&1
 { grep -q '"\[tone:tent\]"' "$TMP/v2/.obsidian/graph.json" && [ -f "$TMP/v2/.obsidian/graph.json.bak" ] && [ "$(grep -c '\[tone:' "$TMP/v2/.obsidian/graph.json")" = 15 ]; } && ok "P17 仮の色が無い graph.json に足す(15 群)" || ng "P17 tent upgrade" "$(grep tone "$TMP/v2/.obsidian/graph.json")"
+# P17b Obsidian が整形した複数行形式の graph.json にも足す(JSON として読める)
+printf '{\n  "colorGroups": [\n    {\n      "query": "[tone:off]",\n      "color": {\n        "a": 1,\n        "rgb": 7041144\n      }\n    }\n  ]\n}\n' > "$TMP/v2/.obsidian/graph.json"
+sh scripts/pages.sh --root $FX --vault "$TMP/v2" --today 2026-09-08 >/dev/null 2>&1
+{ grep -q '"\[tone:tent\]"' "$TMP/v2/.obsidian/graph.json" && python3 -c "import json,sys; json.load(open(sys.argv[1]))" "$TMP/v2/.obsidian/graph.json" 2>/dev/null; } && ok "P17b 複数行形式の graph.json にも足し、JSON として読める" || ng "P17b pretty" "$(cat "$TMP/v2/.obsidian/graph.json")"
 echo; echo "PASS $pass / FAIL $fail"
 [ $fail -eq 0 ]

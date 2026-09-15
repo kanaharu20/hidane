@@ -14,7 +14,7 @@ Decisions from the defect discussion.
   (`name(…) {`), excluding control keywords and test helpers (it / test / describe).
 - open.sh uses `xdg-open` outside macOS.
 - next.sh's awk program moved to `scripts/next.awk` (run via `awk -f`); install.sh copies `*.awk`.
-- 207 tests.
+- 208 tests.
 
 ## 0.5.4 — 2026-09-15
 
