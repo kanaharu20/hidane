@@ -11,7 +11,7 @@ Claude reads that map before explaining: it skips what you know and starts from 
 You look at the same map. Not a score, but which concepts are lit.
 
 <p align="center">
-  <img src="docs/graph.svg" alt="A map drawn from fictional data: 2 repositories, 42 concepts. green=understood, amber=fuzzy, red=not understood, dark gray=unasked" width="820">
+  <img src="docs/graph.svg" alt="A map drawn from fictional data: 2 repositories, 42 concepts. Thirteen steps from red (-6) through amber (0) to green (+6); dark gray = never asked" width="820">
 </p>
 
 ## What happens
@@ -46,8 +46,8 @@ Thirteen steps from red (-6) through amber (0) to green (+6); one answer moves a
 | +4 and up (toward green) | understood | hits piled up |
 | -4 and down (toward red) | not understood | misses piled up |
 
-How far one answer moves it depends on the question type: tracing 1, boundary 2, summary 3. Partial does not move it. Reading an explanation does not move it.
-After 30 days without an answer, understood and not understood both fall back to amber; one answer brings them back. At first almost everything is dark, and it lights up one answer at a time.
+How far one answer moves it depends on the question type: tracing 1, boundary 2. The concept the question targeted gets the full amount, the other concepts on the same function half. Partial does not move it. Reading an explanation does not move it.
+After 30 days without an answer, understood and not understood both fall back to amber. Only a hit brings a concept back to understood; only a miss brings it back to not understood. At first almost everything is dark, and it lights up one answer at a time.
 
 When you want an explanation, just ask after `/hidane`: `/hidane what is printf?`. Claude reads the map first.
 Concepts you understand are not even named; concepts you do not understand are explained carefully, starting from what you got wrong, using your own functions as examples.
@@ -119,15 +119,15 @@ The mechanics in detail: [docs/DESIGN.md](docs/DESIGN.md).
 ## Limits, and what is not done
 
 - One author, two repositories, 32 answers so far. Weights (1 / 2 / 3), threshold (±4) and forgetting (30 days) are all provisional
-- The "what does this function do" question type (summary) is still judged by Claude reading the answer; grading by generating code from the explanation (CGBG) is not in
-- Zero dependencies beyond git and POSIX sh came at the price of dense sh and awk. 190 tests are what make it safe to change
+- The "what does this function do" type (summary) was removed: there is no grading method for it (CGBG, generating code from the explanation). Two question types remain, follow and boundary
+- Zero dependencies beyond git and POSIX sh came at the price of dense sh and awk. 197 tests are what make it safe to change
 - Linux should work but is untested; `/hidane --vault` uses macOS `open`
 - How closely Claude follows the SKILL steps is checked by reading real session transcripts. Prose instructions sometimes do not take
 
 ## Development
 
 ```sh
-sh tests/run_all.sh     # 190 tests, no LLM, seconds
+sh tests/run_all.sh     # 197 tests, no LLM, seconds
 ```
 
 A new test is trusted only after breaking the implementation and watching it fail. `run_all.sh` also fails if the test count in this README drifts from reality.
@@ -137,7 +137,7 @@ A new test is trusted only after breaking the implementation and watching it fai
 | `HIDANE_LANG` | from config, else en | display and prompt language |
 | `HIDANE_ROOT` | `~/.claude/hidane` | records |
 | `HIDANE_VAULT` | `~/Documents/hidane` | the map |
-| `HIDANE_W_TRACE` / `_EDGE` / `_SUMMARY` | 1 / 2 / 3 | type weights |
+| `HIDANE_W_TRACE` / `_EDGE` | 1 / 2 | type weights |
 | `HIDANE_THRESHOLD` / `HIDANE_CAP` | 4 / 6 | threshold and clamp |
 | `HIDANE_FRESH_DAYS` | 30 | forgetting |
 | `HIDANE_MAX_FUNCS` | 8 | functions per LLM call |

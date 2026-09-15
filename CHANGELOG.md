@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.5.1 — 2026-09-15
+
+Three rules of the value model, after the outside review.
+
+- Freshness is tracked per direction: a concept returns to understood only through a hit and to not understood only
+  through a miss. A miss recorded after 30 days of silence used to re-certify a decayed concept as understood.
+- The concept a question targets (the lead, marked `*` in the concept column) is credited in full; the other concepts
+  on the same function get half (0 for a trace question, 1 for a boundary question). Older rows without the mark are
+  credited in full as before.
+- The summary question type (weight 3) is retired: it was never asked by `next.sh` and had no grading method.
+  Old summary rows are still read at weight 3. `HIDANE_W_SUMMARY` is gone.
+- 197 L0 tests.
+
 ## 0.5.0 — 2026-09-15
 
 Color and pace, after a week of use: a concept took 4-5 answers to change color, and nothing moved in between.

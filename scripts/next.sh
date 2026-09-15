@@ -10,7 +10,7 @@
 #   known の概念からは出さない。-n N で上位 N 件を表にする。
 # 出力は決まった形。Claude はこれをそのまま使って問いを作る。
 # 型もここで決める(一度でも答えた概念 → edge(境界を突く、重み 2)、初めての概念 → trace)。決めた内容は
-# <root>/<repo>/pending に置き、record.sh はそれと一致する記録しか受け付けない。
+# <root>/<repo>/pending(場所 関数 概念 型 代表)に置き、record.sh はそれと一致する記録しか受け付けない。
 set -eu
 HERE=$(cd "$(dirname "$0")" && pwd -P)
 ROOT="${HIDANE_ROOT:-$HOME/.claude/hidane}"; REPO=""; TODAY=""; N=1; TREE=""; FOCUS=""; FOCUS_C=""
@@ -77,13 +77,13 @@ BEGIN {
   while ((getline l < map) > 0) { split(l, t, "\t"); c = t[1]; val[c] = t[2]; st[c] = t[5]; if (!(c in st)) st[c] = "unasked" }
   while ((getline l < alllog) > 0) {
     split(l, t, "\t"); repo = t[1]; split(t[2], col, "|"); z = trim(col[9]); res = trim(col[8]); k = split(trim(col[5]), cs, ",")
-    for (i = 1; i <= k; i++) { c = trim(cs[i]); if (c == "") continue
+    for (i = 1; i <= k; i++) { c = trim(cs[i]); sub(/^\*/, "", c); if (c == "") continue
       if (res != "skip") answered[c] = 1
       if (z != "") zure[c] = zure[c] "- " z "(" repo ", " substr(trim(col[2]), 1, 10) ")\n" }
   }
 }
 {
-  kind = $1; split($2, col, "|"); place = trim(col[3]); fnm = trim(col[4]); k = split(trim(col[5]), cs, ",")
+  kind = $1; split($2, col, "|"); place = trim(col[3]); fnm = trim(col[4]); k = split(trim(col[5]), cs, ","); for (i = 1; i <= k; i++) sub(/^\*/, "", cs[i])
   f = place; sub(/:[^:]*$/, "", f); fk = f "\t" fnm
   if (kind == "log") { asked[fk] = 1; next }
   if (kind == "stale") next
@@ -122,6 +122,6 @@ END {
   if (c in answered) { type = "edge"; if (zure[c] != "") printf("%s(%s):\n%s", n_zure, c, zure[c]); printf("%s: edge (%s) — %s\n%s: %s\n", n_type, ty_edge, edge_hint, n_inputs, in_edge) }
   else { type = "trace"; printf("%s: trace (%s)\n%s: %s\n", n_type, ty_trace, n_inputs, in_trace) }
   printf("%s: %s\n", n_form, form_text)
-  printf("%s\t%s\t%s\t%s\n", p, fname[p], cand[p], type) > pending
+  printf("%s\t%s\t%s\t%s\t%s\n", p, fname[p], cand[p], type, c) > pending
   close(pending)
 }' "$tmp/mine"

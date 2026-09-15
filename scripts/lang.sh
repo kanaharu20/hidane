@@ -1,7 +1,7 @@
 #!/bin/sh
 # hidane lang.sh — 表示言語の表。各スクリプトが `. lang.sh` で読む。記録の中は言語に依らない記号。
 #   言語の決め方: HIDANE_LANG > <root>/config の lang= > en
-#   記号: 状態 known/fuzzy/unknown/unasked  型 trace/edge/summary  結果 hit/miss/dunno/skip
+#   記号: 状態 known/fuzzy/unknown/unasked  型 trace/edge(summary は旧記録のみ)  結果 hit/partial/miss/dunno/skip
 hidane_lang() {
   if [ -n "${HIDANE_LANG:-}" ]; then echo "$HIDANE_LANG"; return; fi
   c="${ROOT:-$HOME/.claude/hidane}/config"
@@ -105,7 +105,7 @@ L() {
     ja:p_summary) echo "概念 %s / repo %s ページ。" ;;  en:p_summary) echo "%s concept / %s repo pages." ;;
     ja:r_usage) echo "引数は 場所 関数 概念 型 問い 結果 [ズレ] [備考] の 6〜8 個" ;;
     en:r_usage) echo "expected 6-8 args: place function concepts type question result [miss] [note]" ;;
-    ja:r_type) echo "型は trace / edge / summary のどれか" ;;   en:r_type) echo "type must be one of trace / edge / summary" ;;
+    ja:r_type) echo "型は trace / edge のどちらか" ;;   en:r_type) echo "type must be trace or edge" ;;
     ja:r_result) echo "結果は dunno / skip のどちらか。hit / partial / miss は --verdict から決まる(手動は --free)" ;;
     en:r_result) echo "result must be dunno or skip; hit / partial / miss are derived from --verdict (or use --free)" ;;
     ja:r_nokeys) echo "鍵が無い。keys.sh で先に鍵を置いてから --verdict で判定する" ;;

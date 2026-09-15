@@ -24,7 +24,7 @@ BEGIN {
   head = substr($0, 1, i - 1); tbl = substr($0, i)
   n = split(tbl, col, "|")
   k = split(col[5], cs, ","); out = ""; delete seen
-  for (j = 1; j <= k; j++) { c = canon(trim(cs[j])); if (c == "" || (c in seen)) continue; seen[c] = 1; out = (out == "" ? c : out ", " c) }
+  for (j = 1; j <= k; j++) { c = trim(cs[j]); m = (c ~ /^\*/) ? "*" : ""; sub(/^\*/, "", c); c = canon(c); if (c == "" || (c in seen)) continue; seen[c] = 1; out = (out == "" ? m c : out ", " m c) }
   col[5] = " " out " "
   line = col[1]; for (j = 2; j <= n; j++) line = line "|" col[j]
   print head line

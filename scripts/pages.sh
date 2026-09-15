@@ -85,7 +85,7 @@ BEGIN {
   split($3, col, "|")
   date = substr(trim(col[2]), 1, 10); place = trim(col[3]); fnm = trim(col[4])
   k = split(trim(col[5]), cs, ",")
-  for (i = 1; i <= k; i++) { cl[i] = trim(cs[i]) }
+  for (i = 1; i <= k; i++) { cl[i] = trim(cs[i]); sub(/^\*/, "", cl[i]) }
   for (i = 1; i <= k; i++) for (j = 1; j <= k; j++) if (cl[i] != "" && cl[j] != "") link(cl[i], cl[j])
   for (i = 1; i <= k; i++) {
     c = cl[i]; if (c == "") continue

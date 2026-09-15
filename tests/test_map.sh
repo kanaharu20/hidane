@@ -68,5 +68,18 @@ $MAP --root "$TMP/none" >/dev/null 2>&1; [ $? -eq 1 ] && ok "T12 log.md も func
 r=$(row "$TMP/out.md" 起動と引数処理)
 echo "$r" | grep -q '| +0 | 0 | - | 未出題 | worker |' && ok "T13 functions.md だけの概念は未出題" || ng "T13 functions.md" "$r"
 
+# T10 忘却後のズレで理解に戻らない: 理解(+6)を 60 日放置 → 曖昧。そこでズレ 1 つ → 値 5 のまま曖昧(理解の鮮度は最後の当たりの日)
+mkdir -p "$TMP/fr/x"; printf '| 日時 | 場所 | 関数 | 概念 | 型 | 問い | 結果 | miss | 備考 |\n|---|---|---|---|---|---|---|---|---|\n| 2026-07-01 | a.c:1-2 | f | 復帰 | edge | q | hit |  |  |\n| 2026-07-02 | a.c:1-2 | f | 復帰 | edge | q | hit |  |  |\n| 2026-07-03 | a.c:1-2 | f | 復帰 | edge | q | hit |  |  |\n' > "$TMP/fr/x/log.md"
+r=$($MAP --root "$TMP/fr" --today 2026-09-01 | row /dev/stdin 復帰); echo "$r" | grep -q '| +6 | 3 | .* | 曖昧 |' || ng "T10 前提" "$r"
+printf '| 2026-09-01 | a.c:1-2 | f | 復帰 | trace | q | miss | x |  |\n' >> "$TMP/fr/x/log.md"
+r=$($MAP --root "$TMP/fr" --today 2026-09-01 | row /dev/stdin 復帰); echo "$r" | grep -q '| +5 | 4 | .* | 曖昧 |' && ok "T10 忘却後のズレでは理解に戻らない(5 のまま曖昧)" || ng "T10 recert" "$r"
+printf '| 2026-09-02 | a.c:1-2 | f | 復帰 | trace | q | hit |  |  |\n' >> "$TMP/fr/x/log.md"
+r=$($MAP --root "$TMP/fr" --today 2026-09-02 | row /dev/stdin 復帰); echo "$r" | grep -q '| +6 | 5 | .* | 理解 |' && ok "T10b 当たりで理解に戻る" || ng "T10b" "$r"
+# T11 対称: 非理解を放置 → 曖昧。当たりでは赤に戻らず、ズレで戻る
+mkdir -p "$TMP/fr2/x"; printf '| 日時 | 場所 | 関数 | 概念 | 型 | 問い | 結果 | miss | 備考 |\n|---|---|---|---|---|---|---|---|---|\n| 2026-07-01 | a.c:1-2 | f | 沈む | edge | q | miss | x |  |\n| 2026-07-02 | a.c:1-2 | f | 沈む | edge | q | miss | x |  |\n| 2026-07-03 | a.c:1-2 | f | 沈む | edge | q | miss | x |  |\n| 2026-09-01 | a.c:1-2 | f | 沈む | trace | q | hit |  |  |\n' > "$TMP/fr2/x/log.md"
+r=$($MAP --root "$TMP/fr2" --today 2026-09-01 | row /dev/stdin 沈む); echo "$r" | grep -q '| -5 | 4 | .* | 曖昧 |' && ok "T11 忘却後の当たりでは非理解に戻らない" || ng "T11" "$r"
+# T12 代表印: * 付きは満額、他は半分。印の無い旧行は全部満額
+mkdir -p "$TMP/ld/x"; printf '| 日時 | 場所 | 関数 | 概念 | 型 | 問い | 結果 | miss | 備考 |\n|---|---|---|---|---|---|---|---|---|\n| 2026-09-08 | a.c:1-2 | f | *主, 副 | edge | q | hit |  |  |\n| 2026-09-08 | a.c:1-2 | f | 旧甲, 旧乙 | edge | q | hit |  |  |\n| 2026-09-08 | a.c:1-2 | f | *主, 副 | trace | q | hit |  |  |\n' > "$TMP/ld/x/log.md"
+m=$($MAP --root "$TMP/ld" --today 2026-09-08); { echo "$m" | grep -q '| 主 | +3 |' && echo "$m" | grep -q '| 副 | +1 |' && echo "$m" | grep -q '| 旧甲 | +2 |' && echo "$m" | grep -q '| 旧乙 | +2 |'; } && ok "T12 代表 * は満額(2+1)、他は半分(1+0)、印の無い旧行は満額" || ng "T12 lead" "$(echo "$m" | grep '主\|副\|旧')"
 echo; echo "PASS $pass / FAIL $fail"
 [ $fail -eq 0 ]

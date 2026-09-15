@@ -46,7 +46,7 @@ BEGIN { while ((getline l < tsv) > 0) { split(l, t, "\t"); c = t[1]; val[c] = t[
   r = $1; kind = $2; split($3, col, "|"); date = substr(trim(col[2]), 1, 10); place = trim(col[3]); fnm = trim(col[4])
   k = split(trim(col[5]), cs, ",")
   for (i = 1; i <= k; i++) {
-    c = trim(cs[i]); if (c == "") continue
+    c = trim(cs[i]); sub(/^\*/, "", c); if (c == "") continue
     if (kind == "log") { z = trim(col[9]); if (z != "") { nz[c]++; zl[c] = sprintf("- %s %s `%s` (%s): %s\n", date, fnm, place, r, z) zl[c] } }
     else if (r == repo) { fk = c SUBSEP fnm; if (!(fk in seen)) { seen[fk] = 1; nf[c]++ }; fplace[fk] = place }
   }

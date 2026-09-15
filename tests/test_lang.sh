@@ -27,7 +27,7 @@ HIDANE_LANG=en sh scripts/record.sh --free --root "$TMP/root" --repo z "a.c:1-2"
 { grep -q '^| Date | Place | Function |' "$TMP/root/z/log.md" && grep -q '^state: fuzzy$' "$TMP/vault/concepts/boundary conditions.md" && grep -q '^## Records$' "$TMP/vault/concepts/boundary conditions.md" && grep -q 'trace — hit' "$TMP/vault/concepts/boundary conditions.md"; } \
   && ok "X07 record/pages: 見出しと節は英語、frontmatter は記号" || ng "X07 record en" "$(cat "$TMP/vault/concepts/boundary conditions.md" 2>&1 | head -12)"
 # X08 record.sh のエラーも英語
-HIDANE_LANG=en sh scripts/record.sh --free --root "$TMP/root" --repo z "a.c:1-2" f "x" 追う "q" hit >/dev/null 2>"$TMP/e"; grep -q 'type must be one of' "$TMP/e" && ok "X08 record.sh のエラーが英語(旧語彙は受け付けない)" || ng "X08" "$(cat "$TMP/e")"
+HIDANE_LANG=en sh scripts/record.sh --free --root "$TMP/root" --repo z "a.c:1-2" f "x" 追う "q" hit >/dev/null 2>"$TMP/e"; grep -q 'type must be trace or edge' "$TMP/e" && ok "X08 record.sh のエラーが英語(旧語彙は受け付けない)" || ng "X08" "$(cat "$TMP/e")"
 # X09 tag.sh の en プロンプト
 mkdir -p "$TMP/tr/src"; (cd "$TMP/tr" && git init -q && git config user.email t@t && git config user.name t && printf 'int one(void)\n{\n\treturn 1;\n}\n' > src/one.c && git add -A && git commit -qm init)
 d=$(HIDANE_LANG=en sh scripts/tag.sh --repo "$TMP/tr" --root "$TMP/root" --dry-run 2>/dev/null || true)

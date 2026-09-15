@@ -9,7 +9,7 @@
 #   record.sh [--root DIR] [--repo NAME] 場所 関数 概念 型 問い dunno|skip [備考]
 #   record.sh --free 場所 関数 概念 型 問い hit|partial|miss|dunno|skip [ズレ] [備考]   手で記録する(照合なし)
 #   record.sh --path                                                              log.md の場所
-#   型 trace | edge | summary。next.sh の pending が無い、pending と場所・関数・概念・型が違う、鍵が今の pending のものでない、のどれでも exit 7(--free 以外)。
+#   型 trace | edge(summary は 0.5.1 で廃止。旧行は map.sh が重み 3 で読む)。next.sh の pending が無い、pending と場所・関数・概念・型が違う、鍵が今の pending のものでない、のどれでも exit 7(--free 以外)。
 # 追記後、その行が読めることを確かめ(読めなければ exit 6 で取り消す)、pending と keys を消し、vault を作り直す。
 set -eu
 HERE=$(cd "$(dirname "$0")" && pwd -P)
@@ -40,7 +40,7 @@ if [ -z "$FREE" ]; then [ -f "$pending" ] || { echo "record.sh: $(L r_nopending)
 clean() { printf '%s' "$1" | tr '\n\t' '  ' | sed 's/|/｜/g; s/^ *//; s/ *$//'; }
 rlabel() { case "$1" in hit) L rs_hit ;; partial) L rs_partial ;; miss) L rs_miss ;; dunno) L rs_dunno ;; skip) L rs_skip ;; *) echo "$1" ;; esac; }
 place=$(clean "$1"); func=$(clean "$2"); concepts=$(clean "$3"); type=$(clean "$4"); q=$(clean "$5")
-case "$type" in trace|edge|summary) ;; *) echo "record.sh: $(L r_type): $type" >&2; exit 2 ;; esac
+case "$type" in trace|edge) ;; *) echo "record.sh: $(L r_type): $type" >&2; exit 2 ;; esac
 printf '%s' "$place" | grep -Eq '^[^ ]+:[0-9]+-[0-9]+$' || { echo "record.sh: $(L r_place): $place" >&2; exit 2; }
 [ -n "$concepts" ] || { echo "record.sh: $(L r_concepts)" >&2; exit 2; }
 
@@ -83,14 +83,17 @@ else
   fi
 fi
 
+lead=""
 if [ -z "$FREE" ] && [ -f "$pending" ]; then
-  want=$(cat "$pending"); got=$(printf '%s\t%s\t%s\t%s' "$place" "$func" "$concepts" "$type")
+  want=$(cut -f1-4 "$pending"); got=$(printf '%s\t%s\t%s\t%s' "$place" "$func" "$concepts" "$type"); lead=$(cut -f5 "$pending")
   if [ "$want" != "$got" ]; then
     printf 'record.sh: %s\n  %s: %s\n  %s: %s\n  %s\n' "$(L r_pending)" "$(L r_decided)" "$(printf '%s' "$want" | tr '\t' '|')" "$(L r_given)" "$(printf '%s' "$got" | tr '\t' '|')" "$(L r_free)" >&2
     exit 7
   fi
 fi
 
+# 代表概念(next.sh が狙った概念)に * を付ける。map.sh はそれを満額、他を半分で数える
+if [ -n "$lead" ]; then concepts=$(printf '%s' "$concepts" | awk -F', ' -v l="$lead" '{ for (i = 1; i <= NF; i++) printf("%s%s%s", (i > 1 ? ", " : ""), ($i == l ? "*" : ""), $i) }'); fi
 mkdir -p "$(dirname "$log")"; [ -z "$top" ] || printf '%s\n' "$top" > "$ROOT/$REPO/path"
 [ -f "$log" ] || printf '# hidane — %s\n\n%s\n|---|---|---|---|---|---|---|---|---|\n' "$REPO" "$(L log_header)" > "$log"
 before=$(grep -c '^| 20' "$log" || true)

@@ -80,8 +80,8 @@
 <circle cx="700" cy="440" r="20" fill="#cfd3da"/><text x="700" y="476" text-anchor="middle" fill="#e0e0e0" font-size="14" font-weight="600">api</text>
 <circle cx="539" cy="422" r="17.3" fill="#ffd23f" opacity="0.55" filter="url(#glow)"/>
 <circle cx="539" cy="422" r="10.8" fill="#ffd23f"/><text x="539" y="446" text-anchor="middle" fill="#cfcfcf" font-size="11">境界条件</text>
-<circle cx="463" cy="254" r="17.3" fill="#ffd23f" opacity="0.55" filter="url(#glow)"/>
-<circle cx="463" cy="254" r="10.8" fill="#ffd23f"/><text x="463" y="277" text-anchor="middle" fill="#cfcfcf" font-size="11">入力検証</text>
+<circle cx="463" cy="254" r="17.3" fill="#ffa447" opacity="0.55" filter="url(#glow)"/>
+<circle cx="463" cy="254" r="10.8" fill="#ffa447"/><text x="463" y="277" text-anchor="middle" fill="#cfcfcf" font-size="11">入力検証</text>
 <circle cx="446" cy="428" r="9.6" fill="#6b7078"/><text x="446" y="450" text-anchor="middle" fill="#cfcfcf" font-size="11">早期リターン</text>
 <circle cx="423" cy="528" r="9.6" fill="#6b7078"/><text x="423" y="550" text-anchor="middle" fill="#cfcfcf" font-size="11">例外の伝播</text>
 <circle cx="485" cy="348" r="17.3" fill="#ffd23f" opacity="0.55" filter="url(#glow)"/>
@@ -89,24 +89,24 @@
 <circle cx="549" cy="242" r="9.6" fill="#6b7078"/><text x="549" y="264" text-anchor="middle" fill="#cfcfcf" font-size="11">冪等性</text>
 <circle cx="174" cy="172" r="15.4" fill="#ff4757" opacity="0.55" filter="url(#glow)"/>
 <circle cx="174" cy="172" r="9.6" fill="#ff4757"/><text x="174" y="195" text-anchor="middle" fill="#cfcfcf" font-size="11">排他制御</text>
-<circle cx="101" cy="290" r="15.4" fill="#ffd23f" opacity="0.55" filter="url(#glow)"/>
-<circle cx="101" cy="290" r="9.6" fill="#ffd23f"/><text x="101" y="312" text-anchor="middle" fill="#cfcfcf" font-size="11">条件変数の待機と通知</text>
-<circle cx="70" cy="141" r="15.4" fill="#17e6a1" opacity="0.55" filter="url(#glow)"/>
-<circle cx="70" cy="141" r="9.6" fill="#17e6a1"/><text x="70" y="163" text-anchor="middle" fill="#cfcfcf" font-size="11">一斉起床</text>
+<circle cx="101" cy="290" r="15.4" fill="#ff8c4b" opacity="0.55" filter="url(#glow)"/>
+<circle cx="101" cy="290" r="9.6" fill="#ff8c4b"/><text x="101" y="312" text-anchor="middle" fill="#cfcfcf" font-size="11">条件変数の待機と通知</text>
+<circle cx="70" cy="141" r="15.4" fill="#64df80" opacity="0.55" filter="url(#glow)"/>
+<circle cx="70" cy="141" r="9.6" fill="#64df80"/><text x="70" y="163" text-anchor="middle" fill="#cfcfcf" font-size="11">一斉起床</text>
 <circle cx="70" cy="224" r="15.4" fill="#ff4757" opacity="0.55" filter="url(#glow)"/>
 <circle cx="70" cy="224" r="9.6" fill="#ff4757"/><text x="70" y="247" text-anchor="middle" fill="#cfcfcf" font-size="11">停止シグナルの伝搬</text>
-<circle cx="337" cy="162" r="13.4" fill="#ffd23f" opacity="0.55" filter="url(#glow)"/>
-<circle cx="337" cy="162" r="8.4" fill="#ffd23f"/><text x="337" y="184" text-anchor="middle" fill="#cfcfcf" font-size="11">タイムアウト判定</text>
+<circle cx="337" cy="162" r="13.4" fill="#ffa447" opacity="0.55" filter="url(#glow)"/>
+<circle cx="337" cy="162" r="8.4" fill="#ffa447"/><text x="337" y="184" text-anchor="middle" fill="#cfcfcf" font-size="11">タイムアウト判定</text>
 <circle cx="393" cy="50" r="15.4" fill="#ffd23f" opacity="0.55" filter="url(#glow)"/>
 <circle cx="393" cy="50" r="9.6" fill="#ffd23f"/><text x="393" y="73" text-anchor="middle" fill="#cfcfcf" font-size="11">時刻の単位換算</text>
 <circle cx="329" cy="455" r="8.4" fill="#6b7078"/><text x="329" y="476" text-anchor="middle" fill="#cfcfcf" font-size="11">スレッドの生成と回収</text>
-<circle cx="133" cy="563" r="13.4" fill="#ffd23f" opacity="0.55" filter="url(#glow)"/>
-<circle cx="133" cy="563" r="8.4" fill="#ffd23f"/><text x="133" y="584" text-anchor="middle" fill="#cfcfcf" font-size="11">優先度付きキュー</text>
+<circle cx="133" cy="563" r="13.4" fill="#b2d960" opacity="0.55" filter="url(#glow)"/>
+<circle cx="133" cy="563" r="8.4" fill="#b2d960"/><text x="133" y="584" text-anchor="middle" fill="#cfcfcf" font-size="11">優先度付きキュー</text>
 <circle cx="223" cy="542" r="8.4" fill="#6b7078"/><text x="223" y="564" text-anchor="middle" fill="#cfcfcf" font-size="11">リングバッファ</text>
 <circle cx="107" cy="68" r="8.4" fill="#6b7078"/><text x="107" y="90" text-anchor="middle" fill="#cfcfcf" font-size="11">状態機械</text>
 <circle cx="497" cy="95" r="9.6" fill="#6b7078"/><text x="497" y="118" text-anchor="middle" fill="#cfcfcf" font-size="11">バックオフ</text>
-<circle cx="171" cy="438" r="13.4" fill="#ffd23f" opacity="0.55" filter="url(#glow)"/>
-<circle cx="171" cy="438" r="8.4" fill="#ffd23f"/><text x="171" y="459" text-anchor="middle" fill="#cfcfcf" font-size="11">資源の獲得順序</text>
+<circle cx="171" cy="438" r="13.4" fill="#ff8c4b" opacity="0.55" filter="url(#glow)"/>
+<circle cx="171" cy="438" r="8.4" fill="#ff8c4b"/><text x="171" y="459" text-anchor="middle" fill="#cfcfcf" font-size="11">資源の獲得順序</text>
 <circle cx="322" cy="90" r="8.4" fill="#6b7078"/><text x="322" y="111" text-anchor="middle" fill="#cfcfcf" font-size="11">整数オーバーフロー</text>
 <circle cx="76" cy="482" r="8.4" fill="#6b7078"/><text x="76" y="504" text-anchor="middle" fill="#cfcfcf" font-size="11">ログのバッファリング</text>
 <circle cx="70" cy="378" r="7.2" fill="#6b7078"/><text x="70" y="398" text-anchor="middle" fill="#cfcfcf" font-size="11">参照の所有権</text>
@@ -116,25 +116,25 @@
 <circle cx="743" cy="238" r="8.4" fill="#6b7078"/><text x="743" y="259" text-anchor="middle" fill="#cfcfcf" font-size="11">キャッシュの無効化</text>
 <circle cx="645" cy="150" r="9.6" fill="#6b7078"/><text x="645" y="173" text-anchor="middle" fill="#cfcfcf" font-size="11">リトライ</text>
 <circle cx="848" cy="268" r="8.4" fill="#6b7078"/><text x="848" y="289" text-anchor="middle" fill="#cfcfcf" font-size="11">トークンの期限</text>
-<circle cx="496" cy="630" r="13.4" fill="#ffd23f" opacity="0.55" filter="url(#glow)"/>
-<circle cx="496" cy="630" r="8.4" fill="#ffd23f"/><text x="496" y="651" text-anchor="middle" fill="#cfcfcf" font-size="11">入力の正規化</text>
+<circle cx="496" cy="630" r="13.4" fill="#ffbb43" opacity="0.55" filter="url(#glow)"/>
+<circle cx="496" cy="630" r="8.4" fill="#ffbb43"/><text x="496" y="651" text-anchor="middle" fill="#cfcfcf" font-size="11">入力の正規化</text>
 <circle cx="858" cy="514" r="8.4" fill="#6b7078"/><text x="858" y="535" text-anchor="middle" fill="#cfcfcf" font-size="11">JSON の型変換</text>
 <circle cx="930" cy="457" r="8.4" fill="#6b7078"/><text x="930" y="478" text-anchor="middle" fill="#cfcfcf" font-size="11">N+1 クエリ</text>
-<circle cx="636" cy="285" r="13.4" fill="#ff4757" opacity="0.55" filter="url(#glow)"/>
-<circle cx="636" cy="285" r="8.4" fill="#ff4757"/><text x="636" y="306" text-anchor="middle" fill="#cfcfcf" font-size="11">トランザクション境界</text>
+<circle cx="636" cy="285" r="13.4" fill="#ff754f" opacity="0.55" filter="url(#glow)"/>
+<circle cx="636" cy="285" r="8.4" fill="#ff754f"/><text x="636" y="306" text-anchor="middle" fill="#cfcfcf" font-size="11">トランザクション境界</text>
 <circle cx="930" cy="308" r="8.4" fill="#6b7078"/><text x="930" y="329" text-anchor="middle" fill="#cfcfcf" font-size="11">遅延評価</text>
 <circle cx="816" cy="412" r="8.4" fill="#6b7078"/><text x="816" y="434" text-anchor="middle" fill="#cfcfcf" font-size="11">再帰の反復化</text>
 <circle cx="798" cy="148" r="8.4" fill="#6b7078"/><text x="798" y="169" text-anchor="middle" fill="#cfcfcf" font-size="11">貪欲な選択</text>
 <circle cx="917" cy="192" r="8.4" fill="#6b7078"/><text x="917" y="213" text-anchor="middle" fill="#cfcfcf" font-size="11">同点時の順序</text>
 <circle cx="601" cy="630" r="8.4" fill="#6b7078"/><text x="601" y="651" text-anchor="middle" fill="#cfcfcf" font-size="11">上位 k 件の切り出し</text>
 <circle cx="930" cy="553" r="7.2" fill="#6b7078"/><text x="930" y="573" text-anchor="middle" fill="#cfcfcf" font-size="11">ゼロ除算の回避</text>
-<circle cx="542" cy="543" r="13.4" fill="#ffd23f" opacity="0.55" filter="url(#glow)"/>
-<circle cx="542" cy="543" r="8.4" fill="#ffd23f"/><text x="542" y="564" text-anchor="middle" fill="#cfcfcf" font-size="11">空入力と零値の区別</text>
+<circle cx="542" cy="543" r="13.4" fill="#ffa447" opacity="0.55" filter="url(#glow)"/>
+<circle cx="542" cy="543" r="8.4" fill="#ffa447"/><text x="542" y="564" text-anchor="middle" fill="#cfcfcf" font-size="11">空入力と零値の区別</text>
 <circle cx="930" cy="386" r="8.4" fill="#6b7078"/><text x="930" y="407" text-anchor="middle" fill="#cfcfcf" font-size="11">種別による振り分け</text>
 <circle cx="680" cy="534" r="8.4" fill="#6b7078"/><text x="680" y="556" text-anchor="middle" fill="#cfcfcf" font-size="11">区間の重なり</text>
-<circle cx="666" cy="614" r="13.4" fill="#17e6a1" opacity="0.55" filter="url(#glow)"/>
-<circle cx="666" cy="614" r="8.4" fill="#17e6a1"/><text x="666" y="636" text-anchor="middle" fill="#cfcfcf" font-size="11">文字列の走査</text>
+<circle cx="666" cy="614" r="13.4" fill="#3ee391" opacity="0.55" filter="url(#glow)"/>
+<circle cx="666" cy="614" r="8.4" fill="#3ee391"/><text x="666" y="636" text-anchor="middle" fill="#cfcfcf" font-size="11">文字列の走査</text>
 <circle cx="840" cy="630" r="7.2" fill="#6b7078"/><text x="840" y="650" text-anchor="middle" fill="#cfcfcf" font-size="11">設定の既定値</text>
 <circle cx="930" cy="630" r="7.2" fill="#6b7078"/><text x="930" y="650" text-anchor="middle" fill="#cfcfcf" font-size="11">レート制限</text>
-<g font-size="12" fill="#bdbdbd"><circle cx="620" cy="696" r="6" fill="#17e6a1"/><text x="632" y="700">理解</text><circle cx="680" cy="696" r="6" fill="#ffd23f"/><text x="692" y="700">曖昧</text><circle cx="740" cy="696" r="6" fill="#ff4757"/><text x="752" y="700">非理解</text><circle cx="812" cy="696" r="6" fill="#6b7078"/><text x="824" y="700">未出題</text><circle cx="884" cy="696" r="6" fill="#cfd3da"/><text x="896" y="700">リポジトリ</text></g>
-<text x="20" y="700" font-size="12" fill="#8a8a8a">架空のデータで描いた例(2 リポジトリ、42 概念)。Obsidian の Graph view で概念がこう見える。</text></svg>
+<g font-size="12" fill="#bdbdbd"><text x="440" y="700">非理解</text><rect x="560" y="690" width="12" height="12" fill="#ff4757"/><rect x="572" y="690" width="12" height="12" fill="#ff5e53"/><rect x="584" y="690" width="12" height="12" fill="#ff754f"/><rect x="596" y="690" width="12" height="12" fill="#ff8c4b"/><rect x="608" y="690" width="12" height="12" fill="#ffa447"/><rect x="620" y="690" width="12" height="12" fill="#ffbb43"/><rect x="632" y="690" width="12" height="12" fill="#ffd23f"/><rect x="644" y="690" width="12" height="12" fill="#d8d54f"/><rect x="656" y="690" width="12" height="12" fill="#b2d960"/><rect x="668" y="690" width="12" height="12" fill="#8bdc70"/><rect x="680" y="690" width="12" height="12" fill="#64df80"/><rect x="692" y="690" width="12" height="12" fill="#3ee391"/><rect x="704" y="690" width="12" height="12" fill="#17e6a1"/><text x="722" y="700">理解</text><circle cx="790" cy="696" r="6" fill="#6b7078"/><text x="802" y="700">未出題</text><circle cx="870" cy="696" r="6" fill="#cfd3da"/><text x="882" y="700">リポジトリ</text></g>
+<text x="20" y="700" font-size="12" fill="#8a8a8a">架空のデータで描いた例(2 リポジトリ、42 概念)。値 −6〜+6 の 13 段で色が変わる。</text></svg>

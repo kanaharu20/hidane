@@ -10,7 +10,7 @@ Only the rows of `~/.claude/hidane/<repo>/log.md` are stored. One question, one 
 | Date | Place | Function | Concepts | Type | Question | Result | Miss | Note |
 ```
 
-Type and result are language-neutral tokens. Type `trace` (follow the code) / `edge` (boundary or mutation) / `summary`.
+Type and result are language-neutral tokens. Type `trace` (follow the code) / `edge` (boundary or mutation).
 Result `hit` / `partial` / `miss` / `dunno` / `skip`. `scripts/lang.sh` turns them into English or Japanese only for display.
 
 Values and states are never stored; they are recomputed from these rows every time, so the record and the map cannot disagree.
@@ -21,9 +21,12 @@ Value = the sum over rows of (type weight × result sign), added one row at a ti
 
 | Type | Weight |
 |---|---|
-| trace | 1 |
-| edge | 2 |
-| summary | 3 |
+| trace (follow) | 1 |
+| edge (boundary) | 2 |
+
+summary (weight 3) was retired in 0.5.1: the type existed without a grading method (CGBG, generating code from the explanation and comparing). Old summary rows are still read at weight 3.
+
+Lead concept: a question targets the one concept next.sh chose (the lead). record.sh marks it with `*` in the concept column and map.sh credits the lead in full and the other concepts on the row at half (rounded down: 0 for trace, 1 for edge), so a concept the question did not test does not light up as a side effect. Rows without `*` (older) are credited in full.
 
 | Result | Sign |
 |---|---|
@@ -34,9 +37,11 @@ Value = the sum over rows of (type weight × result sign), added one row at a ti
 
 | State | Condition |
 |---|---|
-| understood | value ≥ +4, last answer within 30 days |
-| not understood | value ≤ −4, within 30 days |
+| understood | value ≥ +4, last **hit** within 30 days |
+| not understood | value ≤ −4, last **miss or "I don't know"** within 30 days |
 | fuzzy | −4 < value < +4, or older than 30 days (the value is kept; only certainty decays) |
+
+Freshness is tracked separately for hits and misses (0.5.1) so that a concept that decayed to fuzzy cannot be re-certified as understood by a miss whose date happens to be fresh. Only a hit brings it back to understood; only a miss brings it back to not understood.
 | unasked | no evidence (tag only, or unanswered only) |
 
 A hit on a hard question moves the value a lot; a miss on an easy one moves it a lot the other way. One answer never flips a state.

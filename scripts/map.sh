@@ -9,18 +9,19 @@
 #   --tsv         見出し・脚注なしのタブ区切り(概念 値 証拠 最終 状態 repo)。状態は記号。pages.sh 用
 #
 # 記録の中の語彙は言語に依らない記号(lang.sh 参照):
-#   型   trace 1 / edge 2 / summary 3     結果  hit +1 / partial 0(証拠にはなる) / miss -1 / dunno -1 / skip 0(証拠にしない)
+#   型   trace 1 / edge 2(summary は旧記録だけ。重み 3 のまま読む)   結果  hit +1 / partial 0(証拠にはなる) / miss -1 / dunno -1 / skip 0(証拠にしない)
+#   代表 概念列で先頭に * が付いた概念(next.sh が狙った概念)は満額、同じ行の他の概念は半分(切り捨て)。* が無い旧行は全部満額
 #   状態 known / fuzzy / unknown / unasked  表示だけ言語表を通す
 # 規則(定数は環境変数で上書きできる。全部仮置き):
 #   値   = Σ(型の重み × 符号)。1 行ごとに足し、±CAP で止める(歩きながら止める)
-#   鮮度 = 最後に証拠のあった日から FRESH_DAYS 日以内
-#   状態 = 証拠なし → unasked / 値 >= +THRESHOLD かつ新鮮 → known / 値 <= -THRESHOLD かつ新鮮 → unknown / それ以外 → fuzzy
+#   鮮度 = known は最後の当たりの日、unknown は最後のズレ(miss / dunno)の日から FRESH_DAYS 日以内(ズレでは理解に戻らず、当たりでは非理解に戻らない)
+#   状態 = 証拠なし → unasked / 値 >= +THRESHOLD かつ当たりが新鮮 → known / 値 <= -THRESHOLD かつズレが新鮮 → unknown / それ以外 → fuzzy
 # 出力は値の昇順(=出題の優先順)。末尾に「読んだ行数 / 使えた行数」を出す。
 set -eu
 HERE=$(cd "$(dirname "$0")" && pwd -P)
 ROOT="${HIDANE_ROOT:-$HOME/.claude/hidane}"
 TODAY=""; TSV=""
-W_TRACE="${HIDANE_W_TRACE:-1}"; W_EDGE="${HIDANE_W_EDGE:-2}"; W_SUMMARY="${HIDANE_W_SUMMARY:-3}"
+W_TRACE="${HIDANE_W_TRACE:-1}"; W_EDGE="${HIDANE_W_EDGE:-2}"; W_SUMMARY=3   # summary は 0.5.1 で廃止。旧行を読むためだけに残す
 THRESHOLD="${HIDANE_THRESHOLD:-4}"; CAP="${HIDANE_CAP:-6}"; FRESH_DAYS="${HIDANE_FRESH_DAYS:-30}"
 while [ $# -gt 0 ]; do
   case "$1" in
@@ -74,13 +75,18 @@ $2 == "fn" {
   w = weight(type); s = sign(result)
   if (w < 0 || s == -99 || date !~ /^20[0-9][0-9]-[0-9][0-9]-[0-9][0-9]$/) { printf("map.sh: %s (%s): %s\n", m_bad, repo, line) > "/dev/stderr"; next }
   used++
-  k = split(concepts, cs, ",")
+  k = split(concepts, cs, ","); haslead = 0
+  for (i = 1; i <= k; i++) if (trim(cs[i]) ~ /^\*/) haslead = 1
   for (i = 1; i <= k; i++) {
-    c = trim(cs[i]); if (c == "") continue; seen[c] = 1
+    c = trim(cs[i]); if (c == "") continue
+    islead = (c ~ /^\*/); sub(/^\*/, "", c); seen[c] = 1
     if (!(c SUBSEP repo in rep)) { rep[c SUBSEP repo] = 1; repos[c] = (repos[c] == "" ? repo : repos[c] "," repo) }
     if (result == "skip") continue
-    v = val[c] + w * s; if (v > cap) v = cap; if (v < -cap) v = -cap
+    ww = (haslead && !islead) ? int(w / 2) : w
+    v = val[c] + ww * s; if (v > cap) v = cap; if (v < -cap) v = -cap
     val[c] = v; cnt[c]++; if (date > last[c]) last[c] = date
+    if (s > 0 && date > lasthit[c]) lasthit[c] = date
+    if (s < 0 && date > lastmiss[c]) lastmiss[c] = date
   }
 }
 END {
@@ -88,8 +94,10 @@ END {
   for (c in seen) {
     v = val[c] + 0; n = cnt[c] + 0
     if (n == 0) { st = "unasked"; lastd = "-" }
-    else { lastd = last[c]; isfresh = (jdn(today) - jdn(lastd) <= fresh)
-      if (v >= th && isfresh) st = "known"; else if (v <= -th && isfresh) st = "unknown"; else st = "fuzzy" }
+    else { lastd = last[c]
+      hitfresh = (lasthit[c] != "" && jdn(today) - jdn(lasthit[c]) <= fresh)
+      missfresh = (lastmiss[c] != "" && jdn(today) - jdn(lastmiss[c]) <= fresh)
+      if (v >= th && hitfresh) st = "known"; else if (v <= -th && missfresh) st = "unknown"; else st = "fuzzy" }
     if (tsv) printf("%+04d\t%s\t%s\t%d\t%d\t%s\t%s\t%s\n", v + 100, c, c, v, n, lastd, st, repos[c])
     else     printf("%+04d\t%s\t| %s | %+d | %d | %s | %s | %s |\n", v + 100, c, c, v, n, lastd, label(st), repos[c])
   }

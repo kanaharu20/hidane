@@ -48,9 +48,11 @@ You will see `concepts/`, `repos/`, `index.md`. Click the **Graph view** icon.
 
 | Color | Meaning |
 |---|---|
-| green | understood (repeated hits, checked within 30 days) |
-| amber | fuzzy (mixed results, or not checked for 30 days) |
-| red | not understood (misses and "don't know" have piled up) |
+| toward green | understood (value +4 or more, with a hit within 30 days) |
+| around amber | fuzzy (mixed results, or not checked for 30 days) |
+| toward red | not understood (value -4 or less, with a miss or "don't know" within 30 days) |
+
+Colors are 13 steps over the value (-6 to +6), red → amber → green; one answer moves a concept one or two steps.
 | dark gray | unasked (tagged, never asked) |
 | light gray | repository |
 
@@ -138,8 +140,8 @@ To update hidane: `sh ~/hidane/install.sh --update` (or `/hidane --update` in Cl
 
 ## 7. A little of the mechanics
 
-- Value = weighted sum of answers. Easy (trace) 1, edge 2, summary 3. hit +, miss / don't know −, partial 0. Clamped at ±6.
-- Beyond ±4 a concept lights green / red. Not checked for 30 days → amber (the value is kept).
+- Value = weighted sum of answers. Easy (trace) 1, boundary (edge) 2. The targeted concept gets the full amount, the other concepts on the function half. hit +, miss / don't know −, partial 0. Clamped at ±6.
+- Beyond ±4 a concept lights green / red. Not checked for 30 days → amber (the value is kept). Only a hit brings it back to understood, only a miss back to not understood.
 - Order of questions: not understood > fuzzy > unasked. Ranking uses records from all repositories, so a concept you failed in A is asked first in B.
 - No scores, only colors. Research shows scores lower interest and shift attention from the code to the self.
 
