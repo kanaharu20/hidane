@@ -22,9 +22,9 @@ $K "分岐: 59 行は is_done だけを見るので終わらない @59" "返り�
 $K "branch: loop continues because is_done is false" "return: returns 1" >/dev/null 2>&1; rc=$?; [ $rc = 2 ] && ok "K08 because を含む鍵も exit 2" || ng "K08" "rc=$rc"
 $K "stopped を立てる @ 26" "返り値: 1 を返す" >/dev/null 2>"$TMP/e"; rc=$?; { [ $rc = 2 ] && grep -q '鍵 1 に種別が無い' "$TMP/e" && [ ! -f "$ROOT/p/keys" ]; } && ok "K09 種別の無い鍵は exit 2" || ng "K09" "rc=$rc $(cat "$TMP/e")"
 o=$($K "返り値: {start: 0} を返す @59" "分岐: 49 行で 1 回だけ取り出す @49" "分岐: 53 行の for は回らない @53" "状態: queue が空で while を抜ける @48")
-{ echo "$o" | sed -n 2p | grep -q '^答えに含めるもの: 返り値 1、分岐 2、状態 1$' && echo "$o" | sed -n 3p | grep -q '問いの最後の行'; } && ok "K10 2 行目に種別と数だけの「答えに含めるもの」(中身と行は出ない)" || ng "K10" "$o"
-o=$($K "return: 1 @5" "branch: x > 0 @3"); { grep -q '^1	返り値: 1 @5$' "$ROOT/p/keys" && echo "$o" | grep -q '^答えに含めるもの: 返り値 1、分岐 1$'; } && ok "K11 英語の種別も受け、表示言語の語で保存する" || ng "K11" "$o $(cat "$ROOT/p/keys")"
-o=$(HIDANE_LANG=en $K "return: 1 @5" "branch: x > 0 @3" "branch: y @4"); echo "$o" | grep -q '^Include in your answer: return value 1, branch 2$' && ok "K12 en の答えに含めるもの" || ng "K12" "$o"
+{ echo "$o" | sed -n 2p | grep -q '^答えには 何を返すか、どの条件でどちらへ進むか(2 か所)、何が書き換わるか を含めてください$' && echo "$o" | sed -n 3p | grep -q '問いの最後の行'; } && ok "K10 2 行目は種別を言葉にした「答えには … を含めてください」(中身と行は出ない)" || ng "K10" "$o"
+o=$($K "return: 1 @5" "branch: x > 0 @3"); { grep -q '^1	返り値: 1 @5$' "$ROOT/p/keys" && echo "$o" | grep -q '^答えには 何を返すか、どの条件でどちらへ進むか を含めてください$'; } && ok "K11 英語の種別も受け、表示言語の語で保存する" || ng "K11" "$o $(cat "$ROOT/p/keys")"
+o=$(HIDANE_LANG=en $K "return: 1 @5" "branch: x > 0 @3" "branch: y @4"); echo "$o" | grep -q '^Your answer should cover what it returns, which way it goes at the condition (2 places)\.$' && ok "K12 en の誘導行" || ng "K12" "$o"
 
 # --verdict → 結果
 fourkeys

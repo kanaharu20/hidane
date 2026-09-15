@@ -49,7 +49,7 @@ Every constant is provisional and can be changed through environment variables (
 
 ## Keys
 
-Before the answer is heard, Claude fixes 2-5 elements of the correct answer with `keys.sh` ("state: sets stopped @ 26"; kinds are return / branch / call / order / state). `keys.sh` returns one line with kinds and counts only, "Include in your answer: return value 1, branch 1", and that line ends the question. It stops the mismatch where the question asks only for a return value while the keys demand the steps in between. A key is an outcome, never a reason: `keys.sh` rejects keys containing "because" (exit 2).
+Before the answer is heard, Claude fixes 2-5 elements of the correct answer with `keys.sh` ("state: sets stopped @ 26"; kinds are return / branch / call / order / state). `keys.sh` returns one line that puts the kinds into words, "Your answer should cover what it returns, which way it goes at the condition.", and that line ends the question. It stops the mismatch where the question asks only for a return value while the keys demand the steps in between. A key is an outcome, never a reason: `keys.sh` rejects keys containing "because" (exit 2).
 After the answer, each key gets yes / no / contra, and `record.sh --verdict` derives the result:
 
 - all yes → hit

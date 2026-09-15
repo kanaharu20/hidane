@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.2 — 2026-09-15
+
+- The last line of a question now puts the key kinds into words instead of counts: "答えには 何を返すか、どの条件で
+  どちらへ進むか(2 か所) を含めてください" / "Your answer should cover what it returns, which way it goes at the
+  condition (2 places)." The old "分岐 1、呼び出し 1、順序 1" form was unreadable to the person answering.
+
 ## 0.5.1 — 2026-09-15
 
 Three rules of the value model, after the outside review.

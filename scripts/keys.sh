@@ -3,7 +3,7 @@
 #
 # 使い方: keys.sh [--root DIR] [--repo NAME] "種別: 鍵 1 @ a-b" "種別: 鍵 2 @ a-b" ... (2〜5 個)
 #   種別 = 返り値 / 分岐 / 呼び出し / 順序 / 状態(英語 return / branch / call / order / state でも可。表示言語の語に揃えて保存する)
-#   保存したあと「答えに含めるもの: 返り値 1、分岐 2」の 1 行を出す。問いの最後の行にそのまま置く(鍵の中身は出ない、種別と数だけ)。
+#   保存したあと「答えには 何を返すか、どの条件でどちらへ進むか(2 か所) を含めてください」の 1 行を出す。問いの最後の行にそのまま置く(鍵の中身は出ない、種別を言葉にしたもの)。
 #   これで、鍵にした事実は全部ユーザーが答えられる範囲に入る(問いが返り値だけを聞いて、鍵が途中の分岐まで求めるずれを防ぐ)。
 #         keys.sh [--root DIR] [--repo NAME] --show
 #   鍵 = 具体的で確かめられる事実 1 つ(返り値、呼ばれる関数、実行の順序、通る分岐)。理由は書かない(「ので」「because」を含む鍵は exit 2)。
@@ -56,7 +56,8 @@ printf "keys.sh: $(L k_saved)\n" "$i"
 scope=""
 for c in ret branch call order state; do
   eval n=\$n_$c; [ "$n" -gt 0 ] || continue
-  scope="$scope${scope:+、}$(L k_c_$c) $n"
+  u=""; [ "$n" -gt 1 ] && u="$([ "$LANGX" = ja ] || printf " ")($(printf "$(L k_u_$c)" "$n"))"
+  scope="$scope${scope:+、}$(L k_p_$c)$u"
 done
 [ "$LANGX" = "ja" ] || scope=$(printf '%s' "$scope" | sed 's/、/, /g')
-printf '%s: %s\n%s\n' "$(L k_scope)" "$scope" "$(L k_scope_note)"
+printf "$(L k_scope)\n%s\n" "$scope" "$(L k_scope_note)"

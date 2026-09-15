@@ -22,7 +22,7 @@ Type `/hidane` in Claude Code and it picks one of those functions and asks exact
 ```
 src/main.c:19 is_valid_num
 Given the string "+5", what does this function return?
-Include in your answer: return value 1, branch 1
+Your answer should cover what it returns, which way it goes at the condition.
 ```
 
 Answer in your own words. "I don't know" is an answer.
