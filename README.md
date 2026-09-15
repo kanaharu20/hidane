@@ -168,6 +168,7 @@ A new test is trusted only after breaking the implementation and watching it fai
 | `HIDANE_SKILL_DIR` | `~/.claude/skills/hidane` | where the skill is installed |
 | `HIDANE_CLAUDE` / `HIDANE_OPEN` | claude / open | substitutes for tests |
 
+Forking, sending a PR, reviewing one: [CONTRIBUTING.md](CONTRIBUTING.md).
 Records from reflect (the predecessor) have a different shape and are not imported automatically: [docs/MIGRATING-from-reflect.ja.md](docs/MIGRATING-from-reflect.ja.md).
 Versions: [CHANGELOG.md](CHANGELOG.md).
 
