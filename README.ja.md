@@ -128,6 +128,28 @@ sh tests/run_all.sh     # 181 件。LLM は呼ばない。数秒
 
 新しい検査は、実装を壊して落ちるのを見てから信じる。`run_all.sh` は検査の数がこの README とずれると落ちる。
 
+| ファイル | 一言 |
+|---|---|
+| `hooks/post-commit` | commit 後に tag.sh を背景で呼ぶ。commit は止めない |
+| `scripts/scope.sh` | リポジトリを関数単位に切って候補を出す |
+| `scripts/tag.sh` | 関数に概念を付けて functions.md に追記する(LLM を呼ぶ 1 か所目) |
+| `scripts/map.sh` | log.md から概念ごとの値と状態を毎回計算する |
+| `scripts/next.sh` | 次に問う関数を 1 つ選び、pending に書く |
+| `scripts/keys.sh` | 答えを聞く前に正解の要素(鍵)を固定し、「答えに含めるもの」の行を出す |
+| `scripts/record.sh` | 鍵の判定から結果を決めて log.md に 1 行追記する(一次記録の唯一の書き口) |
+| `scripts/resolve.sh` | 読むときに概念名を aliases.md で新名に置き換えるフィルタ |
+| `scripts/pages.sh` | 地図(Obsidian の vault)を記録から作り直す |
+| `scripts/open.sh` | 地図を作り直して Obsidian で開く |
+| `scripts/lint.sh` | 似た概念名を統合して aliases.md に書く(LLM を呼ぶ 2 か所目) |
+| `scripts/weak.sh` | 弱い所の材料(ズレのある概念、ズレ全件、関数)を集める |
+| `scripts/explained.sh` | 解説を求めたことを explained.md に 1 行残す |
+| `scripts/lang.sh` | ja/en の表示文字列と、記録の置き場の名前の決め方 |
+| `scripts/help.sh` | `/hidane --help` の固定文 |
+| `scripts/migrate.sh` | 記録の形式が変わったとき古い log.md を直す |
+| `scripts/stats.sh` | 名前を出さない数字だけの要約(フィードバック用) |
+| `install.sh` | セットアップ、hook の設置と撤去、更新 |
+| `tests/run_all.sh` | 全検査を回し、README の検査数と照合する |
+
 | 変数 | 既定 | |
 |---|---|---|
 | `HIDANE_LANG` | config、無ければ en | 表示とプロンプトの言語 |
