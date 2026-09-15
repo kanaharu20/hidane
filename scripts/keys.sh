@@ -3,7 +3,8 @@
 #
 # 使い方: keys.sh [--root DIR] [--repo NAME] "種別: 鍵 1 @ a-b" "種別: 鍵 2 @ a-b" ... (2〜5 個)
 #   種別 = 返り値 / 分岐 / 呼び出し / 順序 / 状態(英語 return / branch / call / order / state でも可。表示言語の語に揃えて保存する)
-#   保存したあと「答えには 何を返すか、どの条件でどちらへ進むか(2 か所) を含めてください」の 1 行を出す。問いの最後の行にそのまま置く(鍵の中身は出ない、種別を言葉にしたもの)。
+#   保存したあと「問いの結び: 「何を返しますか。そうなる条件も添えてください」」を出す。問いの最後の文をこの結びで終える(鍵の中身・種別名・数は出ない)。
+#   聞くものは 1 つ(返り値 / 呼び出し / 順序 / 状態。呼び出し+順序は「どの順で呼ばれるか」として可)。分岐はそれを決めるものとして添える。「@ 行」は問う関数の範囲内。
 #   これで、鍵にした事実は全部ユーザーが答えられる範囲に入る(問いが返り値だけを聞いて、鍵が途中の分岐まで求めるずれを防ぐ)。
 #         keys.sh [--root DIR] [--repo NAME] --show
 #   鍵 = 具体的で確かめられる事実 1 つ(返り値、呼ばれる関数、実行の順序、通る分岐)。理由は書かない(「ので」「because」を含む鍵は exit 2)。
@@ -60,17 +61,13 @@ for k in "$@"; do
   esac
   printf '%d\t%s: %s\n' "$i" "$(L k_c_$c)" "$rest" >> "$kf"
 done
-# 種別は 2 つまで(聞くもの 1 つ + それを決める分岐)。3 つ以上は「全部説明して」になる
-kinds=0; kl=""
-for c in ret call order state branch; do eval n=\$n_$c; [ "$n" -gt 0 ] || continue; kinds=$((kinds+1)); kl="$kl${kl:+, }$(L k_p_$c)"; done
-[ "$kinds" -le 2 ] || { rm -f "$kf"; printf "keys.sh: $(L k_kinds)\n" "$kinds" "$kl" >&2; exit 2; }
+# 聞くものは 1 つ(返り値 / 呼び出し / 順序 / 状態)。分岐はそれを決めるものとして添える。呼び出し+順序は「どの順で呼ばれるか」として 1 つ
+prim=""; np=0; pl=""
+for c in ret call order state; do eval n=\$n_$c; [ "$n" -gt 0 ] || continue; np=$((np+1)); prim="$prim${prim:+ }$c"; pl="$pl${pl:+, }$(L k_p_$c)"; done
+[ "$np" -ge 1 ] || { rm -f "$kf"; echo "keys.sh: $(L k_noprim)" >&2; exit 2; }
+if [ "$np" -gt 1 ] && [ "$prim" != "call order" ]; then rm -f "$kf"; printf "keys.sh: $(L k_one)\n" "$np" "$pl" >&2; exit 2; fi
 cp "$ROOT/$REPO/pending" "$kf.pending"   # どの問いの鍵かを残す。record.sh が pending と照合する
 printf "keys.sh: $(L k_saved)\n" "$i"
-scope=""
-for c in ret call order state branch; do
-  eval n=\$n_$c; [ "$n" -gt 0 ] || continue
-  u=""; [ "$n" -gt 1 ] && u="$([ "$LANGX" = ja ] || printf " ")($(printf "$(L k_u_$c)" "$n"))"
-  scope="$scope${scope:+、}$(L k_p_$c)$u"
-done
-[ "$LANGX" = "ja" ] || scope=$(printf '%s' "$scope" | sed 's/、/, /g')
-printf "$(L k_scope)\n%s\n" "$scope" "$(L k_scope_note)"
+case "$prim" in "call order") end=$(L k_e_callorder) ;; *) end=$(L k_e_$prim) ;; esac
+[ "$n_branch" -gt 0 ] && end="$end$(L k_e_branch)"
+printf "$(L k_end)\n%s\n" "$end" "$(L k_end_note)"

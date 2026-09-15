@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.5.4 — 2026-09-15
+
+The last line of a question no longer names key kinds or counts ("何を呼ぶか(2 つ)" read as a hint, and "呼ぶ"
+was ambiguous between the user's functions and pthread calls).
+
+- `keys.sh` now prints a "question ending" derived from the key kinds, and the question's last sentence ends with it:
+  return → "何を返しますか", call → "どの関数が呼ばれますか", call+order → "どの関数がどの順で呼ばれますか",
+  order → "何がどの順で起きますか", state → "何が書き換わりますか"; a branch key appends "そうなる条件も添えてください".
+- One thing asked per question: keys of return / call / order / state may not be mixed (call+order is allowed as
+  "in what order"); branch keys only support it; branch-only keys are rejected. Replaces the "at most 2 kinds" rule.
+- 204 tests.
+
 ## 0.5.3 — 2026-09-15
 
 Question quality, after a focus run produced "from line 20's mark_waiters_unblocked, which path leaves the function"

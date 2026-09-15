@@ -49,7 +49,7 @@ Every constant is provisional and can be changed through environment variables (
 
 ## Keys
 
-Before the answer is heard, Claude fixes 2-5 elements of the correct answer with `keys.sh` ("state: sets stopped @ 26"; kinds are return / branch / call / order / state). Key lines must fall inside the function's range and span at most 2 kinds (`keys.sh` rejects both, which keeps out callee internals and "explain everything" questions). `keys.sh` returns one line that puts the kinds into words, "Your answer should cover what it returns, which way it goes at the condition.", and that line ends the question. It stops the mismatch where the question asks only for a return value while the keys demand the steps in between. A key is an outcome, never a reason: `keys.sh` rejects keys containing "because" (exit 2).
+Before the answer is heard, Claude fixes 2-5 elements of the correct answer with `keys.sh` ("state: sets stopped @ 26"; kinds are return / branch / call / order / state). Key lines must fall inside the function's range, one thing is asked (return / call / order / state; call+order allowed) and branch keys only support it (`keys.sh` rejects the rest, which keeps out callee internals and "explain everything" questions). From the key kinds `keys.sh` returns a "question ending" ("what does it return? Include the condition that makes it so."), and the question's last sentence ends with it. No kind names or counts are shown. It stops the mismatch where the question asks only for a return value while the keys demand the steps in between. A key is an outcome, never a reason: `keys.sh` rejects keys containing "because" (exit 2).
 After the answer, each key gets yes / no / contra, and `record.sh --verdict` derives the result:
 
 - all yes → hit
