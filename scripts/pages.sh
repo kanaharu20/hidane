@@ -10,7 +10,8 @@
 #   concepts/<概念>.md   frontmatter(state, value, evidence, last, repos)+ 関連・典型的なズレ・記録・未出題
 #   repos/<repo>.md      その repo に出た概念と状態
 #   index.md             map.sh の表そのまま
-#   .obsidian/graph.json Graph view の色(理解 黄緑 / 曖昧 黄 / 非理解 赤 / 未出題 灰)。無いときだけ書く
+#   .obsidian/graph.json Graph view の色(理解 青緑 / 曖昧 黄 / 非理解 赤 / 未出題 灰)。無いときだけ書く。理解の条件は
+#                        "[state:known] -[state:unknown]"(Obsidian の property 検索は部分一致で、known が unknown にも当たるため)
 # 前回あって今回無い概念ページは消す(概念の統合で名前が消えたとき)。
 set -eu
 HERE=$(cd "$(dirname "$0")" && pwd -P)
@@ -137,6 +138,8 @@ g="$VAULT/.obsidian/graph.json"
 # Obsidian が整形し直した JSON(数字の後が改行)にも効くよう、行末と非数字の両方を見る
 if [ -f "$g" ]; then
   sed 's/\[state:霧\]/[state:unasked]/; s/\[state:未出題\]/[state:unasked]/; s/\[state:理解\]/[state:known]/; s/\[state:曖昧\]/[state:fuzzy]/; s/\[state:非理解\]/[state:unknown]/' "$g" > "$g.tmp" && mv "$g.tmp" "$g"
+  # Obsidian の [state:known] は部分一致で unknown にも当たり、非理解が理解の色になる。known の条件に -[state:unknown] を足す
+  sed 's/"\[state:known\]"/"[state:known] -[state:unknown]"/' "$g" > "$g.tmp" && mv "$g.tmp" "$g"
   for pair in 9159498:1566369 16771899:16765503 16007990:16729943 10395294:7041144 6323595:13620186; do
     o=${pair%%:*}; n=${pair##*:}
     sed "s/\(\"rgb\": *\)$o\([^0-9]\)/\1$n\2/; s/\(\"rgb\": *\)$o\$/\1$n/" "$g" > "$g.tmp" && mv "$g.tmp" "$g"
@@ -146,7 +149,7 @@ fi
 {
   "collapse-color-groups": false,
   "colorGroups": [
-    { "query": "[state:known]",   "color": { "a": 1, "rgb": 1566369 } },
+    { "query": "[state:known] -[state:unknown]", "color": { "a": 1, "rgb": 1566369 } },
     { "query": "[state:fuzzy]",   "color": { "a": 1, "rgb": 16765503 } },
     { "query": "[state:unknown]", "color": { "a": 1, "rgb": 16729943 } },
     { "query": "[state:unasked]", "color": { "a": 1, "rgb": 7041144 } },

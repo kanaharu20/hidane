@@ -49,6 +49,7 @@ sh scripts/pages.sh --root $FX --vault "$V" --today 2026-09-08 >/dev/null 2>&1
 # P09 初回の graph.json に 4 状態の色がある
 rm -rf "$TMP/v2"; sh scripts/pages.sh --root $FX --vault "$TMP/v2" --today 2026-09-08 >/dev/null 2>&1
 n=$(grep -c '\[state:' "$TMP/v2/.obsidian/graph.json"); [ "$n" = 4 ] && ok "P09 graph.json に 4 状態の色" || ng "P09 graph.json" "state queries=$n"
+grep -q '"\[state:known\] -\[state:unknown\]"' "$TMP/v2/.obsidian/graph.json" && ok "P09b 理解の条件は -[state:unknown] 付き(部分一致で非理解が青緑にならない)" || ng "P09b known query" "$(grep known "$TMP/v2/.obsidian/graph.json")"
 
 # P10 repo ページに概念と状態が重複なしで並ぶ
 r="$V/repos/worker.md"
@@ -67,7 +68,7 @@ sh scripts/pages.sh --root "$TMP/sl" --vault "$TMP/slv" --today 2026-09-08 >/dev
 rm -rf "$TMP/v4"; sh scripts/pages.sh --root $FX --vault "$TMP/v4" --today 2026-09-08 >/dev/null 2>&1
 printf '{"colorGroups":[{"query":"[state:霧]","color":{"a":1,"rgb": 10395294 }},{"query":"[state:理解]","color":{"a":1,"rgb": 123 }}]}\n' > "$TMP/v4/.obsidian/graph.json"
 sh scripts/pages.sh --root $FX --vault "$TMP/v4" --today 2026-09-08 >/dev/null 2>&1
-{ grep -q '\[state:unasked\]' "$TMP/v4/.obsidian/graph.json" && grep -q '"rgb": 7041144 ' "$TMP/v4/.obsidian/graph.json" && grep -q '"rgb": 123 ' "$TMP/v4/.obsidian/graph.json"; } \
+{ grep -q '\[state:unasked\]' "$TMP/v4/.obsidian/graph.json" && grep -q '"rgb": 7041144 ' "$TMP/v4/.obsidian/graph.json" && grep -q '"rgb": 123 ' "$TMP/v4/.obsidian/graph.json" && grep -q '"\[state:known\] -\[state:unknown\]"' "$TMP/v4/.obsidian/graph.json"; } \
   && ok "P13 旧名と旧配色は移行し、利用者の色は残る" || ng "P13 移行" "$(cat "$TMP/v4/.obsidian/graph.json")"
 # P14 Obsidian が整形した形(数字の後が改行)でも移行する
 printf '{\n  "colorGroups": [\n    {\n      "query": "[state:曖昧]",\n      "color": {\n        "a": 1,\n        "rgb": 16771899\n      }\n    }\n  ]\n}\n' > "$TMP/v4/.obsidian/graph.json"

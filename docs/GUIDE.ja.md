@@ -56,7 +56,7 @@ Obsidian を起動 → 左下の vault 切替 → **Open folder as vault** → `
 
 最初は**ほぼ全部が暗い灰**です。これは正常で、問いに答えるたびに 1 つずつ灯っていく。
 
-色が付かないときは Graph view 右上の歯車 → Groups に `[state:known]` などの 4 行があるか確認する。無ければ `~/Documents/hidane/.obsidian/graph.json` を消して `/hidane --vault` を打つと作り直される。
+色が付かないときは Graph view 右上の歯車 → Groups に `[state:known] -[state:unknown]` などの 4 行があるか確認する。無ければ `~/Documents/hidane/.obsidian/graph.json` を消して `/hidane --vault` を打つと作り直される。
 
 ## 3. 一問答える
 

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.2 — 2026-09-15
+
+- Not-understood concepts were drawn in the understood color: Obsidian's `[state:known]` group matches by substring,
+  so it also caught `unknown`, and it came first. The understood group is now `[state:known] -[state:unknown]`;
+  existing `graph.json` files are migrated on the next `pages.sh` run.
+- 159 L0 tests.
+
 ## 0.3.1 — 2026-09-14
 
 - `tag.sh --all` no longer stops at the 20 functions with the most branches (a reflect leftover in `scope.sh`).
