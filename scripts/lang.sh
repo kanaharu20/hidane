@@ -175,6 +175,11 @@ L() {
     ja:r_nokeyn) echo "鍵 %s は無い(1〜%s)" ;;  en:r_nokeyn) echo "no key %s (1-%s)" ;;
     ja:r_disputed) echo "異議を記録した。値と状態は変わらない(次にこの関数を問うとき、鍵を作る側に見せる)" ;;
     en:r_disputed) echo "dispute recorded. Value and state do not change (it is shown when keys are next made for this function)" ;;
+    ja:i_start) echo "登録: %s(%s)" ;;            en:i_start) echo "registering: %s (%s)" ;;
+    ja:i_noinstall) echo "install.sh が見つからない。<skill>/HOME か scripts/ の 1 つ上に要る" ;;
+    en:i_noinstall) echo "install.sh not found (expected via <skill>/HOME or one level above scripts/)" ;;
+    ja:i_done) echo "登録した: %s。記録は %s。次の commit から hook が動く。概念が付いたら /hidane で一問" ;;
+    en:i_done) echo "registered: %s. Records in %s. The hook runs from the next commit; once concepts are tagged, /hidane asks one question" ;;
     ja:k_range) echo "鍵 %d の行(@%s)が、問う関数の範囲 %s の外。鍵はこの関数の行にある事実だけ(呼んだ関数の中身は別の問い)" ;;
     en:k_range) echo "key %d points at @%s, outside the asked function's range %s. Keys are facts on this function's own lines (what a callee does inside is another question)" ;;
     ja:r_place) echo "場所は file:a-b の形" ;;   en:r_place) echo "place must look like file:a-b" ;;

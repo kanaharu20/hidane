@@ -39,7 +39,7 @@ tag.sh: 候補 20、呼び出し 3 回、追記 20 行、捨てた 0 行 → /Us
 
 - 「別の post-commit hook があるので触らない」と出たら、既存の hook の末尾に `sh ~/hidane/hooks/post-commit` を呼ぶ行を自分で足す
 - 「claude コマンドが無い」と出たら、Claude Code を入れて `claude` が通るようにしてから、もう一度 `install.sh`
-- 別のリポジトリでも使うなら、そのリポジトリの中でもう一度 `install.sh`(言語は 2 回目から聞かれない)
+- 別のリポジトリでも使うなら、そのリポジトリで Claude Code を開いて `/hidane --init`(またはその中でもう一度 `install.sh`。言語は 2 回目から聞かれない)
 
 ## 2. 地図を開く(初回だけ)
 

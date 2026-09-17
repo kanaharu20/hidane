@@ -19,6 +19,7 @@ hidane $v — 自分のコードのどこを理解していて、どこをまだ
   /hidane --map              概念ごとの値と状態の表
   /hidane --vault            地図を作り直して Obsidian で開く
   /hidane --lint             似た概念名を統合する(3 日に一度は自動)
+  /hidane --init            今いるリポジトリを登録する(hook を置き、全関数に背景で概念を付ける。--no-tag で hook だけ)
   /hidane --tag              まだ地図に無い関数に概念を付ける(背景で。commit 前でも。commit 時は hook が自動)
   /hidane --update           最新版にして記録を移行する
   /hidane --help, -h         これ
@@ -40,6 +41,7 @@ hidane $v — a map of which parts of your code you understand and which you hav
   /hidane --map              the table of concepts, values and states
   /hidane --vault            rebuild the map and open it in Obsidian
   /hidane --lint             merge concept names that mean the same (also automatic every 3 days)
+  /hidane --init             register this repository (installs the hook, tags every function in the background; --no-tag for the hook only)
   /hidane --tag              tag functions not on the map yet, in the background (uncommitted too; the hook does it at commit)
   /hidane --update           latest version, records migrated
   /hidane --help, -h         this

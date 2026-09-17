@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.7 — 2026-09-17
+
+- `/hidane --init` registers the current repository from inside Claude Code: installs the post-commit hook (leaves a
+  foreign hook alone and says so), writes `<root>/<repo>/path`, and tags every function in the background
+  (`tag.sh --all --bg`). `--init --no-tag` installs only the hook. Same result as running install.sh in the repository.
+- 233 tests.
+
 ## 0.5.6 — 2026-09-15
 
 - `ask.sh`: the full question text goes through a mechanical check before the user sees it (at most 4 lines; file and

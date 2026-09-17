@@ -91,6 +91,7 @@ Open that folder in Obsidian with "Open folder as vault". Then `/hidane`.
 | `/hidane --map` | the table of concepts, values and states |
 | `/hidane --vault` | rebuild the map and open it in Obsidian |
 | `/hidane --lint` | merge concept names that mean the same (also automatic every 3 days) |
+| `/hidane --init` | register the current repository (installs the hook, tags every function in the background). Same as running install.sh again |
 | `/hidane --tag` | tag functions not on the map yet, in the background, uncommitted ones too. The hook does it at every commit |
 | `/hidane --update` | latest version, records migrated |
 | `/hidane --help` | usage |
@@ -120,14 +121,14 @@ The mechanics in detail: [docs/DESIGN.md](docs/DESIGN.md).
 
 - One author, two repositories, 32 answers so far. Weights (1 / 2 / 3), threshold (±4) and forgetting (30 days) are all provisional
 - The "what does this function do" type (summary) was removed: there is no grading method for it (CGBG, generating code from the explanation). Two question types remain, follow and boundary
-- Zero dependencies beyond git and POSIX sh came at the price of dense sh and awk. 229 tests are what make it safe to change
+- Zero dependencies beyond git and POSIX sh came at the price of dense sh and awk. 233 tests are what make it safe to change
 - Linux should work but is untested; `/hidane --vault` uses macOS `open`
 - How closely Claude follows the SKILL steps is checked by reading real session transcripts. Prose instructions sometimes do not take
 
 ## Development
 
 ```sh
-sh tests/run_all.sh     # 229 tests, no LLM, seconds
+sh tests/run_all.sh     # 233 tests, no LLM, seconds
 ```
 
 A new test is trusted only after breaking the implementation and watching it fail. `run_all.sh` also fails if the test count in this README drifts from reality.

@@ -39,7 +39,7 @@ Next: open /Users/you/Documents/hidane in Obsidian (Open folder as vault). Then 
 
 - "another post-commit hook exists": add a line calling `sh ~/hidane/hooks/post-commit` to your existing hook.
 - "claude not found": install Claude Code, make sure `claude` runs, then run `install.sh` again.
-- For another repository, run `install.sh` inside it (the language is not asked again).
+- For another repository, open Claude Code there and type `/hidane --init` (or run `install.sh` inside it; the language is not asked again).
 
 ## 2. Open the map (first time only)
 
