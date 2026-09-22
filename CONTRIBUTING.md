@@ -32,7 +32,7 @@ Records live outside the repo: `~/.claude/hidane/<repo>/{log.md,functions.md,pat
 | `scripts/tag.sh` | tags functions with concepts and appends to functions.md (LLM call 1 of 2) |
 | `scripts/map.sh` | computes each concept's value and state from log.md, every time |
 | `scripts/next.sh` | picks the one function to ask next and writes pending |
-| `scripts/next.awk` | ranking, focus and question-type logic, run by next.sh via awk -f |
+| `scripts/next.awk` | ranking and question-type logic, run by next.sh via awk -f |
 | `scripts/keys.sh` | fixes the elements of the correct answer before asking, prints the "Include in your answer" line |
 | `scripts/ask.sh` | validates and stores the full question text (line count, place and function, no expressions / line numbers / callee names, the ending) |
 | `scripts/init.sh` | registers the current repository (installs the hook, runs tag.sh --all --bg) |

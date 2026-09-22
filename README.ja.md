@@ -84,7 +84,6 @@ cd 使いたいリポジトリ && sh ~/hidane/install.sh
 | `/hidane` | 一問 |
 | `/hidane <聞きたいこと>` | 自分に合わせた解説。関数でも概念でも printf でも、「自分の弱い所は」でも |
 | `/hidane --weak` | 弱い所を 1 枚に。ズレを型にまとめ、流れのどの段で躓いているかを自分のコードの行で示す |
-| `/hidane --focus [概念]` | 集中。1 回の呼び出しで 1 つの概念の関数を 1 問ずつ 3 問出して決着をつける |
 | `/hidane --dispute <番号> <理由>` | 直前の問いの鍵に異議を残す。値は変わらない。次にその関数を問うとき、鍵を作る側に見せる |
 | `/hidane --map` | 概念ごとの値と状態の表 |
 | `/hidane --vault` | 地図を作り直して Obsidian で開く |
@@ -119,14 +118,14 @@ LLM に判断させるのは 3 か所だけ。関数にどの概念を付ける�
 
 - 作者 1 人が 2 リポジトリで 32 問答えた段階。重み(1 / 2 / 3)、閾値(±4)、忘却(30 日)は全部仮置き
 - 「何をするか」を説明させる型(summary)は、判定の方式(説明からコードを生成して照合する CGBG)が無いので外した。問いは「追う」と「境界を突く」の 2 型
-- 依存を git と POSIX sh だけにした代わりに、sh と awk が密で読みにくい。234 件の検査がそれを支えている
+- 依存を git と POSIX sh だけにした代わりに、sh と awk が密で読みにくい。228 件の検査がそれを支えている
 - Linux は動くはずだが未検証。`/hidane --vault` は macOS の `open` を使う
 - Claude が SKILL の手順をどこまで守るかは、実走の会話記録で確かめている。文面の指示は効かないことがある
 
 ## 開発
 
 ```sh
-sh tests/run_all.sh     # 234 件。LLM は呼ばない。数秒
+sh tests/run_all.sh     # 228 件。LLM は呼ばない。数秒
 ```
 
 新しい検査は、実装を壊して落ちるのを見てから信じる。`run_all.sh` は検査の数がこの README とずれると落ちる。
@@ -142,7 +141,6 @@ sh tests/run_all.sh     # 234 件。LLM は呼ばない。数秒
 | `HIDANE_MAX_FUNCS` | 8 | 1 回の LLM 呼び出しに載せる関数 |
 | `HIDANE_LINT_DAYS` | 3 | lint の間隔 |
 | `HIDANE_WEAK_N` | 3 | `--weak` に載せる概念の数 |
-| `HIDANE_FOCUS_N` | 3 | `--focus` で続けて出す問いの数 |
 | `HIDANE_MODEL` | | `claude -p` に渡す `--model` |
 | `HIDANE_HOOK_OFF` | | 1 で hook を止める |
 | `HIDANE_SKILL_DIR` | `~/.claude/skills/hidane` | skill の置き場 |

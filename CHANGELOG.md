@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.6.0 — 2026-09-22
+
+- Focus mode (`--focus`, `--focus-next`, `<repo>/focus`, `HIDANE_FOCUS_N`) is removed. It was the only exception to
+  "one question per invocation", and a run stopped halfway left state that turned later plain questions into focus
+  questions. Records are untouched; a leftover `focus` file is simply ignored.
+- 228 tests.
+
 ## 0.5.8 — 2026-09-22
 
 - A plain `/hidane` no longer turns into focus mode. A focus file left behind by an unfinished `--focus` run made every

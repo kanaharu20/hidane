@@ -135,10 +135,4 @@ case "$result" in partial|miss) if [ -n "$usermsg" ]; then
   echo "$(L r_hint)"
 fi ;; esac
 if [ -z "$FREE" ]; then [ ! -f "$keys" ] || cp "$keys" "$keys.last"; rm -f "$pending" "$keys" "$keys.pending" "$keys.end" "$ROOT/$REPO/question"; fi   # keys.last は --dispute 用
-# 集中モードの残りを 1 つ減らす。0 になれば終わりを告げて消す
-ff="$ROOT/$REPO/focus"
-if [ -z "$FREE" ] && [ -f "$ff" ]; then
-  fc=$(cut -f1 "$ff"); fleft=$(( $(cut -f2 "$ff") - 1 ))
-  if [ "$fleft" -le 0 ]; then rm -f "$ff"; printf "$(L r_focus_done)\n" "$fc" "${HIDANE_FOCUS_N:-3}"; else printf '%s\t%s\n' "$fc" "$fleft" > "$ff"; fi
-fi
 sh "$HERE/pages.sh" --root "$ROOT" >/dev/null 2>&1 || true

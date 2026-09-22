@@ -1,4 +1,4 @@
-# hidane next.awk — next.sh の順位付け・集中・型の決定。next.sh から awk -f で呼ぶ(-v で表と文言を受け取る)。単独では動かない。
+# hidane next.awk — next.sh の順位付け・型の決定。next.sh から awk -f で呼ぶ(-v で表と文言を受け取る)。単独では動かない。
 function trim(s) { gsub(/^[ \t]+|[ \t]+$/, "", s); return s }
 function rank(st) { return (st == "unknown" ? 0 : st == "fuzzy" ? 1 : st == "unasked" ? 2 : 9) }
 function label(st) { return (st == "known" ? l_known : st == "fuzzy" ? l_fuzzy : st == "unknown" ? l_unknown : l_unasked) }
@@ -30,14 +30,6 @@ END {
     m++; key[m] = sprintf("%d\t%+04d\t%s", best, bv + 100, p); P[m] = p; C[m] = bc
   }
   if (m == 0) { print none_cand (stale > 0 ? " (" stale_note ")" : "") > "/dev/stderr"; exit 1 }
-  # 集中: 概念が決まっていればその概念を持つ候補だけ残す(順位はその概念で付け直す)。"?" なら順位最上位の概念に決める
-  if (focus != "") {
-    if (focus == "?") { best = 99; bv = 999; for (i = 1; i <= m; i++) { c = C[i]; r = rank(st[c]); v = val[c] + 0; if (r < best || (r == best && v < bv)) { best = r; bv = v; focus = c } } }
-    mm = 0
-    for (i = 1; i <= m; i++) { if ((", " cand[P[i]] ", ") ~ (", " focus ", ")) { mm++; key[mm] = sprintf("%d\t%+04d\t%s", rank(st[focus]), val[focus] + 100, P[i]); P[mm] = P[i]; C[mm] = focus } }
-    if (mm == 0) { printf(n_focus_none "\n", focus); focus = ""; printf("") > ff; close(ff); system("rm -f " ff) }
-    else { m = mm; printf("%s\t%s\n", focus, fleft) > ff; close(ff) }
-  }
   for (i = 2; i <= m; i++) { for (j = i; j > 1 && key[j] < key[j-1]; j--) { sw = key[j]; key[j] = key[j-1]; key[j-1] = sw; sw = P[j]; P[j] = P[j-1]; P[j-1] = sw; sw = C[j]; C[j] = C[j-1]; C[j-1] = sw } }
   if (n > 1) {
     printf("| # | %s | %s | %s | %s | %s | %s |\n|---|---|---|---|---|---|---|\n", h_place, h_func, n_lead, h_state, h_value, n_concepts)
@@ -45,7 +37,6 @@ END {
     exit 0
   }
   p = P[1]; c = C[1]
-  if (focus != "") printf(n_focus_left "\n", focus, fleft)
   printf("%s: %s\n%s: %s\n%s: %s\n%s: %s(%s, %+d)\n", n_place, p, n_func, fname[p], n_concepts, cand[p], n_lead, c, label(st[c]), val[c])
   printf("%s: %s\n", n_why, (st[c] == "unknown" ? why_unknown : st[c] == "fuzzy" ? why_fuzzy : why_unasked))
   if (c in answered) { type = "edge"; if (zure[c] != "") printf("%s(%s):\n%s", n_zure, c, zure[c]); printf("%s: edge (%s) — %s\n%s: %s\n", n_type, ty_edge, edge_hint, n_inputs, in_edge) }

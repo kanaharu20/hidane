@@ -62,7 +62,6 @@ Claude cannot write hit / miss directly (`--free` is for hand entry).
 
 ## Which function is asked next
 
-Focus (`--focus [concept]`): `<repo>/focus` holds "concept<TAB>remaining"; while it lasts, next.sh picks only from that concept's functions. record.sh decrements it; at 0 it ends. Default 3 questions (`HIDANE_FOCUS_N`).
 Type: a concept answered at least once (including "I don't know") gets edge (boundary, weight 2); a first-time concept gets trace.
 
 Concepts are ranked from all repositories: not understood > fuzzy > unasked, lower value first. Understood concepts are never asked.

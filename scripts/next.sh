@@ -1,11 +1,7 @@
 #!/bin/sh
 # hidane next.sh — 次に問う関数を 1 つ選ぶ。LLM は使わない。
 #
-# 使い方: next.sh [--root DIR] [--repo NAME] [--tree DIR] [--today D] [-n N] [--focus [概念]]
-#   --focus [概念]  集中モード。その概念(省略なら順位が最上位の概念)の関数を続けて HIDANE_FOCUS_N 問(既定 3)出す。
-#                   <root>/<repo>/focus に「概念<TAB>残り」を置く。record.sh が 1 つ減らす
-#   --focus-next    集中の 2 問目以降(focus ファイルに従う。無ければ普通の一問)
-#   旗なし          普通の一問。focus ファイルが残っていれば(前回の集中が途中で終わった)消して、そのことを 1 行出す
+# 使い方: next.sh [--root DIR] [--repo NAME] [--tree DIR] [--today D] [-n N]
 #   概念の順位は全 repo の値から(unknown > fuzzy > unasked、同じ状態なら値の低い順)。
 #   候補の関数は今いる repo の functions.md / log.md から。すでに問うた関数(同じファイル・同じ名前。行がずれても同じ)は除く。
 #   作業ツリー(git の root、または --tree)に、その場所にその関数名が今も無ければ除く(消えた・ずれた関数)。
@@ -15,7 +11,7 @@
 # <root>/<repo>/pending(場所 関数 概念 型 代表)に置き、record.sh はそれと一致する記録しか受け付けない。
 set -eu
 HERE=$(cd "$(dirname "$0")" && pwd -P)
-ROOT="${HIDANE_ROOT:-$HOME/.claude/hidane}"; REPO=""; TODAY=""; N=1; TREE=""; FOCUS=""; FOCUS_NEXT=""; FOCUS_C=""
+ROOT="${HIDANE_ROOT:-$HOME/.claude/hidane}"; REPO=""; TODAY=""; N=1; TREE=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --root) ROOT="$2"; shift 2 ;;
@@ -23,8 +19,6 @@ while [ $# -gt 0 ]; do
     --tree) TREE="$2"; shift 2 ;;
     --today) TODAY="$2"; shift 2 ;;
     -n) N="$2"; shift 2 ;;
-    --focus) FOCUS=1; shift; if [ $# -gt 0 ] && [ "${1#-}" = "$1" ]; then FOCUS_C="$1"; shift; fi ;;
-    --focus-next) FOCUS_NEXT=1; shift ;;
     --help|-h) sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "next.sh: unknown arg: $1" >&2; exit 2 ;;
   esac
@@ -57,15 +51,6 @@ stale=0
   [ -f "$d/log.md" ] && grep '^| 20' "$d/log.md" | sed 's/^/log	/'; true; } | sh "$HERE/resolve.sh" --root "$ROOT" > "$tmp/mine"
 stale=$(grep -c '^stale	' "$tmp/mine" || true)
 
-# 集中モード。focus ファイル = 概念<TAB>残り。--focus で始め、残りがある間は次の問いもその概念から
-ff="$d/focus"; fc=""; fleft=0
-if [ -n "$FOCUS" ]; then
-  if [ -n "$FOCUS_C" ]; then cut -f1 "$tmp/map" | grep -qxF "$FOCUS_C" || { printf "next.sh: $(L n_focus_unknown)\n" "$FOCUS_C" >&2; exit 2; }; fi
-  printf '%s\t%s\n' "${FOCUS_C:-?}" "${HIDANE_FOCUS_N:-3}" > "$ff"
-fi
-if [ -f "$ff" ] && [ -z "$FOCUS" ] && [ -z "${FOCUS_NEXT:-}" ]; then rm -f "$ff"; echo "$(L n_focus_reset)"; fi   # 旗なしは普通の一問。残っていた集中は解く
-if [ -f "$ff" ]; then fc=$(cut -f1 "$ff"); fleft=$(cut -f2 "$ff"); fi
-
 awk -F'\t' -v map="$tmp/map" -v alllog="$tmp/alllog" -v n="$N" -v pending="$d/pending" \
   -v l_known="$(L st_known)" -v l_fuzzy="$(L st_fuzzy)" -v l_unknown="$(L st_unknown)" -v l_unasked="$(L st_unasked)" \
   -v ty_trace="$(L ty_trace)" -v ty_edge="$(L ty_edge)" \
@@ -73,4 +58,4 @@ awk -F'\t' -v map="$tmp/map" -v alllog="$tmp/alllog" -v n="$N" -v pending="$d/pe
   -v n_zure="$(L n_zure)" -v n_type="$(L n_type)" -v n_inputs="$(L n_inputs)" -v n_form="$(L n_form)" \
   -v why_unknown="$(L n_why_unknown)" -v why_fuzzy="$(L n_why_fuzzy)" -v why_unasked="$(L n_why_unasked)" \
   -v in_edge="$(L n_inputs_edge)" -v in_trace="$(L n_inputs_trace)" -v form_text="$(L n_form_text)" -v edge_hint="$(L n_edge_hint)" \
-  -v none_cand="$(L n_none_cand)" -v stale="$stale" -v focus="$fc" -v fleft="$fleft" -v ff="$ff" -v n_focus_left="$(L n_focus_left)" -v n_focus_none="$(L n_focus_none)" -v stale_note="$(printf "$(L n_stale)" "$stale")" -v h_concept="$(L h_concept)" -v h_state="$(L h_state)" -v h_value="$(L h_value)" -v h_place="$(L n_place)" -v h_func="$(L n_func)" -v l_dispute="$(L rs_dispute)" -f "$HERE/next.awk" "$tmp/mine"
+  -v none_cand="$(L n_none_cand)" -v stale="$stale" -v stale_note="$(printf "$(L n_stale)" "$stale")" -v h_concept="$(L h_concept)" -v h_state="$(L h_state)" -v h_value="$(L h_value)" -v h_place="$(L n_place)" -v h_func="$(L n_func)" -v l_dispute="$(L rs_dispute)" -f "$HERE/next.awk" "$tmp/mine"
