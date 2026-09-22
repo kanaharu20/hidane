@@ -82,10 +82,11 @@ printf '%s\n| 2026-09-08 | src/z.c:1-4 | z | 新顔 | abc |  |\n' "$F" > "$ROOT/
 o=$($N --repo dn); echo "$o" | grep -q '^型: trace' && ok "N17b 初めての概念は trace" || ng "N17b" "$o"
 # N18-N20 集中モード: --focus で概念を固定、次の呼び出しも同じ概念、record.sh で残りが減って終わる
 o=$($N --repo worker --focus 境界条件); { echo "$o" | sed -n 1p | grep -q '^集中: 境界条件(この概念であと 3 問)$' && echo "$o" | grep -q '^代表: 境界条件' && [ "$(cat "$ROOT/worker/focus")" = "$(printf '境界条件\t3')" ]; } && ok "N18 --focus <概念> でその概念の関数が出て focus に残る" || ng "N18 focus" "$o $(cat "$ROOT/worker/focus")"
-o=$($N --repo worker); echo "$o" | sed -n 1p | grep -q '^集中: 境界条件' && ok "N19 次の呼び出しも同じ概念から" || ng "N19 focus continues" "$o"
+o=$($N --repo worker --focus-next); echo "$o" | sed -n 1p | grep -q '^集中: 境界条件' && [ -f "$ROOT/worker/focus" ] && ok "N19 --focus-next は同じ概念から続ける" || ng "N19 focus continues" "$o"
+o=$($N --repo worker); { echo "$o" | sed -n 1p | grep -q '^前回の集中が途中で終わっていたので解いた' && ! echo "$o" | grep -q '^集中:' && [ ! -f "$ROOT/worker/focus" ]; } && ok "N19a 旗なしの一問は残っていた集中を解いて普通に出す" || ng "N19a plain releases focus" "$o"
 $N --repo worker --focus 存在しない概念 >/dev/null 2>"$TMP/e"; rc=$?; [ $rc = 2 ] && grep -q '地図に無い' "$TMP/e" && ok "N19b 地図に無い概念は exit 2" || ng "N19b" "rc=$rc"
 o=$($N --repo worker --focus); echo "$o" | sed -n 1p | grep -q '^集中: 境界条件' && ok "N19c 概念を省くと、候補が残る中で順位最上位の概念(停止フラグの伝搬の関数は問い済み)に集中" || ng "N19c" "$o"
-printf '境界条件\t1\n' > "$ROOT/worker/focus"; $N --repo worker >/dev/null
+printf '境界条件\t1\n' > "$ROOT/worker/focus"; $N --repo worker --focus-next >/dev/null
 sh scripts/keys.sh --root "$ROOT" --repo worker "返り値: 1 @2" "分岐: x @3" >/dev/null; sh scripts/ask.sh --root "$ROOT" --repo worker "src/b.c b。
 x のとき、何を返しますか。そうなる条件も添えてください" >/dev/null
 o=$(cd "$TMP" && sh "$OLDPWD/scripts/record.sh" --root "$ROOT" --repo worker "src/b.c:1-5" b "境界条件" edge "q" dunno); { echo "$o" | grep -q '^集中: 境界条件 は終わり' && [ ! -f "$ROOT/worker/focus" ]; } && ok "N20 残り 1 で答えると集中が終わる" || ng "N20 focus done" "$o"

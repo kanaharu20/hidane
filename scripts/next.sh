@@ -3,7 +3,9 @@
 #
 # 使い方: next.sh [--root DIR] [--repo NAME] [--tree DIR] [--today D] [-n N] [--focus [概念]]
 #   --focus [概念]  集中モード。その概念(省略なら順位が最上位の概念)の関数を続けて HIDANE_FOCUS_N 問(既定 3)出す。
-#                   <root>/<repo>/focus に「概念<TAB>残り」を置き、以後の呼び出しはそれに従う。record.sh が 1 つ減らす
+#                   <root>/<repo>/focus に「概念<TAB>残り」を置く。record.sh が 1 つ減らす
+#   --focus-next    集中の 2 問目以降(focus ファイルに従う。無ければ普通の一問)
+#   旗なし          普通の一問。focus ファイルが残っていれば(前回の集中が途中で終わった)消して、そのことを 1 行出す
 #   概念の順位は全 repo の値から(unknown > fuzzy > unasked、同じ状態なら値の低い順)。
 #   候補の関数は今いる repo の functions.md / log.md から。すでに問うた関数(同じファイル・同じ名前。行がずれても同じ)は除く。
 #   作業ツリー(git の root、または --tree)に、その場所にその関数名が今も無ければ除く(消えた・ずれた関数)。
@@ -13,7 +15,7 @@
 # <root>/<repo>/pending(場所 関数 概念 型 代表)に置き、record.sh はそれと一致する記録しか受け付けない。
 set -eu
 HERE=$(cd "$(dirname "$0")" && pwd -P)
-ROOT="${HIDANE_ROOT:-$HOME/.claude/hidane}"; REPO=""; TODAY=""; N=1; TREE=""; FOCUS=""; FOCUS_C=""
+ROOT="${HIDANE_ROOT:-$HOME/.claude/hidane}"; REPO=""; TODAY=""; N=1; TREE=""; FOCUS=""; FOCUS_NEXT=""; FOCUS_C=""
 while [ $# -gt 0 ]; do
   case "$1" in
     --root) ROOT="$2"; shift 2 ;;
@@ -22,6 +24,7 @@ while [ $# -gt 0 ]; do
     --today) TODAY="$2"; shift 2 ;;
     -n) N="$2"; shift 2 ;;
     --focus) FOCUS=1; shift; if [ $# -gt 0 ] && [ "${1#-}" = "$1" ]; then FOCUS_C="$1"; shift; fi ;;
+    --focus-next) FOCUS_NEXT=1; shift ;;
     --help|-h) sed -n '2,12p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "next.sh: unknown arg: $1" >&2; exit 2 ;;
   esac
@@ -60,6 +63,7 @@ if [ -n "$FOCUS" ]; then
   if [ -n "$FOCUS_C" ]; then cut -f1 "$tmp/map" | grep -qxF "$FOCUS_C" || { printf "next.sh: $(L n_focus_unknown)\n" "$FOCUS_C" >&2; exit 2; }; fi
   printf '%s\t%s\n' "${FOCUS_C:-?}" "${HIDANE_FOCUS_N:-3}" > "$ff"
 fi
+if [ -f "$ff" ] && [ -z "$FOCUS" ] && [ -z "${FOCUS_NEXT:-}" ]; then rm -f "$ff"; echo "$(L n_focus_reset)"; fi   # 旗なしは普通の一問。残っていた集中は解く
 if [ -f "$ff" ]; then fc=$(cut -f1 "$ff"); fleft=$(cut -f2 "$ff"); fi
 
 awk -F'\t' -v map="$tmp/map" -v alllog="$tmp/alllog" -v n="$N" -v pending="$d/pending" \

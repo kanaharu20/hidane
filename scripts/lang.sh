@@ -48,6 +48,8 @@ L() {
     ja:n_focus_left) echo "集中: %s(この概念であと %d 問)" ;;  en:n_focus_left) echo "Focus: %s (%d more questions on this concept)" ;;
     ja:n_focus_none) echo "集中していた %s に問える関数が無くなったので、集中を解いた" ;;  en:n_focus_none) echo "no function left to ask for %s; focus released" ;;
     ja:n_focus_unknown) echo "その概念は地図に無い: %s" ;;  en:n_focus_unknown) echo "no such concept on the map: %s" ;;
+    ja:n_focus_reset) echo "前回の集中が途中で終わっていたので解いた(続けるなら /hidane --focus)" ;;
+    en:n_focus_reset) echo "a previous focus run was left unfinished; released (use /hidane --focus to start one)" ;;
     ja:r_focus_done) echo "集中: %s は終わり(%d 問答えた)" ;;  en:r_focus_done) echo "Focus: %s done (%d questions answered)" ;;
     ja:n_why) echo "理由" ;;                    en:n_why) echo "Why" ;;
     ja:n_zure) echo "過去のズレ" ;;             en:n_zure) echo "Past misses" ;;

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.5.8 — 2026-09-22
+
+- A plain `/hidane` no longer turns into focus mode. A focus file left behind by an unfinished `--focus` run made every
+  later question continue that focus. Now a plain `next.sh` removes a leftover focus file and says so; the 2nd and 3rd
+  questions of a focus run use the new `next.sh --focus-next`.
+- 234 tests.
+
 ## 0.5.7 — 2026-09-17
 
 - `/hidane --init` registers the current repository from inside Claude Code: installs the post-commit hook (leaves a
